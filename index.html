@@ -12,17 +12,19 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script>
-    const savedUi = JSON.parse(localStorage.getItem('songbook_settings'));
-    if(savedUi) {
-      document.documentElement.setAttribute('data-theme', savedUi.theme || 'dark');
-      document.documentElement.style.setProperty('--primary', savedUi.color || '#10b981');
-      document.documentElement.style.setProperty('--font-main', savedUi.font || "'Kanit', sans-serif");
-      document.documentElement.style.setProperty('--radius-ui', savedUi.radius || '16px');
-      document.documentElement.style.setProperty('--pad-ui', savedUi.pad || '20px');
-      let hex = (savedUi.color || '#10b981').replace('#', '');
-      let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-      document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`); 
-    }
+    try {
+      const savedUi = JSON.parse(localStorage.getItem('songbook_settings'));
+      if(savedUi) {
+        document.documentElement.setAttribute('data-theme', savedUi.theme || 'dark');
+        document.documentElement.style.setProperty('--primary', savedUi.color || '#10b981');
+        document.documentElement.style.setProperty('--font-main', savedUi.font || "'Kanit', sans-serif");
+        document.documentElement.style.setProperty('--radius-ui', savedUi.radius || '16px');
+        document.documentElement.style.setProperty('--pad-ui', savedUi.pad || '20px');
+        let hex = (savedUi.color || '#10b981').replace('#', '');
+        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+        document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`); 
+      }
+    } catch(e){}
   </script>
 
   <style>
@@ -41,7 +43,6 @@
     .container { max-width: 900px; margin: 0 auto; padding: 20px; padding-bottom: 100px;}
     h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.5px; }
     
-    /* Login & Payment */
     .auth-wrapper { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background: var(--bg-main); }
     .auth-card { background: var(--bg-surface); padding: 40px 30px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; border: 1px solid #e2e8f0; animation: fadeInDown 0.4s ease; }
     .auth-icon { font-size: 4rem; color: var(--primary); margin-bottom: 15px; }
@@ -151,10 +152,11 @@
     .btn-primary { background: var(--primary); color: white; border: none; padding: 15px 24px; border-radius: var(--radius-ui); font-size: 1.1rem; font-family: var(--font-main); font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px var(--primary-glow); transition: var(--transition); }
     .btn-primary:active { transform: scale(0.98); }
 
-    .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; height: 70px; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; display: flex; align-items: center; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; padding: 0 15px; gap: 10px; z-index: 100;}
-    .bottom-nav::-webkit-scrollbar { display: none; } 
-    .bottom-nav.justify-center { justify-content: space-around; padding: 0; }
-    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); position: relative; flex-shrink: 0; width: 60px; height: 100%; }
+    /* แก้ปัญหา Bottom Nav เบี้ยว */
+    .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; height: 70px; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-around; z-index: 100; overflow:hidden;}
+    .nav-scroll-area { display: flex; overflow-x: auto; gap: 10px; width: 100%; padding: 0 15px; scrollbar-width: none; -ms-overflow-style: none; align-items: center;}
+    .nav-scroll-area::-webkit-scrollbar { display: none; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); flex-shrink: 0; width: 60px; height: 100%; }
     .nav-item i { font-size: 1.3rem; transition: var(--transition); margin-bottom: 2px;}
     .nav-item span { font-size: 0.65rem; font-weight: 500; text-align:center;}
     .nav-item.active { color: var(--primary); }
@@ -195,46 +197,35 @@
     <div class="spinner"></div><h2 style="color:var(--text-main);" id="loader-text">กำลังโหลดข้อมูล...</h2>
   </div>
 
-  <!-- Authentication Views (Login & Payment) -->
+  <!-- Authentication Views -->
   <div id="view-auth" class="auth-wrapper hidden">
-    <div class="auth-card" style="max-width: 450px;">
-      
+    <div class="auth-card">
       <div class="auth-icon"><i class="fa-solid fa-music"></i></div>
       <h2 class="auth-title">Akha Songbook Pro</h2>
-      
-      <!-- แท็บเลือกว่าจะ สมัครใหม่ หรือ ล็อกอิน/ต่ออายุ -->
       <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="tab-login" onclick="switchAuthTab('login')">เข้าสู่ระบบ / ต่ออายุ</button>
-        <button class="auth-tab-btn" id="tab-register" onclick="switchAuthTab('register')">สมัครสมาชิกใหม่</button>
+        <button class="auth-tab-btn active" id="tab-login" onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
+        <button class="auth-tab-btn" id="tab-register" onclick="switchAuthTab('register')">สมัครใหม่</button>
       </div>
-      
-      <div id="auth-content-box">
-        <!-- เนื้อหาจะถูก JS วาดใส่ตรงนี้ -->
-      </div>
-
+      <div id="auth-content-box"></div>
     </div>
   </div>
 
   <div id="view-payment" class="auth-wrapper hidden">
     <div class="auth-card" style="max-width: 500px; padding: 30px;">
-      <h2 style="color: var(--primary); margin-bottom: 10px;">ชำระเงินเพื่อเข้าใช้งาน</h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">ค่าบริการ: <strong style="color:var(--danger); font-size:1.1rem;">49 บาท / เดือน</strong></p>
-      
+      <h2 style="color: var(--primary); margin-bottom: 10px;" id="pay-title">ชำระเงินเพื่อเข้าใช้งาน</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">ค่าบริการ: <strong style="color:var(--danger); font-size:1.1rem;">99 บาท / เดือน</strong></p>
       <div style="background: #f1f5f9; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-        <!-- รูป QR Code -->
         <img src="my-qr.jpg" alt="QR Code" style="width: 200px; border-radius: 10px; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
         <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">091-014-5332</p>
         <p style="color: var(--text-muted); font-size: 0.85rem;">ชื่อบัญชี: สุรชาติ มาเยอะ Surachat Mayer</p>
       </div>
-
       <div style="text-align: left; margin-bottom: 20px;">
         <label style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); display: block; margin-bottom: 5px;">แนบสลิปโอนเงิน (จำเป็น) <span style="color:red">*</span></label>
         <input type="file" id="slip-upload" accept="image/*" onchange="previewSlip(event)">
         <img id="slip-image-preview" class="slip-preview">
       </div>
-
       <button class="btn-primary" id="btn-submit-payment" style="margin-bottom: 10px;" onclick="submitPayment()">ส่งหลักฐานและรอตรวจสอบ</button>
-      <button class="btn-cancel" style="width:100%; padding:15px; border-radius:var(--radius-ui); border:none; cursor:pointer;" onclick="showLoginView()">ยกเลิก / กลับไปหน้าล็อกอิน</button>
+      <button class="btn-cancel" style="width:100%; padding:15px; border-radius:var(--radius-ui); border:none; cursor:pointer;" onclick="cancelPayment()">ยกเลิก</button>
     </div>
   </div>
 
@@ -257,32 +248,21 @@
 
     <div id="view-dashboard" class="fade-in">
       <div class="hero-header">
-        <div>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Akha Songbook 🎵</p>
-          <h1 data-i18n="app_title">คลังเพลงคริสเตียนอาข่า</h1>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn-icon hidden" id="btn-logout" style="color:var(--danger); border-color:#fee2e2;" onclick="logoutAdmin()" title="ออกจากโหมดแอดมิน"><i class="fa-solid fa-right-from-bracket"></i></button>
-        </div>
+        <div><p style="color:var(--text-muted); font-size:0.9rem;">Akha Songbook 🎵</p><h1 data-i18n="app_title">คลังเพลงคริสเตียนอาข่า</h1></div>
+        <div style="display: flex; gap: 10px;"><button class="btn-icon hidden" id="btn-logout" style="color:var(--danger); border-color:#fee2e2;" onclick="logoutAdmin()" title="ออกจากโหมดแอดมิน"><i class="fa-solid fa-right-from-bracket"></i></button></div>
       </div>
-      
       <div class="lang-switcher">
         <button class="lang-btn active" id="btn-lang-th" onclick="setAppLanguage('th')">ไทย</button>
         <button class="lang-btn" id="btn-lang-an" onclick="setAppLanguage('an')">อาข่าใหม่</button>
         <button class="lang-btn" id="btn-lang-ao" onclick="setAppLanguage('ao')">อาข่าเก่า</button>
       </div>
-
       <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()"></div>
       <div id="search-results" style="margin-top: 10px;"></div>
-      
       <div id="dashboard-content">
         <div class="all-songs-card" onclick="openAllSongs()">
           <div style="display:flex; align-items:center;">
             <div class="icon-box"><i class="fa-solid fa-compact-disc"></i></div>
-            <div>
-              <div style="font-size: 0.8rem; opacity:0.8;" data-i18n="manage_text">ดูและจัดการ</div>
-              <div data-i18n="total_songs">เพลงทั้งหมดในคลัง</div>
-            </div>
+            <div><div style="font-size: 0.8rem; opacity:0.8;" data-i18n="manage_text">ดูและจัดการ</div><div data-i18n="total_songs">เพลงทั้งหมดในคลัง</div></div>
           </div>
           <div class="total-num" id="total-count">0</div>
         </div>
@@ -309,13 +289,11 @@
         <button class="btn-icon" style="margin-right:5px;" onclick="forceDataRefresh()"><i class="fa-solid fa-rotate-right"></i></button>
         <button class="btn-icon" onclick="toggleTextSettings()" title="ปรับแต่งการอ่าน"><i class="fa-solid fa-sliders"></i></button>
       </div>
-
       <div id="text-settings-panel" class="controls-wrapper">
         <div class="control-group"><button class="btn-icon align-btn" id="btn-align-left" onclick="setAlign('left')"><i class="fa-solid fa-align-left"></i></button><button class="btn-icon align-btn active-align" id="btn-align-center" onclick="setAlign('center')"><i class="fa-solid fa-align-center"></i></button><button class="btn-icon align-btn" id="btn-align-right" onclick="setAlign('right')"><i class="fa-solid fa-align-right"></i></button></div>
         <div class="control-group"><span class="c-label">A<i class="fa-solid fa-arrow-up-right-dots" style="font-size:0.6rem"></i></span><button class="btn-icon" onclick="zoomText(-1)"><i class="fa-solid fa-minus"></i></button><button class="btn-icon" onclick="zoomText(1)"><i class="fa-solid fa-plus"></i></button></div>
         <div class="control-group"><span class="c-label"><i class="fa-solid fa-arrows-up-down"></i></span><button class="btn-icon" onclick="adjustSpacing(-0.2)"><i class="fa-solid fa-minus"></i></button><button class="btn-icon" onclick="adjustSpacing(0.2)"><i class="fa-solid fa-plus"></i></button></div>
       </div>
-
       <div class="reader-card">
         <div class="reader-header">
           <h2 id="detail-title" class="reader-title">ชื่อเพลง</h2>
@@ -344,29 +322,21 @@
         <h2 id="admin-title" style="flex:1; text-align:center;">เพิ่มเพลงใหม่</h2>
         <button class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px;" id="btn-save-top" onclick="saveSong()"><i class="fa-solid fa-check"></i> บันทึก</button>
       </div>
-      
       <div class="reader-card form-group">
         <input type="hidden" id="form-id">
         <div class="admin-form-grid">
           <div class="form-col-left">
             <label>หมวดหมู่ <span style="color:red">*</span></label>
             <select id="form-cat" onchange="toggleEngTitleField()">
-              <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option>
-              <option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
-              <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option>
-              <option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
-              <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option>
-              <option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
-              <option value="เพลงนมัสการ">เพลงนมัสการ</option>
-              <option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
+              <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option><option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
+              <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option><option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
+              <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option><option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
+              <option value="เพลงนมัสการ">เพลงนมัสการ</option><option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
             </select>
             <label>ชื่อเพลง (อาข่า/ไทย) <span style="color:red">*</span></label><input type="text" id="form-title" placeholder="พิมพ์ชื่อเพลง...">
             <div id="eng-title-group"><label>ชื่อเพลงภาษาอังกฤษ <span style="color:var(--text-muted); font-size:0.8rem;">(ถ้ามี)</span></label><input type="text" id="form-eng-title" placeholder="English title..."></div>
             <label>ผู้แต่ง / เรียบเรียง</label><input type="text" id="form-author" placeholder="เว้นว่างได้...">
-            <div style="display:flex; gap:10px;">
-              <div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div>
-              <div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div>
-            </div>
+            <div style="display:flex; gap:10px;"><div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div><div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div></div>
             <hr class="pc-hidden-hr" style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
             <label>🔗 ลิงก์ไฟล์เสียง MP3 (ถ้ามี)</label><input type="text" id="form-audio" placeholder="วางลิงก์ .mp3 ที่นี่">
             <label>🌐 ลิงก์ภายนอก (YouTube / ข้อมูลเพิ่มเติม)</label><input type="text" id="form-link" placeholder="วางลิงก์เว็บ หรือ YouTube">
@@ -418,7 +388,11 @@
         <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> บัญชีของคุณ</h3>
         <p>เบอร์โทรศัพท์: <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
         <p>วันหมดอายุ: <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
-        <button class="btn-primary" style="background:#f1f5f9; color:var(--text-main); margin-top:15px; box-shadow:none; border:1px solid #cbd5e1;" onclick="logoutUser()"><i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ</button>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <!-- ปุ่มต่ออายุในหน้าโปรไฟล์ -->
+          <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()">ต่ออายุการใช้งาน</button>
+          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); box-shadow:none; border:1px solid #cbd5e1; font-size:0.9rem;" onclick="logoutUser()">ออกจากระบบ</button>
+        </div>
       </div>
 
       <div id="admin-tools-section" class="reader-card hidden" style="margin-bottom: 20px; border-left: 5px solid #f59e0b; background: rgba(245, 158, 11, 0.05);">
@@ -460,8 +434,8 @@
 
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem; box-shadow:none; border:1px solid #cbd5e1;" onclick="addDaysToExpiry(30)">+ ต่อ 30 วัน</button>
-          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem; box-shadow:none; border:1px solid #cbd5e1;" onclick="addDaysToExpiry(365)">+ ต่อ 1 ปี</button>
+          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem; box-shadow:none; border:1px solid #cbd5e1;" onclick="addDaysToExpiry(30)">+ ต่ออายุ 30 วัน</button>
+          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem; box-shadow:none; border:1px solid #cbd5e1;" onclick="addDaysToExpiry(365)">+ ต่ออายุ 1 ปี</button>
         </div>
       </div>
     </div>
@@ -471,9 +445,6 @@
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <script>
-    // ==========================================
-    // ใส่ URL ของ Web App Google Script รอบล่าสุด
-    // ==========================================
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz0HRpuQJxXRGRbz7P7QFSSeUvWXudWl_N_4CdCKpmeVxMgP3KcvPoIQnGGgfOBTJI/exec"; 
 
     async function fetchGAS(action, params = {}) {
@@ -497,6 +468,7 @@
     let readerFontSize = 1.2; let readerLineHeight = 2.0; let readerAlign = "center"; 
     
     let pendingSlipBase64 = "";
+    let isRegisteringNew = true;
 
     const baseCategories = [
       { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
@@ -510,7 +482,7 @@
     ];
 
     window.onload = () => {
-      switchAuthTab('login'); // เลือกหน้าล็อกอินเป็นหน้าแรกเสมอ
+      switchAuthTab('login');
       const savedLang = localStorage.getItem('app_lang'); if(savedLang) appLang = savedLang; setAppLanguage(appLang, false); 
       const reader = JSON.parse(localStorage.getItem('songbook_reader')); if(reader) { readerFontSize = reader.size || 1.2; readerLineHeight = reader.line || 2.0; readerAlign = reader.align || 'center'; }
       const savedPass = localStorage.getItem('adminPass'); if(savedPass) { isAdmin = true; adminPassword = savedPass; }
@@ -536,19 +508,16 @@
     }
 
     // ==========================================
-    // ระบบ ล็อกอิน / สมัคร / ต่ออายุ โฉมใหม่
+    // Auth Flow (Login & Registration)
     // ==========================================
     function switchAuthTab(tab) {
-      document.getElementById('tab-login').classList.remove('active');
-      document.getElementById('tab-register').classList.remove('active');
-      document.getElementById('tab-'+tab).classList.add('active');
-      
+      document.getElementById('tab-login').classList.remove('active'); document.getElementById('tab-register').classList.remove('active'); document.getElementById('tab-'+tab).classList.add('active');
       let html = "";
       if(tab === 'login') {
         html = `
-          <div class="search-container"><i class="fa-solid fa-phone"></i><input type="tel" id="auth-phone" placeholder="เบอร์โทรศัพท์" maxlength="10"></div>
+          <div class="search-container"><i class="fa-solid fa-phone"></i><input type="tel" id="auth-phone" placeholder="เบอร์โทรศัพท์ (ใส่ 0 นำหน้า)" maxlength="10"></div>
           <div class="search-container"><i class="fa-solid fa-lock"></i><input type="password" id="auth-pin" placeholder="รหัสผ่าน PIN" maxlength="6"></div>
-          <button class="btn-primary" onclick="doLogin()" id="btn-auth-action" style="margin-top:10px;">เข้าสู่ระบบ / ยืนยันสิทธิ์</button>
+          <button class="btn-primary" onclick="doLogin()" id="btn-auth-action" style="margin-top:10px;">เข้าสู่ระบบ</button>
         `;
       } else {
         html = `
@@ -564,9 +533,6 @@
       document.getElementById('auth-content-box').innerHTML = html;
     }
 
-    function showPaymentView() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden'); }
-    function showLoginView() { document.getElementById('view-payment').classList.add('hidden'); document.getElementById('view-auth').classList.remove('hidden'); }
-
     function doLogin() {
       const phone = document.getElementById('auth-phone').value.trim(); const pin = document.getElementById('auth-pin').value.trim();
       if(!phone || !pin) { showToast("กรุณากรอกเบอร์โทรและรหัสผ่าน", "warning"); return; }
@@ -576,10 +542,9 @@
 
     function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       if(!isSilentMode) { document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังตรวจสอบสิทธิ์..."; }
-      
       fetchGAS('authAndGetSongs', { phone: phone, pin: pin })
       .then(res => {
-        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ / ยืนยันสิทธิ์'; btnObj.disabled = false; }
+        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
         document.getElementById('loader').classList.add('hidden');
         if(res.status === 'success') {
           userPhone = phone; userExpiry = res.expiry;
@@ -587,7 +552,6 @@
           document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
           document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
           document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
-          
           allSongs = res.songs || []; updateBottomNav('dashboard'); renderDashboard(); updateAdminUI();
           if(!isSilentMode) showToast(res.msg, "success");
         } else if(res.status === 'expired') {
@@ -602,9 +566,8 @@
           showToast(res.msg, "error"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
           showLoginView(); localStorage.removeItem('songbook_user');
         }
-      })
-      .catch(err => {
-        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ / ยืนยันสิทธิ์'; btnObj.disabled = false; }
+      }).catch(err => {
+        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
         document.getElementById('loader').classList.add('hidden');
         if(isSilentMode) {
           showToast("ใช้งานแบบออฟไลน์", "warning");
@@ -615,23 +578,52 @@
     }
 
     // ==========================================
-    // ระบบ อัปโหลดสลิป
+    // Payment / Renewal Flow
     // ==========================================
+    function showPaymentView() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden'); }
+    function showLoginView() { document.getElementById('view-payment').classList.add('hidden'); document.getElementById('view-auth').classList.remove('hidden'); switchAuthTab('login');}
+
+    function goToRenewFromProfile() {
+      const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
+      if(!savedUser) return;
+      localStorage.setItem('temp_renew_phone', savedUser.phone);
+      localStorage.setItem('temp_renew_pin', savedUser.pin);
+      localStorage.setItem('temp_renew_name', "สมาชิกเดิม (ต่ออายุ)"); 
+      isRegisteringNew = false; 
+      
+      document.getElementById('pay-title').innerText = "ต่ออายุการใช้งาน";
+      document.getElementById('slip-upload').value = ""; document.getElementById('slip-image-preview').style.display = "none"; pendingSlipBase64 = "";
+      
+      document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
+      document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden');
+    }
+
     function goToPayment(isNew) {
       isRegisteringNew = isNew;
-      
+      document.getElementById('pay-title').innerText = isNew ? "ชำระเงินเพื่อสมัครสมาชิก" : "ต่ออายุการใช้งาน";
       if(isNew) {
         const name = document.getElementById('auth-name').value.trim();
         const phone = document.getElementById('auth-phone').value.trim();
         const pin = document.getElementById('auth-pin').value.trim();
         if(!name || !phone || !pin) { showToast("กรุณากรอกข้อมูลให้ครบถ้วน", "warning"); return; }
-        localStorage.setItem('temp_renew_name', name);
-        localStorage.setItem('temp_renew_phone', phone);
-        localStorage.setItem('temp_renew_pin', pin);
+        localStorage.setItem('temp_renew_name', name); localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin);
       }
       
       pendingSlipBase64 = ""; document.getElementById('slip-upload').value = ""; document.getElementById('slip-image-preview').style.display = "none";
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden');
+    }
+
+    function cancelPayment() {
+      document.getElementById('view-payment').classList.add('hidden');
+      const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
+      if(savedUser && document.getElementById('app').classList.contains('hidden') === true && isRegisteringNew === false) {
+          // ถ้ายกเลิกการต่ออายุจากหน้าโปรไฟล์ ให้กลับเข้าแอป
+          document.getElementById('app').classList.remove('hidden');
+          document.getElementById('main-bottom-nav').classList.remove('hidden');
+      } else {
+          document.getElementById('view-auth').classList.remove('hidden');
+          switchAuthTab('login');
+      }
     }
 
     function previewSlip(event) {
@@ -655,22 +647,22 @@
     function submitPayment() {
       if(!pendingSlipBase64) { showToast("กรุณาแนบรูปภาพสลิปโอนเงิน", "warning"); return; }
       
-      const phone = localStorage.getItem('temp_renew_phone');
-      const pin = localStorage.getItem('temp_renew_pin');
-      const name = localStorage.getItem('temp_renew_name');
+      const phone = localStorage.getItem('temp_renew_phone'); const pin = localStorage.getItem('temp_renew_pin'); const name = localStorage.getItem('temp_renew_name');
       if(!phone || !pin) { showToast("ข้อมูลสูญหาย กรุณาทำรายการใหม่", "error"); showLoginView(); return; }
 
-      const btn = document.getElementById('btn-submit-payment');
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดสลิป...'; btn.disabled = true;
+      const btn = document.getElementById('btn-submit-payment'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดสลิป...'; btn.disabled = true;
 
       fetchGAS('submitPayment', { phone: phone, pin: pin, name: name, type: isRegisteringNew ? 'register' : 'renew', base64Image: pendingSlipBase64 })
       .then(res => {
         btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false;
-        if(res.status === 'success') { showToast(res.msg, "success"); setTimeout(() => { showLoginView(); }, 2000); } 
-        else { showToast(res.msg, "error"); }
-      }).catch(err => {
-        btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false; alert("อัปโหลดไม่สำเร็จ: " + err.message);
-      });
+        if(res.status === 'success') {
+          showToast(res.msg, "success");
+          setTimeout(() => { 
+            // เมื่อส่งสลิปเสร็จ ถ้าเป็นคนที่มีรหัสอยู่แล้วในเครื่อง (กดจากหน้าโปรไฟล์) ก็ให้ล็อกเอาท์ เพื่อรอแอดมินอนุมัติ
+            logoutUser(); 
+          }, 2000);
+        } else { showToast(res.msg, "error"); }
+      }).catch(err => { btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false; alert("อัปโหลดไม่สำเร็จ: " + err.message); });
     }
 
     function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('adminPass'); location.reload(); }
@@ -687,10 +679,7 @@
       } else {
         nav.classList.remove('justify-center');
         html += `<div class="nav-item" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div><div class="nav-scroll-area">`;
-        baseCategories.forEach(cat => {
-          let isActive = (currentCategory === cat.id) ? 'active' : '';
-          html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`;
-        });
+        baseCategories.forEach(cat => { let isActive = (currentCategory === cat.id) ? 'active' : ''; html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; });
         html += `</div><div class="nav-item" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
       }
       nav.innerHTML = html;
@@ -699,9 +688,7 @@
     document.addEventListener("visibilitychange", () => {
       const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
       if (document.visibilityState === "visible" && savedUser && allSongs.length > 0) {
-        fetchGAS('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin })
-          .then(res => { if(res.status === 'success') { allSongs = res.songs || []; renderDashboard(); if(currentCategory) searchCategory(); } })
-          .catch(e => console.log('Auto sync failed'));
+        fetchGAS('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { if(res.status === 'success') { allSongs = res.songs || []; renderDashboard(); if(currentCategory) searchCategory(); } }).catch(e => console.log('Auto sync failed'));
       }
     });
 
@@ -720,21 +707,18 @@
     function forceDataRefresh() {
       const savedUser = JSON.parse(localStorage.getItem('songbook_user')); if(!savedUser) return;
       document.getElementById('app').classList.add('hidden'); document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
-      
-      fetchGAS('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin })
-      .then(res => {
-        if(res.status === 'success') {
-          allSongs = res.songs || []; renderDashboard(); updateAdminUI(); 
-          if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
-          document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
-        } else { logoutUser(); }
-      }).catch(error => { alert("เกิดข้อผิดพลาด: " + error.message); document.getElementById('loader-text').innerText = "โหลดข้อมูลล้มเหลว"; });
+      fetchGAS('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => {
+          if(res.status === 'success') {
+            allSongs = res.songs || []; renderDashboard(); updateAdminUI(); 
+            if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
+            document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
+          } else { logoutUser(); }
+        }).catch(error => { alert("เกิดข้อผิดพลาด: " + error.message); document.getElementById('loader-text').innerText = "โหลดข้อมูลล้มเหลว"; });
     }
 
     function renderDashboard() {
       try {
-        document.getElementById('total-count').innerText = allSongs.length;
-        const grid = document.getElementById('grid-container');
+        document.getElementById('total-count').innerText = allSongs.length; const grid = document.getElementById('grid-container');
         grid.innerHTML = baseCategories.map(cat => {
           const count = allSongs.filter(s => s.Category === cat.id).length; const catName = i18n[appLang][cat.i18n_cat];
           return `<div class="cat-card ${cat.bg}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><h3 style="font-size: 1rem;">${catName}</h3><div class="count">${count} ${i18n[appLang].song_unit}</div></div>`;
@@ -763,26 +747,15 @@
     function openCategory(catId, catRealId) { currentCategory = catId; const catConf = baseCategories.find(c => c.id === catId); document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
 
     function quickChangeCategory(songId, newCat) {
-      const song = allSongs.find(s => s.ID === songId); if(!song) return;
-      const oldCat = song.Category; song.Category = newCat; 
-      showToast("กำลังย้าย...", "success"); if(currentCategory !== "ALL") searchCategory();
-      fetchGAS('updateSongCategory', { id: songId, newCategory: newCat, password: adminPassword })
-      .then(res => { if(res.status === 'success') { renderDashboard(); } else { song.Category = oldCat; if(currentCategory !== "ALL") searchCategory(); } })
-      .catch(e => { song.Category = oldCat; if(currentCategory !== "ALL") searchCategory(); showToast("ย้ายไม่สำเร็จ: " + e.message, "error"); });
+      const song = allSongs.find(s => s.ID === songId); if(!song) return; const oldCat = song.Category; song.Category = newCat; showToast("กำลังย้าย...", "success"); if(currentCategory !== "ALL") searchCategory();
+      fetchGAS('updateSongCategory', { id: songId, newCategory: newCat, password: adminPassword }).then(res => { if(res.status === 'success') { renderDashboard(); } else { song.Category = oldCat; if(currentCategory !== "ALL") searchCategory(); } }).catch(e => { song.Category = oldCat; if(currentCategory !== "ALL") searchCategory(); showToast("ย้ายไม่สำเร็จ: " + e.message, "error"); });
     }
 
     function searchCategory() {
       try {
         const q = document.getElementById('cat-search').value.toLowerCase();
-        const results = allSongs.filter(s => {
-          const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory);
-          const t1 = s.Title ? s.Title.toString().toLowerCase() : "";
-          const t2 = s.ID ? s.ID.toString().toLowerCase() : "";
-          const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : "";
-          return matchCat && (t1.includes(q) || t2.includes(q) || t3.includes(q));
-        });
-        document.getElementById('cat-total').innerText = results.length; 
-        renderList(results, document.getElementById('song-list'));
+        const results = allSongs.filter(s => { const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; return matchCat && (t1.includes(q) || t2.includes(q) || t3.includes(q)); });
+        document.getElementById('cat-total').innerText = results.length; renderList(results, document.getElementById('song-list'));
       } catch(e) { console.error("Search Error", e); }
     }
 
@@ -791,17 +764,8 @@
         if(songs.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลเพลง 😢</div>`; return; }
         container.innerHTML = songs.map(s => {
           let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; let adminHtml = '';
-          if(isAdmin) {
-            let optionsHtml = baseCategories.map(c => `<option value="${c.id}" ${c.id===s.Category?'selected':''}>${i18n[appLang][c.i18n_nav]}</option>`).join('');
-            adminHtml = `<select onclick="event.stopPropagation()" onchange="quickChangeCategory('${s.ID}', this.value)" class="quick-cat-select">${optionsHtml}</select>
-              <div class="quick-actions" style="margin-top:8px; margin-left:0;"><button class="btn-quick edit" onclick="event.stopPropagation(); openAdminForm('${s.ID}')" title="แก้ไข"><i class="fa-solid fa-pen"></i></button><button class="btn-quick del" onclick="quickDeleteSong('${s.ID}', event)" title="ลบ"><i class="fa-solid fa-trash"></i></button></div>`;
-          }
-          return `
-          <div class="song-item" onclick="openSong('${s.ID}')">
-            <div class="s-id">${s.ID}</div>
-            <div class="s-info" style="min-width:0;"><div class="s-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div>${adminHtml}</div>
-            ${!isAdmin ? `<i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>` : ``}
-          </div>`
+          if(isAdmin) { let optionsHtml = baseCategories.map(c => `<option value="${c.id}" ${c.id===s.Category?'selected':''}>${i18n[appLang][c.i18n_nav]}</option>`).join(''); adminHtml = `<select onclick="event.stopPropagation()" onchange="quickChangeCategory('${s.ID}', this.value)" class="quick-cat-select">${optionsHtml}</select><div class="quick-actions" style="margin-top:8px; margin-left:0;"><button class="btn-quick edit" onclick="event.stopPropagation(); openAdminForm('${s.ID}')" title="แก้ไข"><i class="fa-solid fa-pen"></i></button><button class="btn-quick del" onclick="quickDeleteSong('${s.ID}', event)" title="ลบ"><i class="fa-solid fa-trash"></i></button></div>`; }
+          return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info" style="min-width:0;"><div class="s-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div>${adminHtml}</div>${!isAdmin ? `<i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i>` : ``}</div>`
         }).join('');
       } catch(e) { console.error("Render List Error", e); }
     }
@@ -810,19 +774,11 @@
       const editorOld = document.getElementById('form-lyrics-old'); const editorNew = document.getElementById('form-lyrics-new');
       if(songId) { 
         currentSong = allSongs.find(s => s.ID === songId);
-        document.getElementById('form-id').value = currentSong.ID; document.getElementById('form-cat').value = currentSong.Category; 
-        document.getElementById('form-title').value = currentSong.Title; document.getElementById('form-eng-title').value = currentSong.EnglishTitle || ""; 
-        document.getElementById('form-author').value = currentSong.Author || ""; document.getElementById('form-chords').value = currentSong.Chords || "";
-        document.getElementById('form-notation').value = currentSong.Notation || ""; document.getElementById('form-audio').value = currentSong.AudioUrl || ""; 
-        document.getElementById('form-link').value = currentSong.ExternalLink || ""; document.getElementById('form-image').value = currentSong.ImageUrl || ""; 
-        document.getElementById('form-inspiration').value = currentSong.Inspiration || ""; 
+        document.getElementById('form-id').value = currentSong.ID; document.getElementById('form-cat').value = currentSong.Category; document.getElementById('form-title').value = currentSong.Title; document.getElementById('form-eng-title').value = currentSong.EnglishTitle || ""; document.getElementById('form-author').value = currentSong.Author || ""; document.getElementById('form-chords').value = currentSong.Chords || ""; document.getElementById('form-notation').value = currentSong.Notation || ""; document.getElementById('form-audio').value = currentSong.AudioUrl || ""; document.getElementById('form-link').value = currentSong.ExternalLink || ""; document.getElementById('form-image').value = currentSong.ImageUrl || ""; document.getElementById('form-inspiration').value = currentSong.Inspiration || ""; 
         editorOld.innerHTML = currentSong.Lyrics || ""; editorNew.innerHTML = currentSong.LyricsNew || ""; document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + currentSong.ID;
       } else { 
-        document.getElementById('form-id').value = "";
-        if(currentCategory && currentCategory !== "ALL") document.getElementById('form-cat').value = currentCategory; else document.getElementById('form-cat').value = "เพลงชีวิตคริสเตียนอาข่า";
-        document.getElementById('form-title').value = ""; document.getElementById('form-eng-title').value = ""; document.getElementById('form-author').value = "";
-        document.getElementById('form-chords').value = ""; document.getElementById('form-notation').value = ""; document.getElementById('form-audio').value = "";
-        document.getElementById('form-link').value = ""; document.getElementById('form-image').value = ""; document.getElementById('form-inspiration').value = "";
+        document.getElementById('form-id').value = ""; if(currentCategory && currentCategory !== "ALL") document.getElementById('form-cat').value = currentCategory; else document.getElementById('form-cat').value = "เพลงชีวิตคริสเตียนอาข่า";
+        document.getElementById('form-title').value = ""; document.getElementById('form-eng-title').value = ""; document.getElementById('form-author').value = ""; document.getElementById('form-chords').value = ""; document.getElementById('form-notation').value = ""; document.getElementById('form-audio').value = ""; document.getElementById('form-link').value = ""; document.getElementById('form-image').value = ""; document.getElementById('form-inspiration').value = "";
         editorOld.innerHTML = ""; editorOld.style.textAlign = "center"; editorOld.style.lineHeight = "2.0"; editorNew.innerHTML = ""; editorNew.style.textAlign = "center"; editorNew.style.lineHeight = "2.0"; document.getElementById('editor-line-height-1').value = "2.0"; document.getElementById('editor-line-height-2').value = "2.0"; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
       }
       toggleEngTitleField(); switchAdminLyricView('old'); switchView('admin');
@@ -832,38 +788,20 @@
       const lyricsOldHTML = document.getElementById('form-lyrics-old').innerHTML.trim(); const lyricsNewHTML = document.getElementById('form-lyrics-new').innerHTML.trim();
       if(!document.getElementById('form-title').value || (!lyricsOldHTML && !lyricsNewHTML)) { showToast("กรุณากรอกชื่อและเนื้อเพลง", "warning"); return; }
       const btn = document.getElementById('btn-save-top'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true;
-      const data = {
-        ID: document.getElementById('form-id').value, Title: document.getElementById('form-title').value, Category: document.getElementById('form-cat').value, Language: "Akha", Author: document.getElementById('form-author').value, Chords: document.getElementById('form-chords').value,
-        Lyrics: lyricsOldHTML, LyricsNew: lyricsNewHTML, Inspiration: document.getElementById('form-inspiration').value, Notation: document.getElementById('form-notation').value, AudioUrl: document.getElementById('form-audio').value, ExternalLink: document.getElementById('form-link').value, EnglishTitle: document.getElementById('form-eng-title').value, ImageUrl: document.getElementById('form-image').value 
-      };
-      fetchGAS('saveSong', { data: data, password: adminPassword })
-      .then(res => {
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false;
-        if(res.status === 'success') { 
-          showToast(res.msg); let viewToGo = currentCategory ? 'category' : 'dashboard'; forceDataRefresh(); switchView(viewToGo);
-        } else { showToast(res.msg, "error"); }
-      }).catch(e => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; showToast("ผิดพลาด: " + e.message, "error"); });
+      const data = { ID: document.getElementById('form-id').value, Title: document.getElementById('form-title').value, Category: document.getElementById('form-cat').value, Language: "Akha", Author: document.getElementById('form-author').value, Chords: document.getElementById('form-chords').value, Lyrics: lyricsOldHTML, LyricsNew: lyricsNewHTML, Inspiration: document.getElementById('form-inspiration').value, Notation: document.getElementById('form-notation').value, AudioUrl: document.getElementById('form-audio').value, ExternalLink: document.getElementById('form-link').value, EnglishTitle: document.getElementById('form-eng-title').value, ImageUrl: document.getElementById('form-image').value };
+      fetchGAS('saveSong', { data: data, password: adminPassword }).then(res => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; if(res.status === 'success') { showToast(res.msg); let viewToGo = currentCategory ? 'category' : 'dashboard'; forceDataRefresh(); switchView(viewToGo); } else { showToast(res.msg, "error"); } }).catch(e => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; showToast("ผิดพลาด: " + e.message, "error"); });
     }
 
     function quickDeleteSong(songId, event) {
       event.stopPropagation(); const songToDelete = allSongs.find(s => s.ID === songId);
-      if(confirm(`⚠️ ยืนยันลบเพลง "${songToDelete.Title}" ถาวร?`)) {
-        fetchGAS('deleteSong', { id: songId, password: adminPassword })
-        .then(res => { showToast("🗑 " + res.msg); forceDataRefresh(); }).catch(e => showToast("ลบไม่สำเร็จ: " + e.message, "error"));
-      }
+      if(confirm(`⚠️ ยืนยันลบเพลง "${songToDelete.Title}" ถาวร?`)) { fetchGAS('deleteSong', { id: songId, password: adminPassword }).then(res => { showToast("🗑 " + res.msg); forceDataRefresh(); }).catch(e => showToast("ลบไม่สำเร็จ: " + e.message, "error")); }
     }
 
     function searchGlobal() {
       try {
         const q = document.getElementById('global-search').value.toLowerCase(); const resDiv = document.getElementById('search-results'); const contentDiv = document.getElementById('dashboard-content');
         if(!q) { resDiv.innerHTML = ""; contentDiv.classList.remove('hidden'); return; }
-        contentDiv.classList.add('hidden'); 
-        const results = allSongs.filter(s => {
-          const t1 = s.Title ? s.Title.toString().toLowerCase() : "";
-          const t2 = s.ID ? s.ID.toString().toLowerCase() : "";
-          const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : "";
-          return t1.includes(q) || t2.includes(q) || t3.includes(q);
-        });
+        contentDiv.classList.add('hidden'); const results = allSongs.filter(s => { const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; return t1.includes(q) || t2.includes(q) || t3.includes(q); });
         renderList(results, resDiv);
       } catch(e) { console.error("Search Global Error", e); }
     }
@@ -872,8 +810,7 @@
       try {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         ['view-dashboard', 'view-category', 'view-song', 'view-admin', 'view-settings', 'view-admin-users', 'view-admin-user-form'].forEach(v => { document.getElementById(v).classList.add('hidden'); document.getElementById(v).classList.remove('fade-in'); });
-        let activeView = document.getElementById('view-' + view); 
-        if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
+        let activeView = document.getElementById('view-' + view); if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
         if(view === 'dashboard') { currentCategory = ""; if(document.getElementById('global-search').value === "") document.getElementById('dashboard-content').classList.remove('hidden'); }
         updateBottomNav(view); 
       } catch (e) { console.error("Switch View Error", e); }
@@ -891,21 +828,14 @@
 
     function openSong(id) {
       try {
-        currentSong = allSongs.find(s => s.ID === id);
-        document.getElementById('detail-title').innerText = currentSong.Title;
-        const engTitleEl = document.getElementById('detail-eng-title'); if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
-        document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-';
-        const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
+        currentSong = allSongs.find(s => s.ID === id); document.getElementById('detail-title').innerText = currentSong.Title; const engTitleEl = document.getElementById('detail-eng-title'); if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
+        document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-'; const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
         const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
         const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
 
         const toggleBox = document.getElementById('lyrics-toggle-box');
-        if(currentSong.LyricsNew && currentSong.Lyrics) {
-          toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new');
-        } else {
-          toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>";
-          lyricsEl.style.fontSize = readerFontSize + 'rem'; lyricsEl.style.lineHeight = readerLineHeight; lyricsEl.style.textAlign = readerAlign;
-        }
+        if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
+        else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; lyricsEl.style.fontSize = readerFontSize + 'rem'; lyricsEl.style.lineHeight = readerLineHeight; lyricsEl.style.textAlign = readerAlign; }
 
         ['left', 'center', 'right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active-align')); document.getElementById('btn-align-'+readerAlign).classList.add('active-align');
         const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
@@ -918,15 +848,12 @@
     function zoomText(step) { readerFontSize += (step * 0.2); if(readerFontSize < 0.8) readerFontSize = 0.8; if(readerFontSize > 2.5) readerFontSize = 2.5; document.getElementById('detail-lyrics').style.fontSize = readerFontSize + 'rem'; saveReaderPrefs(); }
     function adjustSpacing(step) { readerLineHeight += step; if(readerLineHeight < 1.2) readerLineHeight = 1.2; if(readerLineHeight > 4.0) readerLineHeight = 4.0; document.getElementById('detail-lyrics').style.lineHeight = readerLineHeight; saveReaderPrefs(); }
     function setAlign(align) { readerAlign = align; document.getElementById('detail-lyrics').style.textAlign = align; ['left', 'center', 'right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active-align')); document.getElementById('btn-align-'+align).classList.add('active-align'); saveReaderPrefs(); }
-    
-    function openUserManagement() { 
-      document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังดึงข้อมูลสมาชิก..."; 
-      fetchGAS('getAllUsers', { password: adminPassword })
-      .then(res => {
-        allUsers = res.users || []; renderUserList(); document.getElementById('loader').classList.add('hidden'); switchView('admin-users'); 
-      }).catch(err => { alert("ดึงข้อมูลไม่สำเร็จ: " + err.message); document.getElementById('loader').classList.add('hidden'); }); 
-    }
-    
+    function saveReaderPrefs() { const prefs = { size: readerFontSize, line: readerLineHeight, align: readerAlign }; localStorage.setItem('songbook_reader', JSON.stringify(prefs)); }
+
+    // ==========================================
+    // ระบบจัดการสมาชิกของ Admin
+    // ==========================================
+    function openUserManagement() { document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังดึงข้อมูลสมาชิก..."; fetchGAS('getAllUsers', { password: adminPassword }).then(res => { allUsers = res.users || []; renderUserList(); document.getElementById('loader').classList.add('hidden'); switchView('admin-users'); }).catch(err => { alert("ดึงข้อมูลไม่สำเร็จ: " + err.message); document.getElementById('loader').classList.add('hidden'); }); }
     function searchUsers() { renderUserList(); }
     function renderUserList() {
       try {
@@ -935,11 +862,8 @@
         if(results.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลผู้ใช้</div>`; return; }
         let today = new Date(); today.setHours(0,0,0,0);
         container.innerHTML = results.map(u => {
-          let isPending = u.ExpiryDate === "รอตรวจสอบ";
-          let expDate = isPending ? null : new Date(u.ExpiryDate); if(expDate) expDate.setHours(0,0,0,0); 
-          let isExpired = expDate ? (expDate < today) : false;
-          let statusColor = isPending ? "#f59e0b" : (isExpired ? "var(--danger)" : "var(--primary)"); 
-          let statusText = isPending ? "รอตรวจสอบสลิป" : (isExpired ? "หมดอายุ" : "ใช้งานได้");
+          let isPending = u.ExpiryDate === "รอตรวจสอบ"; let expDate = isPending ? null : new Date(u.ExpiryDate); if(expDate) expDate.setHours(0,0,0,0); let isExpired = expDate ? (expDate < today) : false;
+          let statusColor = isPending ? "#f59e0b" : (isExpired ? "var(--danger)" : "var(--primary)"); let statusText = isPending ? "รอตรวจสอบสลิป" : (isExpired ? "หมดอายุ" : "ใช้งานได้");
           let expStr = isPending ? "-" : `${String(expDate.getDate()).padStart(2, '0')}/${String(expDate.getMonth() + 1).padStart(2, '0')}/${expDate.getFullYear()+543}`;
           let slipBadge = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; text-decoration:none;"><i class="fa-solid fa-image"></i> ดูสลิป</a>` : '';
           return `
@@ -974,20 +898,10 @@
       if(!phone || !pin || !exp) { showToast("กรุณากรอกข้อมูลสำคัญให้ครบ (*)", "warning"); return; }
       const btn = document.getElementById('btn-save-user'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>'; btn.disabled = true;
       const userData = { Phone: phone, PIN: pin, Name: name, ExpiryDate: exp };
-      
-      fetchGAS('saveUser', { userData: userData, isEdit: isEdit, password: adminPassword })
-      .then(res => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; if(res.status === 'success') { showToast(res.msg); openUserManagement(); } else { showToast(res.msg, "error"); } })
-      .catch(e => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; showToast("ผิดพลาด: " + e.message, "error"); });
+      fetchGAS('saveUser', { userData: userData, isEdit: isEdit, password: adminPassword }).then(res => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; if(res.status === 'success') { showToast(res.msg); openUserManagement(); } else { showToast(res.msg, "error"); } }).catch(e => { btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false; showToast("ผิดพลาด: " + e.message, "error"); });
     }
     
-    function deleteUser(phone) { 
-      if(confirm(`⚠️ ยืนยันลบผู้ใช้งานเบอร์ ${phone} ถาวร?`)) { 
-        showToast("กำลังลบ...", "success"); 
-        fetchGAS('deleteUser', { phone: phone, password: adminPassword })
-        .then(res => { if(res.status === 'success') { showToast(res.msg); openUserManagement(); } else { showToast(res.msg, "error"); } })
-        .catch(e => showToast("ลบไม่สำเร็จ: " + e.message, "error"));
-      } 
-    }
+    function deleteUser(phone) { if(confirm(`⚠️ ยืนยันลบผู้ใช้งานเบอร์ ${phone} ถาวร?`)) { showToast("กำลังลบ...", "success"); fetchGAS('deleteUser', { phone: phone, password: adminPassword }).then(res => { if(res.status === 'success') { showToast(res.msg); openUserManagement(); } else { showToast(res.msg, "error"); } }).catch(e => showToast("ลบไม่สำเร็จ: " + e.message, "error")); } }
 
     function showToast(msg, type="success") {
       const toast = document.getElementById('toast');
