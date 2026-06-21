@@ -1,3 +1,5 @@
+--- START OF FILE Paste June 21, 2026 - 5:53PM ---
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -553,7 +555,6 @@
           document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
           document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
           allSongs = res.songs || []; updateBottomNav('dashboard'); renderDashboard(); updateAdminUI();
-          if(!isSilentMode) showToast(res.msg, "success");
         } else if(res.status === 'expired') {
           showToast(res.msg, "error"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
           localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin);
@@ -617,7 +618,6 @@
       document.getElementById('view-payment').classList.add('hidden');
       const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
       if(savedUser && document.getElementById('app').classList.contains('hidden') === true && isRegisteringNew === false) {
-          // ถ้ายกเลิกการต่ออายุจากหน้าโปรไฟล์ ให้กลับเข้าแอป
           document.getElementById('app').classList.remove('hidden');
           document.getElementById('main-bottom-nav').classList.remove('hidden');
       } else {
@@ -646,63 +646,52 @@
 
     function submitPayment() {
       if(!pendingSlipBase64) { showToast("กรุณาแนบรูปภาพสลิปโอนเงิน", "warning"); return; }
-      
       const phone = localStorage.getItem('temp_renew_phone'); const pin = localStorage.getItem('temp_renew_pin'); const name = localStorage.getItem('temp_renew_name');
       if(!phone || !pin) { showToast("ข้อมูลสูญหาย กรุณาทำรายการใหม่", "error"); showLoginView(); return; }
-
       const btn = document.getElementById('btn-submit-payment'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดสลิป...'; btn.disabled = true;
-
       fetchGAS('submitPayment', { phone: phone, pin: pin, name: name, type: isRegisteringNew ? 'register' : 'renew', base64Image: pendingSlipBase64 })
       .then(res => {
         btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false;
         if(res.status === 'success') {
           showToast(res.msg, "success");
-          setTimeout(() => { 
-            // เมื่อส่งสลิปเสร็จ ถ้าเป็นคนที่มีรหัสอยู่แล้วในเครื่อง (กดจากหน้าโปรไฟล์) ก็ให้ล็อกเอาท์ เพื่อรอแอดมินอนุมัติ
-            logoutUser(); 
-          }, 2000);
+          setTimeout(() => { logoutUser(); }, 2000);
         } else { showToast(res.msg, "error"); }
       }).catch(err => { btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false; alert("อัปโหลดไม่สำเร็จ: " + err.message); });
     }
 
     function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('adminPass'); location.reload(); }
 
- // แก้ไขฟังก์ชัน updateBottomNav ให้ปุ่มกดได้จริง
-function updateBottomNav(view) {
-  const nav = document.getElementById('main-bottom-nav');
-  if (!nav) return;
-  
-  let html = '';
-  
-  // 1. เตรียมปุ่มต่างๆ
-  const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
-  const profileBtn = `<div class="nav-item ${view==='settings'||view==='admin-users'||view==='admin-user-form'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
-  const adminBtn = `<div class="nav-item ${view==='admin'?'active':''}" onclick="handleAdminIconClick()"><i class="fa-solid fa-shield-halved" style="${isAdmin?'color:#f59e0b':''}"></i><span data-i18n="nav_admin">${i18n[appLang].nav_admin}</span></div>`;
-  
-  // ปุ่มเพิ่มเพลง (ถ้าเป็น Admin ให้แสดงปุ่ม +)
-  const addSongBtn = isAdmin ? `<div class="nav-item" onclick="openAdminForm()"><i class="fa-solid fa-circle-plus" style="color:#f59e0b; font-size: 1.5rem;"></i><span style="color:#f59e0b;">เพิ่มเพลง</span></div>` : '';
+    // ==========================================
+    // ส่วนที่แก้ไข: ปรับปรุง Bottom Nav ให้มีปุ่มเพิ่มเพลงเมื่อเป็นแอดมิน
+    // ==========================================
+    function updateBottomNav(view) {
+      const nav = document.getElementById('main-bottom-nav'); 
+      if (!nav) return;
+      let html = '';
+      
+      const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
+      const profileBtn = `<div class="nav-item ${view==='settings'||view==='admin-users'||view==='admin-user-form'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
+      const adminBtn = `<div class="nav-item ${view==='admin'?'active':''}" onclick="handleAdminIconClick()"><i class="fa-solid fa-shield-halved" style="${isAdmin?'color:#f59e0b':''}"></i><span data-i18n="nav_admin">${i18n[appLang].nav_admin}</span></div>`;
+      
+      // ปุ่มเพิ่มเพลง (เฉพาะตอนเป็น Admin เท่านั้น)
+      const addSongBtn = isAdmin ? `<div class="nav-item ${view==='admin'?'active':''}" onclick="openAdminForm()"><i class="fa-solid fa-circle-plus" style="color:#f59e0b; font-size:1.5rem;"></i><span style="color:#f59e0b;">เพิ่มเพลง</span></div>` : '';
 
-  // 2. ตรวจสอบมุมมองปัจจุบันเพื่อจัดวางปุ่ม
-  if (view === 'dashboard' || view === 'admin' || view === 'settings' || view === 'admin-users' || view === 'admin-user-form') {
-    nav.classList.add('justify-center');
-    // เรียง: หน้าแรก -> (เพิ่มเพลง) -> โปรไฟล์ -> จัดการระบบ
-    html = homeBtn + addSongBtn + profileBtn + adminBtn;
-  } else {
-    // กรณีอยู่ในหน้าหมวดหมู่ หรือ หน้าอ่านเพลง
-    nav.classList.remove('justify-center');
-    html = homeBtn;
-    html += `<div class="nav-scroll-area">`;
-    baseCategories.forEach(cat => { 
-      let isActive = (currentCategory === cat.id) ? 'active' : ''; 
-      html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; 
-    });
-    html += `</div>`;
-    // เอาปุ่มเพิ่มเพลงมาไว้ข้างๆ ปุ่มโปรไฟล์
-    html += addSongBtn + profileBtn;
-  }
-  
-  nav.innerHTML = html;
-}
+      if (view === 'dashboard' || view === 'admin' || view === 'settings' || view === 'admin-users' || view === 'admin-user-form') {
+        nav.classList.add('justify-center');
+        html = homeBtn + addSongBtn + profileBtn + adminBtn;
+      } else {
+        nav.classList.remove('justify-center');
+        html += homeBtn;
+        html += `<div class="nav-scroll-area">`;
+        baseCategories.forEach(cat => { 
+          let isActive = (currentCategory === cat.id) ? 'active' : ''; 
+          html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; 
+        });
+        html += `</div>`;
+        html += addSongBtn + profileBtn;
+      }
+      nav.innerHTML = html;
+    }
 
     document.addEventListener("visibilitychange", () => {
       const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
@@ -759,32 +748,33 @@ function updateBottomNav(view) {
     document.getElementById('modal-pass-input').addEventListener("keypress", e => { if(e.key === "Enter") { e.preventDefault(); verifyAdmin(); } });
 
     function logoutAdmin() { isAdmin = false; adminPassword = ""; localStorage.removeItem('adminPass'); updateAdminUI(); showToast("ออกจากระบบผู้ดูแลแล้ว"); if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal(); switchView('dashboard'); }
-    // แก้ไขฟังก์ชัน updateAdminUI เพื่อบังคับรีเฟรชเมนู
-function updateAdminUI() {
-  const adminTools = document.getElementById('admin-tools-section');
-  const btnLogout = document.getElementById('btn-logout');
-  
-  if(isAdmin) {
-    if(adminTools) adminTools.classList.remove('hidden');
-    if(btnLogout) btnLogout.classList.remove('hidden');
-  } else {
-    if(adminTools) adminTools.classList.add('hidden');
-    if(btnLogout) btnLogout.classList.add('hidden');
-  }
-  
-  // หาว่าตอนนี้อยู่ที่ View ไหน แล้ววาดเมนูใหม่
-  let currentView = 'dashboard';
-  const views = ['dashboard', 'category', 'song', 'admin', 'settings', 'admin-users', 'admin-user-form'];
-  for (let v of views) {
-    let el = document.getElementById('view-' + v);
-    if (el && !el.classList.contains('hidden')) {
-      currentView = v;
-      break;
+    
+    // ==========================================
+    // ส่วนที่แก้ไข: ปรับปรุงการ Update UI ของ Admin
+    // ==========================================
+    function updateAdminUI() {
+      const adminTools = document.getElementById('admin-tools-section');
+      const btnLogout = document.getElementById('btn-logout');
+      if(isAdmin) {
+        if(adminTools) adminTools.classList.remove('hidden');
+        if(btnLogout) btnLogout.classList.remove('hidden');
+      } else {
+        if(adminTools) adminTools.classList.add('hidden');
+        if(btnLogout) btnLogout.classList.add('hidden');
+      }
+      
+      let currentView = 'dashboard';
+      const views = ['dashboard', 'category', 'song', 'admin', 'settings', 'admin-users', 'admin-user-form'];
+      for (let v of views) {
+        let el = document.getElementById('view-' + v);
+        if (el && !el.classList.contains('hidden')) {
+          currentView = v;
+          break;
+        }
+      }
+      updateBottomNav(currentView);
     }
-  }
-  updateBottomNav(currentView);
-}dateBottomNav(currentActiveView);
-    }
+
     function toggleEngTitleField() { const cat = document.getElementById('form-cat').value; const group = document.getElementById('eng-title-group'); if(cat === 'เพลงชีวิตคริสเตียนอาข่า') { group.classList.remove('hidden'); } else { group.classList.add('hidden'); document.getElementById('form-eng-title').value = ""; } }
 
     function openAllSongs() { currentCategory = "ALL"; document.getElementById('cat-title').innerText = i18n[appLang].total_songs; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
@@ -816,14 +806,14 @@ function updateAdminUI() {
 
     function openAdminForm(songId = null) {
       const editorOld = document.getElementById('form-lyrics-old'); const editorNew = document.getElementById('form-lyrics-new');
-      if(songId) { 
+      if(songId && typeof songId === 'string') { 
         currentSong = allSongs.find(s => s.ID === songId);
         document.getElementById('form-id').value = currentSong.ID; document.getElementById('form-cat').value = currentSong.Category; document.getElementById('form-title').value = currentSong.Title; document.getElementById('form-eng-title').value = currentSong.EnglishTitle || ""; document.getElementById('form-author').value = currentSong.Author || ""; document.getElementById('form-chords').value = currentSong.Chords || ""; document.getElementById('form-notation').value = currentSong.Notation || ""; document.getElementById('form-audio').value = currentSong.AudioUrl || ""; document.getElementById('form-link').value = currentSong.ExternalLink || ""; document.getElementById('form-image').value = currentSong.ImageUrl || ""; document.getElementById('form-inspiration').value = currentSong.Inspiration || ""; 
         editorOld.innerHTML = currentSong.Lyrics || ""; editorNew.innerHTML = currentSong.LyricsNew || ""; document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + currentSong.ID;
       } else { 
         document.getElementById('form-id').value = ""; if(currentCategory && currentCategory !== "ALL") document.getElementById('form-cat').value = currentCategory; else document.getElementById('form-cat').value = "เพลงชีวิตคริสเตียนอาข่า";
         document.getElementById('form-title').value = ""; document.getElementById('form-eng-title').value = ""; document.getElementById('form-author').value = ""; document.getElementById('form-chords').value = ""; document.getElementById('form-notation').value = ""; document.getElementById('form-audio').value = ""; document.getElementById('form-link').value = ""; document.getElementById('form-image').value = ""; document.getElementById('form-inspiration').value = "";
-        editorOld.innerHTML = ""; editorOld.style.textAlign = "center"; editorOld.style.lineHeight = "2.0"; editorNew.innerHTML = ""; editorNew.style.textAlign = "center"; editorNew.style.lineHeight = "2.0"; document.getElementById('editor-line-height-1').value = "2.0"; document.getElementById('editor-line-height-2').value = "2.0"; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
+        editorOld.innerHTML = ""; editorOld.style.textAlign = "center"; editorOld.style.lineHeight = "2.0"; editorNew.innerHTML = ""; editorNew.style.textAlign = "center"; editorNew.style.lineHeight = "2.0"; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
       }
       toggleEngTitleField(); switchAdminLyricView('old'); switchView('admin');
     }
@@ -876,15 +866,12 @@ function updateAdminUI() {
         document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-'; const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
         const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
         const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
-
         const toggleBox = document.getElementById('lyrics-toggle-box');
         if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
         else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; lyricsEl.style.fontSize = readerFontSize + 'rem'; lyricsEl.style.lineHeight = readerLineHeight; lyricsEl.style.textAlign = readerAlign; }
-
         ['left', 'center', 'right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active-align')); document.getElementById('btn-align-'+readerAlign).classList.add('active-align');
         const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
         const mediaBox = document.getElementById('detail-media-container'); let mediaHtml = ""; if(currentSong.AudioUrl) mediaHtml += `<audio controls src="${currentSong.AudioUrl}"></audio><br>`; if(currentSong.ExternalLink) mediaHtml += `<a href="${currentSong.ExternalLink}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ข้อมูลเพิ่มเติม / YouTube</a>`; if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
-
         document.getElementById('text-settings-panel').classList.remove('show'); switchView('song');
       } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
     }
