@@ -667,33 +667,38 @@
 
     function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('adminPass'); location.reload(); }
 
-    // แก้ไขฟังก์ชัน updateBottomNav เพื่อให้แสดงปุ่มเพิ่มเพลงเมื่อเป็นแอดมิน
+ // แก้ไขฟังก์ชัน updateBottomNav ให้ปุ่มกดได้จริง
 function updateBottomNav(view) {
   const nav = document.getElementById('main-bottom-nav');
+  if (!nav) return;
+  
   let html = '';
   
-  // สร้างปุ่มพื้นฐาน
+  // 1. เตรียมปุ่มต่างๆ
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'||view==='admin-users'||view==='admin-user-form'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
-  const adminBtn = `<div class="nav-item" onclick="handleAdminIconClick()"><i class="fa-solid fa-shield-halved" style="${isAdmin?'color:#f59e0b':''}"></i><span data-i18n="nav_admin">${i18n[appLang].nav_admin}</span></div>`;
+  const adminBtn = `<div class="nav-item ${view==='admin'?'active':''}" onclick="handleAdminIconClick()"><i class="fa-solid fa-shield-halved" style="${isAdmin?'color:#f59e0b':''}"></i><span data-i18n="nav_admin">${i18n[appLang].nav_admin}</span></div>`;
   
-  // ปุ่มเพิ่มเพลง (จะปรากฏเฉพาะตอนเป็น Admin เท่านั้น)
-  const addSongBtn = isAdmin ? `<div class="nav-item ${view==='admin'?'active':''}" onclick="openAdminForm()"><i class="fa-solid fa-circle-plus" style="color:#f59e0b;"></i><span>เพิ่มเพลง</span></div>` : '';
+  // ปุ่มเพิ่มเพลง (ถ้าเป็น Admin ให้แสดงปุ่ม +)
+  const addSongBtn = isAdmin ? `<div class="nav-item" onclick="openAdminForm()"><i class="fa-solid fa-circle-plus" style="color:#f59e0b; font-size: 1.5rem;"></i><span style="color:#f59e0b;">เพิ่มเพลง</span></div>` : '';
 
+  // 2. ตรวจสอบมุมมองปัจจุบันเพื่อจัดวางปุ่ม
   if (view === 'dashboard' || view === 'admin' || view === 'settings' || view === 'admin-users' || view === 'admin-user-form') {
     nav.classList.add('justify-center');
+    // เรียง: หน้าแรก -> (เพิ่มเพลง) -> โปรไฟล์ -> จัดการระบบ
     html = homeBtn + addSongBtn + profileBtn + adminBtn;
   } else {
-    // กรณีอยู่ในหน้าหมวดหมู่ (Category View)
+    // กรณีอยู่ในหน้าหมวดหมู่ หรือ หน้าอ่านเพลง
     nav.classList.remove('justify-center');
-    html += homeBtn;
+    html = homeBtn;
     html += `<div class="nav-scroll-area">`;
     baseCategories.forEach(cat => { 
       let isActive = (currentCategory === cat.id) ? 'active' : ''; 
       html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; 
     });
     html += `</div>`;
-    html += addSongBtn + profileBtn; // เพิ่มปุ่ม Add เข้าไปข้างๆ Profile ถ้าเป็นแอดมิน
+    // เอาปุ่มเพิ่มเพลงมาไว้ข้างๆ ปุ่มโปรไฟล์
+    html += addSongBtn + profileBtn;
   }
   
   nav.innerHTML = html;
@@ -754,23 +759,32 @@ function updateBottomNav(view) {
     document.getElementById('modal-pass-input').addEventListener("keypress", e => { if(e.key === "Enter") { e.preventDefault(); verifyAdmin(); } });
 
     function logoutAdmin() { isAdmin = false; adminPassword = ""; localStorage.removeItem('adminPass'); updateAdminUI(); showToast("ออกจากระบบผู้ดูแลแล้ว"); if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal(); switchView('dashboard'); }
-    // 2. แก้ไขฟังก์ชัน updateAdminUI เพื่อให้ปุ่มที่แถบล่างอัปเดตทันที
+    // แก้ไขฟังก์ชัน updateAdminUI เพื่อบังคับรีเฟรชเมนู
 function updateAdminUI() {
   const adminTools = document.getElementById('admin-tools-section');
   const btnLogout = document.getElementById('btn-logout');
   
   if(isAdmin) {
-    adminTools.classList.remove('hidden');
-    btnLogout.classList.remove('hidden');
+    if(adminTools) adminTools.classList.remove('hidden');
+    if(btnLogout) btnLogout.classList.remove('hidden');
   } else {
-    adminTools.classList.add('hidden');
-    btnLogout.classList.add('hidden');
+    if(adminTools) adminTools.classList.add('hidden');
+    if(btnLogout) btnLogout.classList.add('hidden');
   }
   
-  // สั่งให้วาดแถบเมนูด้านล่างใหม่ เพื่อให้ปุ่ม + แสดงผล หรือ หายไป
-  const currentActiveView = document.querySelector('.container > div:not(.hidden)')?.id?.replace('view-', '') || 'dashboard';
-  updateBottomNav(currentActiveView);
-}
+  // หาว่าตอนนี้อยู่ที่ View ไหน แล้ววาดเมนูใหม่
+  let currentView = 'dashboard';
+  const views = ['dashboard', 'category', 'song', 'admin', 'settings', 'admin-users', 'admin-user-form'];
+  for (let v of views) {
+    let el = document.getElementById('view-' + v);
+    if (el && !el.classList.contains('hidden')) {
+      currentView = v;
+      break;
+    }
+  }
+  updateBottomNav(currentView);
+}dateBottomNav(currentActiveView);
+    }
     function toggleEngTitleField() { const cat = document.getElementById('form-cat').value; const group = document.getElementById('eng-title-group'); if(cat === 'เพลงชีวิตคริสเตียนอาข่า') { group.classList.remove('hidden'); } else { group.classList.add('hidden'); document.getElementById('form-eng-title').value = ""; } }
 
     function openAllSongs() { currentCategory = "ALL"; document.getElementById('cat-title').innerText = i18n[appLang].total_songs; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
