@@ -71,7 +71,6 @@
     </div>
   </div>
 
-  <!-- แอปหลักของผู้ใช้ -->
   <div id="app" class="container hidden">
 
     <div id="view-dashboard" class="fade-in">
@@ -144,6 +143,7 @@
     
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
+      
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
         <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> บัญชีของคุณ</h3>
         <p>เบอร์โทรศัพท์: <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
@@ -153,13 +153,31 @@
           <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); box-shadow:none; border:1px solid #cbd5e1; font-size:0.9rem;" onclick="logoutUser()">ออกจากระบบ</button>
         </div>
       </div>
+
+      <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--accent);">
+        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> การแสดงผล</h3>
+        
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">โหมดหน้าจอ</label>
+        <div style="display:flex; gap:10px; margin-bottom: 20px;">
+          <button class="btn-primary" style="flex:1; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; box-shadow:none; font-size:0.9rem;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
+          <button class="btn-primary" style="flex:1; background:#1e293b; color:#f8fafc; border:1px solid #0f172a; box-shadow:none; font-size:0.9rem;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
+        </div>
+
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีหลักของแอป</label>
+        <div style="display:flex; gap:15px; justify-content: center; flex-wrap: wrap;">
+          <button style="width:45px; height:45px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
+          <button style="width:45px; height:45px; border-radius:50%; background:#2563eb; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#2563eb')"></button>
+          <button style="width:45px; height:45px; border-radius:50%; background:#f59e0b; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#f59e0b')"></button>
+          <button style="width:45px; height:45px; border-radius:50%; background:#ef4444; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#ef4444')"></button>
+          <button style="width:45px; height:45px; border-radius:50%; background:#8b5cf6; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#8b5cf6')"></button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <script src="app.js"></script>
-  <!-- สคริปต์ลงทะเบียน Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
