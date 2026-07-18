@@ -40,31 +40,27 @@ function fetchAllData() {
   document.getElementById('loader-text').innerText = "กำลังโหลดข้อมูลระบบ...";
   document.getElementById('view-login').classList.add('hidden');
   
-  Promise.all([fetchAPI('getAllUsers'), fetchAPI('authAndGetSongs', { phone: 'dummy', pin: 'dummy'})]) // backend returns songs regardless of user in admin mode if we slightly tweak it, but since authAndGetSongs is for users, let's just use it to get songs. 
-  // Wait, authAndGetSongs needs valid user. Let's create a new admin endpoint or just simulate it.
-  // Actually, to get all songs in admin, you can just use `authAndGetSongs` if you have a dummy user, OR since it's Cloudflare Worker, we need to make sure Admin can get songs.
-  // We will just use standard user auth logic OR create a simple fetch. Since `saveSong` is public in your worker structure? No, it's admin.
-  // We'll modify the backend slightly if needed, but assuming you have a dummy user or we can just fetch songs without auth.
-  // Let's implement a clean fetch for songs.
-  .then(() => {}).catch(()=>{}); // Handle later
-
-  // Since your backend 'authAndGetSongs' requires phone/pin, for Admin we will just fetch users first.
-  fetchAPI('getAllUsers').then(res => {
-      allUsers = res.users || [];
-      // To get songs, we actually need to hit authAndGetSongs with an admin bypass, or we just add a small fix. 
-      // Assuming we can get songs via standard fetch if we had an endpoint. 
-      // For now, let's fetch users. (You may need to add `getAllSongs` to backend `admin` block).
+  // ยกเลิกการ Hack ดึงเพลงแบบเก่า และใช้ Endpoint 'getAllSongs' แทน
+  // (ฝั่ง Cloudflare Worker ต้องเตรียมรับ action: 'getAllSongs' เอาไว้ด้วยนะครับ)
+  Promise.all([
+    fetchAPI('getAllUsers'), 
+    fetchAPI('getAllSongs') 
+  ]).then(results => {
+      const resUsers = results[0];
+      const resSongs = results[1];
+      
+      if(resUsers.status === 'success') allUsers = resUsers.users || [];
+      if(resSongs.status === 'success') allSongs = resSongs.songs || [];
+      
       showToast("เข้าสู่ระบบแอดมินสำเร็จ");
       document.getElementById('app').classList.remove('hidden');
       document.getElementById('main-bottom-nav').classList.remove('hidden');
       switchView('dashboard');
       document.getElementById('loader').classList.add('hidden');
-      
-      // Temporary hack: fetch songs using first valid user to populate admin list (or add getAllSongs to backend)
-      if(allUsers.length > 0) {
-          fetch(API_URL, {method:'POST', body:JSON.stringify({action:'authAndGetSongs', phone:allUsers[0].Phone, pin:allUsers[0].PIN})})
-          .then(r=>r.json()).then(d=>{ allSongs = d.songs || []; renderSongs(); });
-      }
+      renderSongs();
+  }).catch(err => {
+      showToast("โหลดข้อมูลล้มเหลว: " + err.message, "error");
+      document.getElementById('loader').classList.add('hidden');
   });
 }
 
@@ -135,17 +131,26 @@ function switchAdminLyricView(type) {
 }
 function formatTextAdmin(command, targetId) { document.execCommand(command, false, null); document.getElementById(targetId).focus(); }
 
-/* --- จัดการผู้ใช้ --- */
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
   const results = allUsers.filter(u => (u.Phone||"").includes(q) || (u.Name||"").toLowerCase().includes(q));
   document.getElementById('user-list').innerHTML = results.map(u => {
-    let isPending = u.ExpiryDate === "รอตรวจสอบ";
+    // ปรับปรุงการตรวจสอบสถานะ ไม่พึ่งแค่ String เพื่อป้องกันฐานข้อมูลผิดพลาด
+    let isPending = u.Status === "pending" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
+    let statusText = isPending ? "รอตรวจสอบสลิป" : `หมดอายุ: ${u.ExpiryDate}`;
     let statusColor = isPending ? "#f59e0b" : "var(--primary)";
-    let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
+    let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; margin-left:5px;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
+    
     return `<div class="song-item">
-      <div class="s-info"><div class="s-title">${u.Name||'ไม่มีชื่อ'}</div><div class="s-eng-title"><i class="fa-solid fa-phone"></i> ${u.Phone} | <i class="fa-solid fa-key"></i> ${u.PIN}</div><div class="s-meta" style="color:${statusColor}">หมดอายุ: ${u.ExpiryDate} ${slip}</div></div>
-      <div class="quick-actions"><button class="btn-quick edit" onclick="openUserForm('${u.Phone}')"><i class="fa-solid fa-pen"></i></button><button class="btn-quick del" onclick="deleteUser('${u.Phone}')"><i class="fa-solid fa-trash"></i></button></div>
+      <div class="s-info">
+        <div class="s-title">${u.Name||'ไม่มีชื่อ'} <span style="font-size:0.8rem; color:var(--text-muted);">(รอบ: ${u.RenewCount||1})</span></div>
+        <div class="s-eng-title"><i class="fa-solid fa-phone"></i> ${u.Phone} | <i class="fa-solid fa-key"></i> ${u.PIN}</div>
+        <div class="s-meta" style="color:${statusColor}">${statusText} ${slip}</div>
+      </div>
+      <div class="quick-actions">
+        <button class="btn-quick edit" onclick="openUserForm('${u.Phone}')"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-quick del" onclick="deleteUser('${u.Phone}')"><i class="fa-solid fa-trash"></i></button>
+      </div>
     </div>`;
   }).join('');
 }
@@ -170,8 +175,17 @@ function addDaysToExpiry(days) {
 }
 
 function saveUser() {
-  const d = { Phone: document.getElementById('form-user-phone').value, PIN: document.getElementById('form-user-pin').value, Name: document.getElementById('form-user-name').value, ExpiryDate: document.getElementById('form-user-expiry').value };
-  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
+  // เพิ่มการส่ง RenewCount กลับไปบันทึกด้วย
+  const d = { 
+    Phone: document.getElementById('form-user-phone').value, 
+    PIN: document.getElementById('form-user-pin').value, 
+    Name: document.getElementById('form-user-name').value, 
+    ExpiryDate: document.getElementById('form-user-expiry').value,
+    RenewCount: parseInt(document.getElementById('form-user-count').value) || 1,
+    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending' // ถ้าใส่วันที่จะ active ทันที
+  };
+  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" })
+    .then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
 }
 function deleteUser(phone) { if(confirm(`ลบเบอร์ ${phone}?`)) { fetchAPI('deleteUser', { phone: phone }).then(res => { showToast(res.msg); location.reload(); }); } }
 
