@@ -24,7 +24,7 @@ function loginAdmin() {
   if(!pass) return;
   document.getElementById('loader').classList.remove('hidden');
   adminPassword = pass;
-  fetchAPI('getAllUsers') // ใช้ Test Connection
+  fetchAPI('getAllUsers') 
   .then(res => {
     if(res.status === 'success') {
       sessionStorage.setItem('adminPassTemp', pass);
@@ -42,7 +42,7 @@ function fetchAllData() {
   
   Promise.all([
     fetchAPI('getAllUsers'), 
-    fetchAPI('getAllSongs') // เรียกใช้ endpoint ที่เพิ่มใหม่ฝั่ง Cloudflare
+    fetchAPI('getAllSongsAdmin') // แก้ไขจุดนี้ให้ตรงกับ Backend แล้วครับ
   ]).then(results => {
       const resUsers = results[0];
       const resSongs = results[1];
@@ -107,6 +107,7 @@ function openAdminForm(id = null) {
     editorOld.innerHTML = s.Lyrics || ""; editorNew.innerHTML = s.LyricsNew || ""; document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + s.ID;
   } else {
     document.getElementById('form-id').value = ""; document.getElementById('form-title').value = ""; editorOld.innerHTML = ""; editorNew.innerHTML = ""; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
+    document.getElementById('form-audio').value = ""; document.getElementById('form-image').value = "";
   }
   switchView('admin-form');
 }
@@ -187,7 +188,34 @@ function deleteUser(phone) { if(confirm(`ลบเบอร์ ${phone}?`)) { fe
 
 function showToast(msg, type="success") {
   const toast = document.getElementById('toast');
-  toast.style.background = type === "error" ? "var(--danger)" : "var(--primary)";
+  toast.style.background = type === "error" ? "var(--danger)" : type === "warning" ? "#f59e0b" : "var(--primary)";
   toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${msg}</span>`;
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+/* --- เพิ่มใหม่: ระบบอัปโหลดไฟล์ของ Admin --- */
+function uploadMedia(event, targetId, fileType) {
+  const file = event.target.files[0];
+  if(!file) return;
+  showToast("กำลังอัปโหลดไฟล์...", "warning");
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    fetchAPI('uploadAdminFile', { 
+        base64Data: base64, 
+        fileType: fileType, 
+        extension: file.name.split('.').pop() 
+    }).then(res => {
+      if(res.status === 'success') {
+        document.getElementById(targetId).value = res.url;
+        showToast("อัปโหลดสำเร็จ!", "success");
+      } else {
+        showToast(res.msg, "error");
+      }
+    }).catch(err => {
+      showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error");
+    });
+  };
+  reader.readAsDataURL(file);
 }
