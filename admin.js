@@ -40,11 +40,9 @@ function fetchAllData() {
   document.getElementById('loader-text').innerText = "กำลังโหลดข้อมูลระบบ...";
   document.getElementById('view-login').classList.add('hidden');
   
-  // ยกเลิกการ Hack ดึงเพลงแบบเก่า และใช้ Endpoint 'getAllSongs' แทน
-  // (ฝั่ง Cloudflare Worker ต้องเตรียมรับ action: 'getAllSongs' เอาไว้ด้วยนะครับ)
   Promise.all([
     fetchAPI('getAllUsers'), 
-    fetchAPI('getAllSongs') 
+    fetchAPI('getAllSongs') // เรียกใช้ endpoint ที่เพิ่มใหม่ฝั่ง Cloudflare
   ]).then(results => {
       const resUsers = results[0];
       const resSongs = results[1];
@@ -131,11 +129,11 @@ function switchAdminLyricView(type) {
 }
 function formatTextAdmin(command, targetId) { document.execCommand(command, false, null); document.getElementById(targetId).focus(); }
 
+/* --- จัดการผู้ใช้ --- */
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
   const results = allUsers.filter(u => (u.Phone||"").includes(q) || (u.Name||"").toLowerCase().includes(q));
   document.getElementById('user-list').innerHTML = results.map(u => {
-    // ปรับปรุงการตรวจสอบสถานะ ไม่พึ่งแค่ String เพื่อป้องกันฐานข้อมูลผิดพลาด
     let isPending = u.Status === "pending" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
     let statusText = isPending ? "รอตรวจสอบสลิป" : `หมดอายุ: ${u.ExpiryDate}`;
     let statusColor = isPending ? "#f59e0b" : "var(--primary)";
@@ -175,17 +173,15 @@ function addDaysToExpiry(days) {
 }
 
 function saveUser() {
-  // เพิ่มการส่ง RenewCount กลับไปบันทึกด้วย
   const d = { 
     Phone: document.getElementById('form-user-phone').value, 
     PIN: document.getElementById('form-user-pin').value, 
     Name: document.getElementById('form-user-name').value, 
     ExpiryDate: document.getElementById('form-user-expiry').value,
     RenewCount: parseInt(document.getElementById('form-user-count').value) || 1,
-    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending' // ถ้าใส่วันที่จะ active ทันที
+    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending'
   };
-  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" })
-    .then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
+  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
 }
 function deleteUser(phone) { if(confirm(`ลบเบอร์ ${phone}?`)) { fetchAPI('deleteUser', { phone: phone }).then(res => { showToast(res.msg); location.reload(); }); } }
 
