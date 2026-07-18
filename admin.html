@@ -61,9 +61,29 @@
             <label>ผู้แต่ง / เรียบเรียง</label><input type="text" id="form-author" placeholder="เว้นว่างได้...">
             <div style="display:flex; gap:10px;"><div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div><div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div></div>
             <hr class="pc-hidden-hr" style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
-            <label>🔗 ลิงก์ไฟล์เสียง MP3 (ถ้ามี)</label><input type="text" id="form-audio" placeholder="วางลิงก์ .mp3 ที่นี่">
+            
+            <!-- จุดที่ปรับแต่งเพิ่มปุ่มอัปโหลด -->
+            <label>🔗 ลิงก์ไฟล์เสียง MP3 (ถ้ามี)</label>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <input type="text" id="form-audio" placeholder="วางลิงก์ หรืออัปโหลดไฟล์..." style="margin-bottom:0; flex:1;">
+              <label class="btn-primary" style="display:flex; align-items:center; justify-content:center; cursor:pointer; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#3b82f6;">
+                <i class="fa-solid fa-upload"></i>
+                <input type="file" accept="audio/*" style="display:none;" onchange="uploadMedia(event, 'form-audio', 'audio')">
+              </label>
+            </div>
+            
             <label>🌐 ลิงก์ภายนอก (YouTube / ข้อมูลเพิ่มเติม)</label><input type="text" id="form-link" placeholder="วางลิงก์เว็บ หรือ YouTube">
-            <label>🖼️ ลิงก์รูปภาพเนื้อเพลง / โน้ตเพลง (ถ้ามี)</label><input type="text" id="form-image" placeholder="วางลิงก์รูปภาพ (เช่น Facebook, Drive)...">
+            
+            <label>🖼️ ลิงก์รูปภาพเนื้อเพลง / โน้ตเพลง (ถ้ามี)</label>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+              <input type="text" id="form-image" placeholder="วางลิงก์ หรืออัปโหลดรูป..." style="margin-bottom:0; flex:1;">
+              <label class="btn-primary" style="display:flex; align-items:center; justify-content:center; cursor:pointer; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#3b82f6;">
+                <i class="fa-solid fa-upload"></i>
+                <input type="file" accept="image/*" style="display:none;" onchange="uploadMedia(event, 'form-image', 'image')">
+              </label>
+            </div>
+            <!-- สิ้นสุดจุดที่ปรับแต่ง -->
+
           </div>
           <div class="form-col-right">
             <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
@@ -118,7 +138,6 @@
         <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
         <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
         
-        <!-- แก้ไขฟอร์มนับรอบที่นี่ -->
         <label>จำนวนรอบที่ต่ออายุ</label>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
           <input type="number" id="form-user-count" min="1" style="flex:1;">
