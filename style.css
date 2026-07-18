@@ -8,6 +8,7 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 [data-theme="light"] { --bg-main: #f1f5f9; --bg-surface: #ffffff; --bg-glass: rgba(255, 255, 255, 0.95); --text-main: #0f172a; --text-muted: #64748b; }
+[data-theme="dark"] { --bg-main: #0f172a; --bg-surface: #1e293b; --bg-glass: rgba(30, 41, 59, 0.95); --text-main: #f8fafc; --text-muted: #94a3b8; }
 * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 body { background-color: var(--bg-main); color: var(--text-main); font-family: var(--font-main); font-size: 16px; transition: var(--transition); overflow-x: hidden; }
 .container { max-width: 900px; margin: 0 auto; padding: 20px; padding-bottom: 100px;}
@@ -25,7 +26,8 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.5px; }
 
 .search-container { position: relative; margin-bottom: 15px; }
 .search-container i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; }
-input[type="text"], input[type="password"], input[type="tel"], input[type="date"], select, textarea { width: 100%; padding: 16px 16px 16px 48px; background: var(--bg-surface); color: var(--text-main); border: 1px solid #e2e8f0; border-radius: var(--radius-ui); font-family: var(--font-main); font-size: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: var(--transition); outline: none; }
+input[type="text"], input[type="password"], input[type="tel"], input[type="date"], input[type="number"], select, textarea { width: 100%; padding: 16px 16px 16px 48px; background: var(--bg-surface); color: var(--text-main); border: 1px solid #e2e8f0; border-radius: var(--radius-ui); font-family: var(--font-main); font-size: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: var(--transition); outline: none; }
+input[type="number"] { padding: 16px; }
 input[type="file"] { width: 100%; padding: 12px; background: #f1f5f9; border: 1px dashed var(--primary); border-radius: 12px; font-family: var(--font-main); font-size: 0.9rem; cursor: pointer;}
 input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary), 0 0 15px var(--primary-glow); border-color: var(--primary); }
 .form-group input, .form-group select, .form-group textarea { padding-left: 16px; margin-bottom: 15px;}
