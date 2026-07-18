@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Admin - Akha Songbook</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <!-- ใส่ Theme สีส้มเพื่อให้แอดมินรู้ว่าอยู่ในระบบหลังบ้าน -->
+  <style>
+    :root { --primary: #f59e0b; --primary-glow: rgba(245, 158, 11, 0.3); }
+    .nav-item.active { color: #f59e0b; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">ข้อความ</span></div>
+  <div id="loader" class="loader-container"><div class="spinner"></div><h2 style="color:var(--text-main);" id="loader-text">กำลังโหลด...</h2></div>
+
+  <!-- หน้าจอ Login แอดมิน -->
+  <div id="view-login" class="auth-wrapper hidden">
+    <div class="auth-card" style="border-top: 5px solid #f59e0b;">
+      <div class="auth-icon" style="color: #f59e0b;"><i class="fa-solid fa-user-shield"></i></div>
+      <h2 style="margin-bottom: 5px;">ระบบจัดการหลังบ้าน</h2>
+      <p class="auth-desc">Akha Songbook Admin</p>
+      <div class="search-container"><i class="fa-solid fa-lock"></i><input type="password" id="admin-pass" placeholder="รหัสผ่านผู้ดูแลระบบ"></div>
+      <button class="btn-primary" onclick="loginAdmin()" style="width:100%; margin-top:10px; background:#f59e0b;">เข้าสู่ระบบ</button>
+    </div>
+  </div>
+
+  <div id="app" class="container hidden">
+    
+    <!-- หน้าหลักจัดการเพลง -->
+    <div id="view-dashboard" class="fade-in">
+      <div class="top-bar">
+        <h2><i class="fa-solid fa-music"></i> จัดการเพลง</h2>
+        <button class="btn-icon" style="background:#f59e0b; color:white; border:none;" onclick="openAdminForm()"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()"></div>
+      <div id="song-list"></div>
+    </div>
+
+    <!-- ฟอร์มเพิ่ม/แก้ไขเพลง -->
+    <div id="view-admin-form" class="hidden fade-in">
+      <div class="top-bar">
+        <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 id="admin-title" style="flex:1; text-align:center;">เพิ่มเพลงใหม่</h2>
+        <button class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px; background:#10b981;" id="btn-save-top" onclick="saveSong()"><i class="fa-solid fa-check"></i> บันทึก</button>
+      </div>
+      <!-- โครงสร้างฟอร์มเหมือนเดิม 100% -->
+      <div class="reader-card form-group">
+        <input type="hidden" id="form-id">
+        <div class="admin-form-grid">
+          <div class="form-col-left">
+            <label>หมวดหมู่ <span style="color:red">*</span></label>
+            <select id="form-cat" onchange="toggleEngTitleField()">
+              <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option><option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
+              <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option><option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
+              <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option><option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
+              <option value="เพลงนมัสการ">เพลงนมัสการ</option><option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
+            </select>
+            <label>ชื่อเพลง (อาข่า/ไทย) <span style="color:red">*</span></label><input type="text" id="form-title" placeholder="พิมพ์ชื่อเพลง...">
+            <div id="eng-title-group"><label>ชื่อเพลงภาษาอังกฤษ <span style="color:var(--text-muted); font-size:0.8rem;">(ถ้ามี)</span></label><input type="text" id="form-eng-title" placeholder="English title..."></div>
+            <label>ผู้แต่ง / เรียบเรียง</label><input type="text" id="form-author" placeholder="เว้นว่างได้...">
+            <div style="display:flex; gap:10px;"><div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div><div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div></div>
+            <hr class="pc-hidden-hr" style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
+            <label>🔗 ลิงก์ไฟล์เสียง MP3 (ถ้ามี)</label><input type="text" id="form-audio" placeholder="วางลิงก์ .mp3 ที่นี่">
+            <label>🌐 ลิงก์ภายนอก (YouTube / ข้อมูลเพิ่มเติม)</label><input type="text" id="form-link" placeholder="วางลิงก์เว็บ หรือ YouTube">
+            <label>🖼️ ลิงก์รูปภาพเนื้อเพลง / โน้ตเพลง (ถ้ามี)</label><input type="text" id="form-image" placeholder="วางลิงก์รูปภาพ (เช่น Facebook, Drive)...">
+          </div>
+          <div class="form-col-right">
+            <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
+            <div class="lyrics-toggle" style="margin: 0 0 15px 0; width: 100%; display: flex; justify-content: space-between;">
+              <button class="lyrics-toggle-btn active" id="btn-edit-lyric-old" onclick="switchAdminLyricView('old')" style="flex:1; border-radius:4px;">อาข่าแบบเก่า (ข้อมูลเดิม)</button>
+              <button class="lyrics-toggle-btn" id="btn-edit-lyric-new" onclick="switchAdminLyricView('new')" style="flex:1; border-radius:4px;">อาข่าแบบใหม่</button>
+            </div>
+            <div id="toolbar-old" class="editor-toolbar">
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('bold', 'form-lyrics-old')"><i class="fa-solid fa-bold"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('italic', 'form-lyrics-old')"><i class="fa-solid fa-italic"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('underline', 'form-lyrics-old')"><i class="fa-solid fa-underline"></i></button><div class="editor-divider"></div>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyLeft', 'form-lyrics-old')"><i class="fa-solid fa-align-left"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyCenter', 'form-lyrics-old')"><i class="fa-solid fa-align-center"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyRight', 'form-lyrics-old')"><i class="fa-solid fa-align-right"></i></button>
+            </div>
+            <div id="form-lyrics-old" class="rich-editor" contenteditable="true" style="text-align: center; line-height: 2.0; min-height: 200px; margin-bottom: 20px;"></div>
+
+            <div id="toolbar-new" class="editor-toolbar hidden">
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('bold', 'form-lyrics-new')"><i class="fa-solid fa-bold"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('italic', 'form-lyrics-new')"><i class="fa-solid fa-italic"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('underline', 'form-lyrics-new')"><i class="fa-solid fa-underline"></i></button><div class="editor-divider"></div>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyLeft', 'form-lyrics-new')"><i class="fa-solid fa-align-left"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyCenter', 'form-lyrics-new')"><i class="fa-solid fa-align-center"></i></button>
+              <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyRight', 'form-lyrics-new')"><i class="fa-solid fa-align-right"></i></button>
+            </div>
+            <div id="form-lyrics-new" class="rich-editor hidden" contenteditable="true" style="text-align: center; line-height: 2.0; min-height: 200px; margin-bottom: 20px;"></div>
+
+            <label style="margin-top:15px; display:block;">ข้อพระคัมภีร์ / แรงบันดาลใจ</label><textarea id="form-inspiration" rows="3" placeholder="เช่น สดุดี 23:1..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- จัดการผู้ใช้ -->
+    <div id="view-users" class="hidden fade-in">
+      <div class="top-bar">
+        <h2><i class="fa-solid fa-users"></i> ผู้ใช้งาน</h2>
+        <button class="btn-icon" style="background:#f59e0b; color:white; border:none;" onclick="openUserForm()"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="user-search" placeholder="ค้นหาเบอร์ หรือ ชื่อ..." oninput="searchUsers()"></div>
+      <div id="user-list"></div>
+    </div>
+
+    <div id="view-user-form" class="hidden fade-in">
+      <div class="top-bar">
+        <button class="btn-icon" onclick="switchView('users')"><i class="fa-solid fa-arrow-left"></i></button>
+        <h2 id="user-form-title" style="flex:1; text-align:center;">เพิ่มผู้ใช้ใหม่</h2>
+        <button class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px; background:#10b981;" onclick="saveUser()"><i class="fa-solid fa-check"></i> บันทึก</button>
+      </div>
+      <div class="reader-card form-group">
+        <input type="hidden" id="form-user-is-edit" value="false">
+        <label>เบอร์โทรศัพท์ (ไอดีเข้าสู่ระบบ) <span style="color:red">*</span></label><input type="tel" id="form-user-phone" maxlength="10">
+        <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
+        <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
+        <label>จำนวนรอบที่ต่ออายุ</label><input type="text" id="form-user-count" disabled style="background:#f1f5f9;">
+        <div id="form-user-slip-box" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
+          <a id="form-user-slip-link" href="#" target="_blank" class="btn-link" style="background:#10b981; width:100%; text-align:center;"><i class="fa-solid fa-image"></i> กดดูสลิปโอนเงิน</a>
+        </div>
+        <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
+        <div style="display:flex; gap:10px; margin-bottom: 20px;">
+          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="addDaysToExpiry(30)">+ 30 วัน</button>
+          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="addDaysToExpiry(365)">+ 1 ปี</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
+
+  <script src="admin.js"></script>
+</body>
+</html>
