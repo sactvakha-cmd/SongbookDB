@@ -308,3 +308,26 @@ function showToast(msg, type="success") {
   toast.innerHTML = `<i class="fa-solid ${icon}"></i> <span>${msg}</span>`;
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
+
+// === ฟังก์ชันเพิ่มเติมสำหรับการตั้งค่า Theme ===
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  saveUiSettings();
+}
+
+function setColor(color) {
+  document.documentElement.style.setProperty('--primary', color);
+  let hex = color.replace('#', '');
+  let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+  document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`);
+  saveUiSettings();
+}
+
+function saveUiSettings() {
+  const theme = document.documentElement.getAttribute('data-theme') || 'light';
+  const color = document.documentElement.style.getPropertyValue('--primary').trim() || '#2563eb';
+  const settings = JSON.parse(localStorage.getItem('songbook_settings')) || {};
+  settings.theme = theme;
+  settings.color = color;
+  localStorage.setItem('songbook_settings', JSON.stringify(settings));
+}
