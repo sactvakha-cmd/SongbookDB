@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
-  <!-- ใส่ Theme สีส้มเพื่อให้แอดมินรู้ว่าอยู่ในระบบหลังบ้าน -->
   <style>
     :root { --primary: #f59e0b; --primary-glow: rgba(245, 158, 11, 0.3); }
     .nav-item.active { color: #f59e0b; }
@@ -19,7 +18,6 @@
   <div id="toast" class="toast"><i class="fa-solid fa-circle-check"></i> <span id="toast-msg">ข้อความ</span></div>
   <div id="loader" class="loader-container"><div class="spinner"></div><h2 style="color:var(--text-main);" id="loader-text">กำลังโหลด...</h2></div>
 
-  <!-- หน้าจอ Login แอดมิน -->
   <div id="view-login" class="auth-wrapper hidden">
     <div class="auth-card" style="border-top: 5px solid #f59e0b;">
       <div class="auth-icon" style="color: #f59e0b;"><i class="fa-solid fa-user-shield"></i></div>
@@ -32,7 +30,6 @@
 
   <div id="app" class="container hidden">
     
-    <!-- หน้าหลักจัดการเพลง -->
     <div id="view-dashboard" class="fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-music"></i> จัดการเพลง</h2>
@@ -42,14 +39,12 @@
       <div id="song-list"></div>
     </div>
 
-    <!-- ฟอร์มเพิ่ม/แก้ไขเพลง -->
     <div id="view-admin-form" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
         <h2 id="admin-title" style="flex:1; text-align:center;">เพิ่มเพลงใหม่</h2>
         <button class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px; background:#10b981;" id="btn-save-top" onclick="saveSong()"><i class="fa-solid fa-check"></i> บันทึก</button>
       </div>
-      <!-- โครงสร้างฟอร์มเหมือนเดิม 100% -->
       <div class="reader-card form-group">
         <input type="hidden" id="form-id">
         <div class="admin-form-grid">
@@ -102,7 +97,6 @@
       </div>
     </div>
 
-    <!-- จัดการผู้ใช้ -->
     <div id="view-users" class="hidden fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-users"></i> ผู้ใช้งาน</h2>
@@ -123,7 +117,14 @@
         <label>เบอร์โทรศัพท์ (ไอดีเข้าสู่ระบบ) <span style="color:red">*</span></label><input type="tel" id="form-user-phone" maxlength="10">
         <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
         <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
-        <label>จำนวนรอบที่ต่ออายุ</label><input type="text" id="form-user-count" disabled style="background:#f1f5f9;">
+        
+        <!-- แก้ไขฟอร์มนับรอบที่นี่ -->
+        <label>จำนวนรอบที่ต่ออายุ</label>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <input type="number" id="form-user-count" min="1" style="flex:1;">
+          <button class="btn-primary" type="button" style="background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="document.getElementById('form-user-count').value = parseInt(document.getElementById('form-user-count').value || 0) + 1">+1 รอบ</button>
+        </div>
+
         <div id="form-user-slip-box" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
           <a id="form-user-slip-link" href="#" target="_blank" class="btn-link" style="background:#10b981; width:100%; text-align:center;"><i class="fa-solid fa-image"></i> กดดูสลิปโอนเงิน</a>
         </div>
