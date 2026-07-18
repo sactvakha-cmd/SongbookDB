@@ -1,25 +1,25 @@
-const CACHE_NAME = 'akha-songbook-v2';
+const CACHE_NAME = 'akha-songbook-safe-v1';
 
-// เก็บแคชเฉพาะไฟล์ในเว็บเราเท่านั้น (เอาพวกฟอนต์ Google ออก ป้องกัน Safari Error)
+// แคชเฉพาะไฟล์โครงสร้างหลักในโดเมนเราเท่านั้น
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/manifest.json'
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './manifest.json'
 ];
 
+// 1. สั่งให้ Service Worker ตัวใหม่ทำงานทันทีที่ติดตั้งเสร็จ
 self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
-  // บังคับให้ Service Worker ตัวใหม่ทำงานทันที ไม่ต้องรอ
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS_TO_CACHE))
+  );
 });
 
+// 2. ล้างแคชเวอร์ชันเก่าที่เคยทำให้เกิด Error ทิ้งให้หมดแบบอัตโนมัติ
 self.addEventListener('activate', event => {
+  self.clients.claim();
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
@@ -27,44 +27,37 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  // ควบคุมหน้าเว็บทั้งหมดทันที
-  self.clients.claim();
 });
 
+// 3. ดักจับการโหลดไฟล์ (หัวใจสำคัญที่ป้องกัน Error)
 self.addEventListener('fetch', event => {
-  // ปล่อยผ่าน API และ Request ที่ไม่ใช่โหมด GET
-  if (event.request.method !== 'GET' || event.request.url.includes('workers.dev')) {
+  const requestUrl = new URL(event.request.url);
+
+  // กฎเหล็ก: ถ้าเป็นไฟล์จากโดเมนอื่น (เช่น Google, Cloudflare) หรือ API 
+  // ให้ "ข้ามการทำงานของ SW" ไปเลย ปล่อยให้เบราว์เซอร์จัดการเอง 
+  // (แก้ปัญหา Safari Redirects ขาด 100%)
+  if (requestUrl.origin !== self.location.origin || event.request.method !== 'GET') {
     return;
   }
 
+  // สำหรับไฟล์ในเว็บเรา (HTML, CSS, JS) ให้ใช้โหมด "ดึงเน็ตก่อนเสมอ (Network First)"
   event.respondWith(
-    (async () => {
-      try {
-        // 1. พยายามดึงข้อมูลจากอินเทอร์เน็ตก่อนเสมอ (แก้ปัญหาหน้าเว็บเก่าค้าง และปัญหา Redirect)
-        // บังคับ redirect: 'follow' เพื่อให้ Safari ไม่ขึ้น Error
-        const networkResponse = await fetch(event.request, { redirect: 'follow' });
-        
-        // 2. ถ้าดึงสำเร็จ และเป็นไฟล์ในโดเมนเรา ให้อัปเดตแคชเงียบๆ
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const cache = await caches.open(CACHE_NAME);
-          cache.put(event.request, networkResponse.clone());
+    fetch(event.request, { redirect: 'follow' })
+      .then(networkResponse => {
+        // ถ้าเน็ตใช้งานได้ปกติ ให้บันทึกไฟล์ล่าสุดลงแคชเงียบๆ
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
         }
-        
         return networkResponse;
-      } catch (error) {
-        // 3. ถ้าไม่มีเน็ต (ดึงพัง) ค่อยกลับไปหาของในแคช
-        const cachedResponse = await caches.match(event.request);
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-        
-        // 4. ถ้าเป็นไฟล์ HTML แล้วหาในแคชไม่เจอจริงๆ ให้โยนหน้า index.html กลับไป
-        if (event.request.destination === 'document') {
-          return caches.match('/index.html');
-        }
-        
-        throw error;
-      }
-    })()
+      })
+      .catch(() => {
+        // ถ้าไม่มีเน็ต (ออฟไลน์) ถึงจะเปิดไฟล์สำรองจากแคชมาให้ใช้งาน
+        return caches.match(event.request).then(cachedResponse => {
+          return cachedResponse || caches.match('./index.html');
+        });
+      })
   );
 });
