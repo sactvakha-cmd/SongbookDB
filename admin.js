@@ -4,6 +4,10 @@ let allSongs = [];
 let allUsers = [];
 
 window.onload = () => {
+  // อ่านค่าหมวดหมู่ล่าสุดที่แอดมินเปิดค้างไว้ก่อนบันทึก
+  const savedCat = sessionStorage.getItem('adminCatTemp');
+  if(savedCat) { currentAdminCategory = savedCat; }
+
   const savedPass = sessionStorage.getItem('adminPassTemp');
   if(savedPass) { adminPassword = savedPass; fetchAllData(); } 
   else { document.getElementById('loader').classList.add('hidden'); document.getElementById('view-login').classList.remove('hidden'); }
@@ -55,7 +59,9 @@ function fetchAllData() {
       document.getElementById('main-bottom-nav').classList.remove('hidden');
       switchView('dashboard');
       document.getElementById('loader').classList.add('hidden');
-      renderSongs();
+      
+      // เรียกใช้ฟังก์ชันกรอง เพื่อให้ปุ่มสีส้ม กลับมาอยู่ที่หมวดล่าสุดทันทีหลังโหลดข้อมูลเสร็จ
+      filterAdminCat(currentAdminCategory);
   }).catch(err => {
       showToast("โหลดข้อมูลล้มเหลว: " + err.message, "error");
       document.getElementById('loader').classList.add('hidden');
@@ -76,32 +82,32 @@ function switchView(view) {
   ['view-dashboard', 'view-admin-form', 'view-users', 'view-user-form'].forEach(v => document.getElementById(v).classList.add('hidden'));
   document.getElementById('view-' + view).classList.remove('hidden');
   updateBottomNav(view);
-  if(view === 'dashboard') renderSongs();
+  if(view === 'dashboard') filterAdminCat(currentAdminCategory);
   if(view === 'users') renderUsers();
 }
 
 function logout() { sessionStorage.removeItem('adminPassTemp'); location.reload(); }
 
 /* --- จัดการเพลง --- */
-let currentAdminCategory = 'ALL'; // ตัวแปรเก็บหมวดหมู่ที่แอดมินกำลังเลือกดู
+let currentAdminCategory = 'ALL';
 
 function filterAdminCat(cat) {
   currentAdminCategory = cat;
   
-  // อัปเดตสีปุ่มให้รู้ว่ากดอันไหนอยู่
+  // จำค่าหมวดหมู่ล่าสุดลงระบบ (เพื่อเวลา Save แล้วรีเฟรช จะได้กลับมาหน้าเดิม)
+  sessionStorage.setItem('adminCatTemp', cat);
+  
   document.querySelectorAll('.admin-cat-btn').forEach(btn => {
     btn.classList.remove('active');
     if(btn.getAttribute('data-cat') === cat) btn.classList.add('active');
   });
   
-  // สั่งให้เรนเดอร์เพลงใหม่ตามหมวด
   renderSongs();
 }
 
 function renderSongs() {
   const q = document.getElementById('song-search').value.toLowerCase();
   
-  // กรองด้วยการพิมพ์ค้นหา และ หมวดหมู่
   const results = allSongs.filter(s => {
     const matchSearch = (s.Title||"").toLowerCase().includes(q) || (s.ID||"").toLowerCase().includes(q);
     const matchCat = (currentAdminCategory === 'ALL') || (s.Category === currentAdminCategory);
@@ -122,6 +128,32 @@ function renderSongs() {
 
 function searchSongs() { renderSongs(); }
 
+/* ฟังก์ชันเสริมสำหรับปรับมุมมองแอดมินตอนพิมพ์ (ไม่แก้ Database) */
+let admFontSize = 1.2;
+let admLineHeight = 2.0;
+
+function adjustAdminEditor(action, val) {
+  const edOld = document.getElementById('form-lyrics-old');
+  const edNew = document.getElementById('form-lyrics-new');
+  
+  if(action === 'size') {
+    admFontSize += val;
+    if(admFontSize < 0.8) admFontSize = 0.8;
+    if(admFontSize > 3.0) admFontSize = 3.0;
+    edOld.style.fontSize = admFontSize + 'rem';
+    edNew.style.fontSize = admFontSize + 'rem';
+  } else if(action === 'line') {
+    admLineHeight += val;
+    if(admLineHeight < 1.0) admLineHeight = 1.0;
+    if(admLineHeight > 4.0) admLineHeight = 4.0;
+    edOld.style.lineHeight = admLineHeight;
+    edNew.style.lineHeight = admLineHeight;
+  } else if(action === 'font') {
+    edOld.style.fontFamily = val;
+    edNew.style.fontFamily = val;
+  }
+}
+
 function openAdminForm(id = null) {
   const editorOld = document.getElementById('form-lyrics-old'); const editorNew = document.getElementById('form-lyrics-new');
   if(id) {
@@ -131,6 +163,11 @@ function openAdminForm(id = null) {
   } else {
     document.getElementById('form-id').value = ""; document.getElementById('form-title').value = ""; editorOld.innerHTML = ""; editorNew.innerHTML = ""; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
     document.getElementById('form-audio').value = ""; document.getElementById('form-image').value = "";
+    
+    // ตั้งค่าหมวดหมู่ Dropdown ให้ตรงกับที่เลือกไว้ข้างนอก เพื่อความสะดวกในการเพิ่มเพลงใหม่รัวๆ
+    if(currentAdminCategory !== 'ALL') {
+      document.getElementById('form-cat').value = currentAdminCategory;
+    }
   }
   switchView('admin-form');
 }
@@ -141,7 +178,9 @@ function saveSong() {
   document.getElementById('btn-save-top').disabled = true;
   fetchAPI('saveSong', { data: data }).then(res => {
     document.getElementById('btn-save-top').disabled = false;
-    showToast(res.msg); setTimeout(() => location.reload(), 1000);
+    showToast(res.msg); 
+    // รีเฟรชหน้าต่าง ระบบจะอ่านค่า Session และกลับมาหน้าหมวดหมู่ที่ทำงานล่าสุดให้อัตโนมัติ
+    setTimeout(() => location.reload(), 1000);
   }).catch(e => { showToast(e.message, "error"); document.getElementById('btn-save-top').disabled = false; });
 }
 function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('deleteSong', { id: id }).then(res => { showToast(res.msg); location.reload(); }); } }
