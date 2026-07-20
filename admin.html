@@ -6,27 +6,23 @@
   <title>Admin - Akha Songbook</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   
-  <!-- เขียน CSS ทับเฉพาะหน้า Admin จะไม่กระทบหน้าผู้ใช้แน่นอน -->
   <style>
     :root { --primary: #f59e0b; --primary-glow: rgba(245, 158, 11, 0.3); }
     .nav-item.active { color: #f59e0b; }
     
-    /* ขยายหน้าจอให้เต็ม 100% ติดขอบ */
     .container { max-width: 100% !important; padding: 15px !important; padding-bottom: 100px !important; }
     .reader-card { padding: 25px !important; border-radius: 12px; }
     
-    /* จัดการกล่องฝั่งขวา (เนื้อเพลง) ให้ยืดเต็มพื้นที่ บน-ล่าง */
     @media (min-width: 768px) {
-      .admin-form-grid { align-items: stretch; gap: 40px; } /* ให้คอลัมน์ซ้ายขวาสูงเท่ากันเสมอ */
+      .admin-form-grid { align-items: stretch; gap: 40px; } 
       .form-col-right { display: flex; flex-direction: column; height: 100%; border-left: 1px dashed #e2e8f0; padding-left: 40px;}
-      .rich-editor { flex: 1; min-height: 60vh !important; margin-bottom: 0 !important; } /* สั่งให้ยืดเต็มพื้นที่ด้านล่างสุด */
+      .rich-editor { flex: 1; min-height: 60vh !important; margin-bottom: 0 !important; } 
     }
     
-    /* ปรับแต่งกล่องพิมพ์ข้อความให้ขอบมนสวยงาม และเคอร์เซอร์เริ่มที่บนสุด */
     .rich-editor {
       padding: 20px;
       border-radius: 0 0 12px 12px !important;
@@ -34,7 +30,6 @@
       overflow-y: auto;
     }
 
-    /* CSS เพิ่มเติมเฉพาะหน้าจัดการเพลง (แถบหมวดหมู่) */
     .admin-hide-scroll::-webkit-scrollbar { display: none; }
     .admin-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .admin-cat-btn {
@@ -56,6 +51,13 @@
       border-color: var(--primary);
       box-shadow: 0 4px 10px var(--primary-glow);
     }
+
+    /* กล่องเครื่องมือปรับฟอนต์ของ Admin */
+    .admin-view-tools {
+      display: flex; gap: 8px; margin-bottom: 15px; background: #f8fafc; padding: 10px 15px; 
+      border-radius: 8px; border: 1px solid #e2e8f0; align-items: center; flex-wrap: wrap;
+    }
+    .admin-view-tools .editor-select { height: 35px; width: auto; flex: 1; min-width: 120px; padding: 0 10px;}
   </style>
 </head>
 <body>
@@ -81,7 +83,6 @@
       </div>
       <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()"></div>
       
-      <!-- แถบเลื่อนเลือกหมวดหมู่ที่เพิ่มใหม่ -->
       <div class="admin-hide-scroll" style="display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px;">
         <button class="admin-cat-btn active" data-cat="ALL" onclick="filterAdminCat('ALL')">ทั้งหมด</button>
         <button class="admin-cat-btn" data-cat="เพลงชีวิตคริสเตียนอาข่า" onclick="filterAdminCat('เพลงชีวิตคริสเตียนอาข่า')">ชีวิตคริสเตียนอาข่า</button>
@@ -110,7 +111,7 @@
           <!-- ฝั่งซ้าย (ข้อมูลทั่วไป) -->
           <div class="form-col-left">
             <label>หมวดหมู่ <span style="color:red">*</span></label>
-            <select id="form-cat" onchange="toggleEngTitleField()">
+            <select id="form-cat">
               <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option><option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
               <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option><option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
               <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option><option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
@@ -148,6 +149,24 @@
 
           <!-- ฝั่งขวา (เนื้อเพลง) -->
           <div class="form-col-right">
+            
+            <!-- [เพิ่มใหม่] แถบปรับมุมมองการพิมพ์สำหรับ Admin (ไม่กระทบ DB) -->
+            <div class="admin-view-tools">
+              <span style="font-size: 0.85rem; color: #475569; font-weight:600;"><i class="fa-solid fa-eye"></i> ปรับมุมมองแอดมิน:</span>
+              <select class="editor-select" onchange="adjustAdminEditor('font', this.value)">
+                <option value="var(--font-lyrics)">ฟอนต์เนื้อเพลง (Nanum)</option>
+                <option value="var(--font-main)">ฟอนต์ระบบ (Kanit)</option>
+                <option value="sans-serif">แบบมาตรฐาน (Sans-serif)</option>
+              </select>
+              <div class="editor-divider"></div>
+              <button class="editor-btn" type="button" onclick="adjustAdminEditor('size', 0.1)" title="เพิ่มขนาดอักษร"><i class="fa-solid fa-a"></i>+</button>
+              <button class="editor-btn" type="button" onclick="adjustAdminEditor('size', -0.1)" title="ลดขนาดอักษร"><i class="fa-solid fa-a"></i>-</button>
+              <div class="editor-divider"></div>
+              <button class="editor-btn" type="button" onclick="adjustAdminEditor('line', 0.2)" title="เพิ่มระยะห่างบรรทัด"><i class="fa-solid fa-arrows-up-down"></i></button>
+              <button class="editor-btn" type="button" onclick="adjustAdminEditor('line', -0.2)" title="ลดระยะห่างบรรทัด"><i class="fa-solid fa-compress"></i></button>
+              <div style="width:100%; text-align:right; font-size:0.75rem; color:var(--primary); margin-top:2px;">*มีผลแค่ตอนพิมพ์ ไม่กระทบแอปผู้ใช้*</div>
+            </div>
+
             <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
             <div class="lyrics-toggle" style="margin: 0 0 15px 0; width: 100%; display: flex; justify-content: space-between;">
               <button class="lyrics-toggle-btn active" id="btn-edit-lyric-old" onclick="switchAdminLyricView('old')" style="flex:1; border-radius:8px;">อาข่าแบบเก่า (ข้อมูลเดิม)</button>
@@ -163,7 +182,7 @@
               <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyCenter', 'form-lyrics-old')"><i class="fa-solid fa-align-center"></i></button>
               <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyRight', 'form-lyrics-old')"><i class="fa-solid fa-align-right"></i></button>
             </div>
-            <div id="form-lyrics-old" class="rich-editor" contenteditable="true" style="text-align: center; line-height: 2.0;"></div>
+            <div id="form-lyrics-old" class="rich-editor" contenteditable="true" style="text-align: center; line-height: 2.0; font-size: 1.2rem;"></div>
 
             <!-- Editor แบบใหม่ -->
             <div id="toolbar-new" class="editor-toolbar hidden">
@@ -174,7 +193,7 @@
               <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyCenter', 'form-lyrics-new')"><i class="fa-solid fa-align-center"></i></button>
               <button class="editor-btn" type="button" onclick="formatTextAdmin('justifyRight', 'form-lyrics-new')"><i class="fa-solid fa-align-right"></i></button>
             </div>
-            <div id="form-lyrics-new" class="rich-editor hidden" contenteditable="true" style="text-align: center; line-height: 2.0;"></div>
+            <div id="form-lyrics-new" class="rich-editor hidden" contenteditable="true" style="text-align: center; line-height: 2.0; font-size: 1.2rem;"></div>
             
           </div>
         </div>
@@ -224,6 +243,6 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="admin.js"></script>
+  <script src="admin.js?v=3"></script>
 </body>
 </html>
