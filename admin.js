@@ -42,7 +42,7 @@ function fetchAllData() {
   
   Promise.all([
     fetchAPI('getAllUsers'), 
-    fetchAPI('getAllSongsAdmin') // แก้ไขจุดนี้ให้ตรงกับ Backend แล้วครับ
+    fetchAPI('getAllSongsAdmin') 
   ]).then(results => {
       const resUsers = results[0];
       const resSongs = results[1];
@@ -83,9 +83,31 @@ function switchView(view) {
 function logout() { sessionStorage.removeItem('adminPassTemp'); location.reload(); }
 
 /* --- จัดการเพลง --- */
+let currentAdminCategory = 'ALL'; // ตัวแปรเก็บหมวดหมู่ที่แอดมินกำลังเลือกดู
+
+function filterAdminCat(cat) {
+  currentAdminCategory = cat;
+  
+  // อัปเดตสีปุ่มให้รู้ว่ากดอันไหนอยู่
+  document.querySelectorAll('.admin-cat-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if(btn.getAttribute('data-cat') === cat) btn.classList.add('active');
+  });
+  
+  // สั่งให้เรนเดอร์เพลงใหม่ตามหมวด
+  renderSongs();
+}
+
 function renderSongs() {
   const q = document.getElementById('song-search').value.toLowerCase();
-  const results = allSongs.filter(s => (s.Title||"").toLowerCase().includes(q) || (s.ID||"").toLowerCase().includes(q));
+  
+  // กรองด้วยการพิมพ์ค้นหา และ หมวดหมู่
+  const results = allSongs.filter(s => {
+    const matchSearch = (s.Title||"").toLowerCase().includes(q) || (s.ID||"").toLowerCase().includes(q);
+    const matchCat = (currentAdminCategory === 'ALL') || (s.Category === currentAdminCategory);
+    return matchSearch && matchCat;
+  });
+
   document.getElementById('song-list').innerHTML = results.map(s => `
     <div class="song-item">
       <div class="s-id">${s.ID}</div>
@@ -97,6 +119,7 @@ function renderSongs() {
     </div>
   `).join('');
 }
+
 function searchSongs() { renderSongs(); }
 
 function openAdminForm(id = null) {
@@ -193,7 +216,7 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-/* --- เพิ่มใหม่: ระบบอัปโหลดไฟล์ของ Admin --- */
+/* --- ระบบอัปโหลดไฟล์ของ Admin --- */
 function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0];
   if(!file) return;
