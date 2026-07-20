@@ -33,6 +33,29 @@
       outline: none;
       overflow-y: auto;
     }
+
+    /* CSS เพิ่มเติมเฉพาะหน้าจัดการเพลง (แถบหมวดหมู่) */
+    .admin-hide-scroll::-webkit-scrollbar { display: none; }
+    .admin-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .admin-cat-btn {
+      padding: 6px 16px;
+      border-radius: 50px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      color: #64748b;
+      font-family: 'Kanit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+    }
+    .admin-cat-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 10px var(--primary-glow);
+    }
   </style>
 </head>
 <body>
@@ -57,6 +80,20 @@
         <button class="btn-icon" style="background:#f59e0b; color:white; border:none;" onclick="openAdminForm()"><i class="fa-solid fa-plus"></i></button>
       </div>
       <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()"></div>
+      
+      <!-- แถบเลื่อนเลือกหมวดหมู่ที่เพิ่มใหม่ -->
+      <div class="admin-hide-scroll" style="display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px;">
+        <button class="admin-cat-btn active" data-cat="ALL" onclick="filterAdminCat('ALL')">ทั้งหมด</button>
+        <button class="admin-cat-btn" data-cat="เพลงชีวิตคริสเตียนอาข่า" onclick="filterAdminCat('เพลงชีวิตคริสเตียนอาข่า')">ชีวิตคริสเตียนอาข่า</button>
+        <button class="admin-cat-btn" data-cat="เพลงคริสเตียนทั่วไป" onclick="filterAdminCat('เพลงคริสเตียนทั่วไป')">คริสเตียนทั่วไป</button>
+        <button class="admin-cat-btn" data-cat="เพลงคริสต์มาส" onclick="filterAdminCat('เพลงคริสต์มาส')">คริสต์มาส</button>
+        <button class="admin-cat-btn" data-cat="เพลงสรรเสริญ" onclick="filterAdminCat('เพลงสรรเสริญ')">สรรเสริญ</button>
+        <button class="admin-cat-btn" data-cat="เพลงนมัสการ" onclick="filterAdminCat('เพลงนมัสการ')">นมัสการ</button>
+        <button class="admin-cat-btn" data-cat="เพลงงานมงคลสมรส" onclick="filterAdminCat('เพลงงานมงคลสมรส')">มงคลสมรส</button>
+        <button class="admin-cat-btn" data-cat="เพลงไว้อาลัย" onclick="filterAdminCat('เพลงไว้อาลัย')">ไว้อาลัย</button>
+        <button class="admin-cat-btn" data-cat="เพลงอื่นๆ" onclick="filterAdminCat('เพลงอื่นๆ')">อื่นๆ</button>
+      </div>
+
       <div id="song-list"></div>
     </div>
 
