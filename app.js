@@ -11,14 +11,13 @@ async function fetchAPI(action, params = {}) {
 const i18n = {
   th: { app_title: "คลังเพลงคริสเตียนอาข่า", search_placeholder: "ค้นหาด้วย เลข หรือ ชื่อเพลง...", manage_text: "ดูและจัดการ", total_songs: "เพลงทั้งหมดในคลัง", group_songs: "กลุ่มเพลง", song_count_label: "จำนวนเพลง:", song_unit: "เพลง", nav_home: "หน้าแรก", nav_profile: "โปรไฟล์", cat_life: "เพลงชีวิตคริสเตียนอาข่า", cat_gen: "เพลงคริสเตียนทั่วไป", cat_xmas: "เพลงคริสต์มาส", cat_sad: "เพลงไว้อาลัย", cat_wed: "เพลงงานมงคลสมรส", cat_praise: "เพลงสรรเสริญ", cat_worship: "เพลงนมัสการ", cat_other: "เพลงอื่นๆ", nav_cat_life: "อาข่า", nav_cat_gen: "ทั่วไป", nav_cat_xmas: "คริสต์มาส", nav_cat_sad: "ไว้อาลัย", nav_cat_wed: "มงคลสมรส", nav_cat_praise: "สรรเสริญ", nav_cat_worship: "นมัสการ", nav_cat_other: "อื่นๆ" },
   an: { app_title: "Aqkaq kalizaq DawrCar deuq.", search_placeholder: "Bof-awr pov-eu...", manage_text: "Haw-awr lavsav-eu", total_songs: "Dawqcar dawqtawvluf", group_songs: "Dawqcawr armaf", song_count_label: "Dawqcar:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", cat_life: "Aqkaq kalizaq Car-eu Sanqbof", cat_gen: "Aqkaq kalizaq cardawq nuideuq.", cat_xmas: "Kirsarmax DawqCar", cat_sad: "Shirbui-anr car-eu Dawqcar", cat_wed: "Oermr barngae Car-eu Dawqcar", cat_praise: "Jaceuq-euu dawqcar", cat_worship: "Uqduq tanq-eu DawqCar", cat_other: "Dawqcar Nuideuq.", nav_cat_life: "Sanqbof", nav_cat_gen: "Nuideuq.", nav_cat_xmas: "Kirsarmax", nav_cat_sad: "Shirbui", nav_cat_wed: "Oermr", nav_cat_praise: "Jaceuq", nav_cat_worship: "Uqduq", nav_cat_other: "Nuideuq." },
-  ao: { app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awr poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ" }
+  ao: { app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awˇ poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ" }
 };
 
 let appLang = 'th'; 
 let allSongs = [];
 let currentCategory = ""; let currentSong = null; 
 let userPhone = ""; let userExpiry = "";
-let readerFontSize = 1.2; let readerLineHeight = 2.0; let readerAlign = "center"; 
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
 
@@ -36,7 +35,6 @@ const baseCategories = [
 window.onload = () => {
   switchAuthTab('login');
   const savedLang = localStorage.getItem('app_lang'); if(savedLang) appLang = savedLang; setAppLanguage(appLang, false); 
-  const reader = JSON.parse(localStorage.getItem('songbook_reader')); if(reader) { readerFontSize = reader.size || 1.2; readerLineHeight = reader.line || 2.0; readerAlign = reader.align || 'center'; }
   
   const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
   if(savedUser && savedUser.phone && savedUser.pin) {
@@ -270,14 +268,11 @@ function switchView(view) {
   } catch (e) { console.error("Switch View Error", e); }
 }
 
-function toggleTextSettings() { document.getElementById('text-settings-panel').classList.toggle('show'); }
-
 function switchReaderLyricView(type) {
   document.getElementById('btn-lyric-new').classList.remove('active'); document.getElementById('btn-lyric-old').classList.remove('active'); document.getElementById('btn-lyric-'+type).classList.add('active');
   const lyricsEl = document.getElementById('detail-lyrics');
   if(type === 'new') { lyricsEl.innerHTML = currentSong.LyricsNew || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบใหม่ในระบบ</div>`; } 
   else { lyricsEl.innerHTML = currentSong.Lyrics || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบเก่าในระบบ</div>`; }
-  lyricsEl.style.fontSize = readerFontSize + 'rem'; lyricsEl.style.lineHeight = readerLineHeight; lyricsEl.style.textAlign = readerAlign;
 }
 
 function openSong(id) {
@@ -288,18 +283,13 @@ function openSong(id) {
     const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
     const toggleBox = document.getElementById('lyrics-toggle-box');
     if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
-    else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; lyricsEl.style.fontSize = readerFontSize + 'rem'; lyricsEl.style.lineHeight = readerLineHeight; lyricsEl.style.textAlign = readerAlign; }
-    ['left', 'center', 'right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active-align')); document.getElementById('btn-align-'+readerAlign).classList.add('active-align');
+    else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; }
+    
     const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
     const mediaBox = document.getElementById('detail-media-container'); let mediaHtml = ""; if(currentSong.AudioUrl) mediaHtml += `<audio controls src="${currentSong.AudioUrl}"></audio><br>`; if(currentSong.ExternalLink) mediaHtml += `<a href="${currentSong.ExternalLink}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ข้อมูลเพิ่มเติม / YouTube</a>`; if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
-    document.getElementById('text-settings-panel').classList.remove('show'); switchView('song');
+    switchView('song');
   } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
 }
-
-function zoomText(step) { readerFontSize += (step * 0.2); if(readerFontSize < 0.8) readerFontSize = 0.8; if(readerFontSize > 2.5) readerFontSize = 2.5; document.getElementById('detail-lyrics').style.fontSize = readerFontSize + 'rem'; saveReaderPrefs(); }
-function adjustSpacing(step) { readerLineHeight += step; if(readerLineHeight < 1.2) readerLineHeight = 1.2; if(readerLineHeight > 4.0) readerLineHeight = 4.0; document.getElementById('detail-lyrics').style.lineHeight = readerLineHeight; saveReaderPrefs(); }
-function setAlign(align) { readerAlign = align; document.getElementById('detail-lyrics').style.textAlign = align; ['left', 'center', 'right'].forEach(a => document.getElementById('btn-align-'+a).classList.remove('active-align')); document.getElementById('btn-align-'+align).classList.add('active-align'); saveReaderPrefs(); }
-function saveReaderPrefs() { const prefs = { size: readerFontSize, line: readerLineHeight, align: readerAlign }; localStorage.setItem('songbook_reader', JSON.stringify(prefs)); }
 
 function showToast(msg, type="success") {
   const toast = document.getElementById('toast');
@@ -309,7 +299,7 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// === ฟังก์ชันเพิ่มเติมสำหรับการตั้งค่า Theme ===
+// === ฟังก์ชันสำหรับการตั้งค่า Theme ===
 function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   saveUiSettings();
