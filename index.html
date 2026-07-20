@@ -99,7 +99,7 @@
 
     <div id="view-category" class="hidden fade-in">
       <div class="top-bar">
-        <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
+        <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
         <h2 id="cat-title" style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">หมวดหมู่</h2>
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
@@ -112,14 +112,10 @@
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
         <div style="flex:1"></div>
-        <button class="btn-icon" style="margin-right:5px;" onclick="forceDataRefresh()"><i class="fa-solid fa-rotate-right"></i></button>
-        <button class="btn-icon" onclick="toggleTextSettings()" title="ปรับแต่งการอ่าน"><i class="fa-solid fa-sliders"></i></button>
+        <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
+        <!-- นำปุ่ม Slider ออกแล้ว เพื่อให้แอดมินกำหนดเองทั้งหมด -->
       </div>
-      <div id="text-settings-panel" class="controls-wrapper">
-        <div class="control-group"><button class="btn-icon align-btn" id="btn-align-left" onclick="setAlign('left')"><i class="fa-solid fa-align-left"></i></button><button class="btn-icon align-btn active-align" id="btn-align-center" onclick="setAlign('center')"><i class="fa-solid fa-align-center"></i></button><button class="btn-icon align-btn" id="btn-align-right" onclick="setAlign('right')"><i class="fa-solid fa-align-right"></i></button></div>
-        <div class="control-group"><span class="c-label">A<i class="fa-solid fa-arrow-up-right-dots" style="font-size:0.6rem"></i></span><button class="btn-icon" onclick="zoomText(-1)"><i class="fa-solid fa-minus"></i></button><button class="btn-icon" onclick="zoomText(1)"><i class="fa-solid fa-plus"></i></button></div>
-        <div class="control-group"><span class="c-label"><i class="fa-solid fa-arrows-up-down"></i></span><button class="btn-icon" onclick="adjustSpacing(-0.2)"><i class="fa-solid fa-minus"></i></button><button class="btn-icon" onclick="adjustSpacing(0.2)"><i class="fa-solid fa-plus"></i></button></div>
-      </div>
+      
       <div class="reader-card">
         <div class="reader-header">
           <h2 id="detail-title" class="reader-title">ชื่อเพลง</h2>
@@ -135,7 +131,10 @@
           <button class="lyrics-toggle-btn" id="btn-lyric-old" onclick="switchReaderLyricView('old')">อาข่าแบบเก่า</button>
         </div>
         <div id="detail-image-container" class="song-image-box hidden"></div>
-        <div id="detail-lyrics" class="reader-lyrics" style="text-align: center;"></div>
+        
+        <!-- ส่วนแสดงเนื้อเพลง (รูปแบบอิงตามที่แอดมินบันทึกเป๊ะๆ) -->
+        <div id="detail-lyrics" class="reader-lyrics"></div>
+        
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
         <div id="detail-media-container" class="media-box hidden"></div>
       </div>
