@@ -260,6 +260,12 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
+    // ปิดเพลงอัตโนมัติเวลากดย้อนกลับ (ไม่ว่าไปหน้าไหนที่ไม่ใช่หน้าเพลง)
+    if(view !== 'song') {
+      const audioEl = document.getElementById('song-audio-element');
+      if(audioEl && !audioEl.paused) { toggleAudio(); }
+    }
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
     ['view-dashboard', 'view-category', 'view-song', 'view-settings'].forEach(v => { document.getElementById(v).classList.add('hidden'); document.getElementById(v).classList.remove('fade-in'); });
     let activeView = document.getElementById('view-' + view); if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
@@ -275,7 +281,6 @@ function switchReaderLyricView(type) {
   else { lyricsEl.innerHTML = currentSong.Lyrics || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบเก่าในระบบ</div>`; }
 }
 
-// อัปเดตส่วนควบคุม Iframe Video และ Audio
 function openSong(id) {
   try {
     currentSong = allSongs.find(s => s.ID === id); 
@@ -283,31 +288,42 @@ function openSong(id) {
     const engTitleEl = document.getElementById('detail-eng-title'); 
     if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
     
-    document.getElementById('detail-id').innerText = currentSong.ID; 
-    document.getElementById('detail-author').innerText = currentSong.Author || '-'; 
-    const chordDiv = document.getElementById('detail-chords-container'); 
-    if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
+    document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-'; 
+    const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
     
-    const notDiv = document.getElementById('detail-notation-container'); 
-    if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
+    const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
     
-    const imgBox = document.getElementById('detail-image-container'); 
-    if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
+    const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
     
     const toggleBox = document.getElementById('lyrics-toggle-box');
     if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
     else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; }
     
-    const inspDiv = document.getElementById('detail-inspiration'); 
-    if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
+    const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
     
     const mediaBox = document.getElementById('detail-media-container'); 
     let mediaHtml = ""; 
     
-    // MP3 Player
-    if(currentSong.AudioUrl) mediaHtml += `<audio controls src="${currentSong.AudioUrl}" style="margin-bottom:10px;"></audio><br>`; 
+    // ตั้งค่าแถบ Audio บน Top Bar
+    const topAudio = document.getElementById('top-audio-player');
+    const topEmpty = document.getElementById('top-audio-empty');
+    const audioEl = document.getElementById('song-audio-element');
     
-    // External Link / YouTube Video
+    if(currentSong.AudioUrl) {
+      topAudio.classList.remove('hidden');
+      topEmpty.classList.add('hidden');
+      audioEl.src = currentSong.AudioUrl;
+      audioEl.pause();
+      document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
+      document.getElementById('audio-fill').style.width = '0%';
+      document.getElementById('audio-time').innerText = '0:00';
+    } else {
+      topAudio.classList.add('hidden');
+      topEmpty.classList.remove('hidden');
+      audioEl.src = "";
+    }
+    
+    // Video YouTube แสดงด้านล่าง
     if(currentSong.ExternalLink) {
       const ytMatch = currentSong.ExternalLink.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
       if (ytMatch && ytMatch[1]) {
@@ -345,4 +361,49 @@ function saveUiSettings() {
   const settings = JSON.parse(localStorage.getItem('songbook_settings')) || {};
   settings.theme = theme; settings.color = color;
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
+}
+
+/* --- ระบบเครื่องเล่นเพลงบน Top Bar --- */
+function toggleAudio() {
+  const audioEl = document.getElementById('song-audio-element');
+  const playBtn = document.getElementById('btn-play-pause');
+  if(!audioEl.src) return;
+  
+  if(audioEl.paused) {
+    audioEl.play();
+    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+  } else {
+    audioEl.pause();
+    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+  }
+}
+
+function seekAudio(e) {
+  const audioEl = document.getElementById('song-audio-element');
+  if(!audioEl.src || isNaN(audioEl.duration) || audioEl.duration === Infinity) return;
+  const track = e.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const clickX = e.clientX - rect.left;
+  const percent = clickX / rect.width;
+  audioEl.currentTime = percent * audioEl.duration;
+}
+
+const songAudioEl = document.getElementById('song-audio-element');
+if(songAudioEl) {
+  songAudioEl.addEventListener('timeupdate', () => {
+    if(isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
+    const percent = (songAudioEl.currentTime / songAudioEl.duration) * 100;
+    document.getElementById('audio-fill').style.width = percent + '%';
+    
+    let mins = Math.floor(songAudioEl.currentTime / 60);
+    let secs = Math.floor(songAudioEl.currentTime % 60);
+    if(secs < 10) secs = '0' + secs;
+    document.getElementById('audio-time').innerText = mins + ':' + secs;
+  });
+
+  songAudioEl.addEventListener('ended', () => {
+    document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
+    document.getElementById('audio-fill').style.width = '0%';
+    document.getElementById('audio-time').innerText = '0:00';
+  });
 }
