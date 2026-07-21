@@ -158,9 +158,41 @@ function switchAdminLyricView(type) {
   }
 }
 
-// ฟังก์ชันนี้จะแปลงข้อความที่ "ไฮไลท์ดำ" ไว้ ให้เป็นตามคำสั่ง
+// ฟังก์ชันนี้จะแปลงข้อความและป้องกันเบราว์เซอร์ค้าง 100%
 function formatTextAdmin(command, value = null) {
+  // 1. บังคับให้เบราว์เซอร์ใช้ CSS Inline ทันสมัย
+  document.execCommand('styleWithCSS', false, true);
+  
+  // 2. สั่งจัดรูปแบบตามที่แอดมินกด
   document.execCommand(command, false, value);
+  
+  // 3. [ระบบป้องกันการค้าง] คลีนโค้ดขยะที่เบราว์เซอร์แอบสร้างทันที และแปลงเป็น CSS ให้ฝั่งผู้ใช้ดู
+  const editorOld = document.getElementById('form-lyrics-old');
+  const editorNew = document.getElementById('form-lyrics-new');
+  
+  [editorOld, editorNew].forEach(editor => {
+    if (!editor.classList.contains('hidden')) {
+      
+      // ล้างแท็ก Size เก่าๆ แปลงเป็นหน่วย rem ที่ผู้ใช้เห็นได้เป๊ะๆ
+      const fontSizes = editor.querySelectorAll('font[size]');
+      fontSizes.forEach(f => {
+        const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
+        const span = document.createElement('span');
+        span.style.fontSize = sizeMap[f.getAttribute('size')] || '1.2rem';
+        span.innerHTML = f.innerHTML;
+        f.replaceWith(span);
+      });
+      
+      // ล้างแท็ก Face เก่าๆ แปลงเป็น Font Family
+      const fontFaces = editor.querySelectorAll('font[face]');
+      fontFaces.forEach(f => {
+        const span = document.createElement('span');
+        span.style.fontFamily = f.getAttribute('face');
+        span.innerHTML = f.innerHTML;
+        f.replaceWith(span);
+      });
+    }
+  });
 }
 
 /* --- จัดการผู้ใช้ --- */
