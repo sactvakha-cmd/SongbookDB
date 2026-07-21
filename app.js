@@ -275,18 +275,50 @@ function switchReaderLyricView(type) {
   else { lyricsEl.innerHTML = currentSong.Lyrics || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบเก่าในระบบ</div>`; }
 }
 
+// อัปเดตส่วนควบคุม Iframe Video และ Audio
 function openSong(id) {
   try {
-    currentSong = allSongs.find(s => s.ID === id); document.getElementById('detail-title').innerText = currentSong.Title; const engTitleEl = document.getElementById('detail-eng-title'); if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
-    document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-'; const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
-    const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
-    const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
+    currentSong = allSongs.find(s => s.ID === id); 
+    document.getElementById('detail-title').innerText = currentSong.Title; 
+    const engTitleEl = document.getElementById('detail-eng-title'); 
+    if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
+    
+    document.getElementById('detail-id').innerText = currentSong.ID; 
+    document.getElementById('detail-author').innerText = currentSong.Author || '-'; 
+    const chordDiv = document.getElementById('detail-chords-container'); 
+    if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
+    
+    const notDiv = document.getElementById('detail-notation-container'); 
+    if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
+    
+    const imgBox = document.getElementById('detail-image-container'); 
+    if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
+    
     const toggleBox = document.getElementById('lyrics-toggle-box');
     if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
     else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; }
     
-    const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
-    const mediaBox = document.getElementById('detail-media-container'); let mediaHtml = ""; if(currentSong.AudioUrl) mediaHtml += `<audio controls src="${currentSong.AudioUrl}"></audio><br>`; if(currentSong.ExternalLink) mediaHtml += `<a href="${currentSong.ExternalLink}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ข้อมูลเพิ่มเติม / YouTube</a>`; if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
+    const inspDiv = document.getElementById('detail-inspiration'); 
+    if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
+    
+    const mediaBox = document.getElementById('detail-media-container'); 
+    let mediaHtml = ""; 
+    
+    // MP3 Player
+    if(currentSong.AudioUrl) mediaHtml += `<audio controls src="${currentSong.AudioUrl}" style="margin-bottom:10px;"></audio><br>`; 
+    
+    // External Link / YouTube Video
+    if(currentSong.ExternalLink) {
+      const ytMatch = currentSong.ExternalLink.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+      if (ytMatch && ytMatch[1]) {
+        mediaHtml += `<div class="video-container"><iframe src="https://www.youtube.com/embed/${ytMatch[1]}" allowfullscreen></iframe></div>`;
+      } else {
+        mediaHtml += `<a href="${currentSong.ExternalLink}" target="_blank" class="btn-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> ข้อมูลเพิ่มเติม</a>`; 
+      }
+    }
+    
+    if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
+    
     switchView('song');
   } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
 }
@@ -299,12 +331,7 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// === ฟังก์ชันสำหรับการตั้งค่า Theme ===
-function setTheme(theme) {
-  document.documentElement.setAttribute('data-theme', theme);
-  saveUiSettings();
-}
-
+function setTheme(theme) { document.documentElement.setAttribute('data-theme', theme); saveUiSettings(); }
 function setColor(color) {
   document.documentElement.style.setProperty('--primary', color);
   let hex = color.replace('#', '');
@@ -312,12 +339,10 @@ function setColor(color) {
   document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`);
   saveUiSettings();
 }
-
 function saveUiSettings() {
   const theme = document.documentElement.getAttribute('data-theme') || 'light';
   const color = document.documentElement.style.getPropertyValue('--primary').trim() || '#2563eb';
   const settings = JSON.parse(localStorage.getItem('songbook_settings')) || {};
-  settings.theme = theme;
-  settings.color = color;
+  settings.theme = theme; settings.color = color;
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
 }
