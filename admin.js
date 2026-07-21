@@ -86,13 +86,10 @@ function switchView(view) {
 
 function logout() { sessionStorage.removeItem('adminPassTemp'); location.reload(); }
 
-/* --- จัดการเพลง --- */
 let currentAdminCategory = 'ALL';
-
 function filterAdminCat(cat) {
   currentAdminCategory = cat;
   sessionStorage.setItem('adminCatTemp', cat);
-  
   document.querySelectorAll('.admin-cat-btn').forEach(btn => {
     btn.classList.remove('active');
     if(btn.getAttribute('data-cat') === cat) btn.classList.add('active');
@@ -102,13 +99,11 @@ function filterAdminCat(cat) {
 
 function renderSongs() {
   const q = document.getElementById('song-search').value.toLowerCase();
-  
   const results = allSongs.filter(s => {
     const matchSearch = (s.Title||"").toLowerCase().includes(q) || (s.ID||"").toLowerCase().includes(q);
     const matchCat = (currentAdminCategory === 'ALL') || (s.Category === currentAdminCategory);
     return matchSearch && matchCat;
   });
-
   document.getElementById('song-list').innerHTML = results.map(s => `
     <div class="song-item">
       <div class="s-id">${s.ID}</div>
@@ -120,7 +115,6 @@ function renderSongs() {
     </div>
   `).join('');
 }
-
 function searchSongs() { renderSongs(); }
 
 function openAdminForm(id = null) {
@@ -148,7 +142,6 @@ function saveSong() {
 }
 function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('deleteSong', { id: id }).then(res => { showToast(res.msg); location.reload(); }); } }
 
-/* --- อัปเดตใหม่: จัดรูปแบบข้อความบันทึกลง DB ทันที --- */
 function switchAdminLyricView(type) {
   document.getElementById('btn-edit-lyric-old').classList.remove('active'); document.getElementById('btn-edit-lyric-new').classList.remove('active'); document.getElementById('btn-edit-lyric-'+type).classList.add('active');
   if(type === 'old') { 
@@ -158,22 +151,15 @@ function switchAdminLyricView(type) {
   }
 }
 
-// ฟังก์ชันนี้จะแปลงข้อความและป้องกันเบราว์เซอร์ค้าง 100%
 function formatTextAdmin(command, value = null) {
-  // 1. บังคับให้เบราว์เซอร์ใช้ CSS Inline ทันสมัย
   document.execCommand('styleWithCSS', false, true);
-  
-  // 2. สั่งจัดรูปแบบตามที่แอดมินกด
   document.execCommand(command, false, value);
   
-  // 3. [ระบบป้องกันการค้าง] คลีนโค้ดขยะที่เบราว์เซอร์แอบสร้างทันที และแปลงเป็น CSS ให้ฝั่งผู้ใช้ดู
   const editorOld = document.getElementById('form-lyrics-old');
   const editorNew = document.getElementById('form-lyrics-new');
   
   [editorOld, editorNew].forEach(editor => {
     if (!editor.classList.contains('hidden')) {
-      
-      // ล้างแท็ก Size เก่าๆ แปลงเป็นหน่วย rem ที่ผู้ใช้เห็นได้เป๊ะๆ
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
         const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
@@ -183,7 +169,6 @@ function formatTextAdmin(command, value = null) {
         f.replaceWith(span);
       });
       
-      // ล้างแท็ก Face เก่าๆ แปลงเป็น Font Family
       const fontFaces = editor.querySelectorAll('font[face]');
       fontFaces.forEach(f => {
         const span = document.createElement('span');
@@ -195,7 +180,6 @@ function formatTextAdmin(command, value = null) {
   });
 }
 
-/* --- จัดการผู้ใช้ --- */
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
   const results = allUsers.filter(u => (u.Phone||"").includes(q) || (u.Name||"").toLowerCase().includes(q));
@@ -258,7 +242,6 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-/* --- ระบบอัปโหลดไฟล์ของ Admin --- */
 function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0];
   if(!file) return;
@@ -283,4 +266,63 @@ function uploadMedia(event, targetId, fileType) {
     });
   };
   reader.readAsDataURL(file);
+}
+
+let mediaRecorder;
+let audioChunks = [];
+let isRecording = false;
+
+async function toggleRecording() {
+  const btn = document.getElementById('btn-record-audio');
+  const icon = btn.querySelector('i');
+  
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      
+      mediaRecorder.start();
+      isRecording = true;
+      
+      btn.style.background = "var(--danger)";
+      btn.classList.add('recording-pulse');
+      icon.classList.remove('fa-microphone');
+      icon.classList.add('fa-stop');
+      showToast("กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
+
+      mediaRecorder.addEventListener("dataavailable", event => {
+        audioChunks.push(event.data);
+      });
+
+      mediaRecorder.addEventListener("stop", () => {
+        showToast("กำลังประมวลผลและอัปโหลดเสียง...", "warning");
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mpeg' });
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+          const base64 = e.target.result;
+          fetchAPI('uploadAdminFile', { 
+              base64Data: base64, 
+              fileType: 'audio', 
+              extension: 'mp3' 
+          }).then(res => {
+            if(res.status === 'success') {
+              document.getElementById('form-audio').value = res.url;
+              showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
+            } else { showToast(res.msg, "error"); }
+          }).catch(err => showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"));
+        };
+        reader.readAsDataURL(audioBlob);
+        stream.getTracks().forEach(track => track.stop());
+      });
+      
+    } catch (err) { alert("ไม่สามารถใช้งานไมโครโฟนได้: " + err.message); }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.classList.remove('recording-pulse');
+    icon.classList.remove('fa-stop');
+    icon.classList.add('fa-microphone');
+  }
 }
