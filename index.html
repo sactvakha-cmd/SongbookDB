@@ -5,15 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Akha Songbook Pro</title>
-  <!-- โค้ด PWA และ ไอคอน -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#2563eb">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+  <!-- โหลดฟอนต์ทั้งหมดให้แสดงผลเหมือนฝั่ง Admin -->
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit:wght@300;400;500;600;700&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo:wght@400;700&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <script>
@@ -72,7 +74,6 @@
   </div>
 
   <div id="app" class="container hidden">
-
     <div id="view-dashboard" class="fade-in">
       <div class="hero-header">
         <div><p style="color:var(--text-muted); font-size:0.9rem;">Akha Songbook 🎵</p><h1 data-i18n="app_title">คลังเพลงคริสเตียนอาข่า</h1></div>
@@ -99,7 +100,7 @@
 
     <div id="view-category" class="hidden fade-in">
       <div class="top-bar">
-        <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
+        <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
         <h2 id="cat-title" style="flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;">หมวดหมู่</h2>
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
@@ -113,7 +114,6 @@
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
         <div style="flex:1"></div>
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
-        <!-- นำปุ่ม Slider ออกแล้ว เพื่อให้แอดมินกำหนดเองทั้งหมด -->
       </div>
       
       <div class="reader-card">
@@ -132,7 +132,6 @@
         </div>
         <div id="detail-image-container" class="song-image-box hidden"></div>
         
-        <!-- ส่วนแสดงเนื้อเพลง (รูปแบบอิงตามที่แอดมินบันทึกเป๊ะๆ) -->
         <div id="detail-lyrics" class="reader-lyrics"></div>
         
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
