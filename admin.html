@@ -139,13 +139,13 @@
               <button class="lyrics-toggle-btn" id="btn-edit-lyric-new" onclick="switchAdminLyricView('new')" style="flex:1; border-radius:8px;">อาข่าแบบใหม่</button>
             </div>
             
-            <!-- [แก้ไขใหม่] แถบเครื่องมือเดี่ยว (รวมฟอนต์ ขนาดตัวอักษร และ B I U เข้าด้วยกันแบบคลีนๆ) -->
+            <!-- [แก้ไขใหม่] แถบเครื่องมือเดี่ยว (ไม่ทำให้ค้าง และส่งค่าให้ผู้ใช้เห็นเป๊ะๆ) -->
             <div id="main-editor-toolbar" class="editor-toolbar">
               <!-- เลือกรูปแบบฟอนต์ -->
               <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;">
                 <option value="">-- รูปแบบ --</option>
-                <option value="Nanum Myeongjo">ฟอนต์เนื้อเพลง</option>
-                <option value="Kanit">ฟอนต์ระบบ (Kanit)</option>
+                <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
+                <option value="'Kanit', sans-serif">ฟอนต์ระบบ (Kanit)</option>
                 <option value="sans-serif">มาตรฐาน</option>
               </select>
               
@@ -161,7 +161,7 @@
               </select>
               <div class="editor-divider"></div>
 
-              <!-- B I U (ใช้ onmousedown เพื่อป้องกันไม่ให้ Editor หลุด Focus ตอนกด) -->
+              <!-- B I U -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('bold')" title="ตัวหนา"><i class="fa-solid fa-bold"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('italic')" title="ตัวเอียง"><i class="fa-solid fa-italic"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('underline')" title="ขีดเส้นใต้"><i class="fa-solid fa-underline"></i></button>
