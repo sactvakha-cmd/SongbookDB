@@ -13,7 +13,6 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- โหลดฟอนต์ทั้งหมดให้แสดงผลเหมือนฝั่ง Admin -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit:wght@300;400;500;600;700&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo:wght@400;700&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -109,10 +108,23 @@
       <div id="song-list"></div>
     </div>
 
+    <!-- ส่วนเนื้อเพลง และ Top Bar แบบใหม่สำหรับเล่น MP3 -->
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
-        <div style="flex:1"></div>
+        
+        <!-- แถบเครื่องเล่นเพลง (อยู่ตรงกลาง) -->
+        <div id="top-audio-player" class="top-audio-ui hidden">
+          <audio id="song-audio-element"></audio>
+          <button class="btn-play-pause" id="btn-play-pause" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
+          <div class="audio-track" onclick="seekAudio(event)">
+            <div class="audio-fill" id="audio-fill"></div>
+          </div>
+          <span class="audio-time" id="audio-time">0:00</span>
+        </div>
+        <!-- กรณีไม่มีเพลง จะเว้นที่ว่างตรงกลางไว้ -->
+        <div id="top-audio-empty" style="flex:1;"></div>
+
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
       
@@ -135,6 +147,7 @@
         <div id="detail-lyrics" class="reader-lyrics"></div>
         
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
+        <!-- media container (สำหรับวิดีโอเท่านั้น) -->
         <div id="detail-media-container" class="media-box hidden"></div>
       </div>
     </div>
@@ -175,7 +188,7 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=6"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
