@@ -4,11 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Admin - Akha Songbook</title>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- โหลดฟอนต์ทั้งหมดในรายการ -->
+  <!-- โหลดฟอนต์ทั้งหมดในรายการ (ไทยและอังกฤษ) ให้เหมือนกับผู้ใช้ เพื่อการแสดงผลที่ตรงกัน -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
+  
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   
@@ -61,6 +63,7 @@
   </div>
 
   <div id="app" class="container hidden">
+    
     <div id="view-dashboard" class="fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-music"></i> จัดการเพลง</h2>
@@ -79,6 +82,7 @@
         <button class="admin-cat-btn" data-cat="เพลงไว้อาลัย" onclick="filterAdminCat('เพลงไว้อาลัย')">ไว้อาลัย</button>
         <button class="admin-cat-btn" data-cat="เพลงอื่นๆ" onclick="filterAdminCat('เพลงอื่นๆ')">อื่นๆ</button>
       </div>
+
       <div id="song-list"></div>
     </div>
 
@@ -88,39 +92,72 @@
         <h2 id="admin-title" style="flex:1; text-align:center;">เพิ่มเพลงใหม่</h2>
         <button class="btn-primary" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px; background:#10b981;" id="btn-save-top" onclick="saveSong()"><i class="fa-solid fa-check"></i> บันทึก</button>
       </div>
+      
       <div class="reader-card form-group">
         <input type="hidden" id="form-id">
         <div class="admin-form-grid">
           
+          <!-- ฝั่งซ้าย (ข้อมูลทั่วไป) -->
           <div class="form-col-left">
             <label>หมวดหมู่ <span style="color:red">*</span></label>
             <select id="form-cat">
-              <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option><option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
-              <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option><option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
-              <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option><option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
-              <option value="เพลงนมัสการ">เพลงนมัสการ</option><option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
+              <option value="เพลงชีวิตคริสเตียนอาข่า">เพลงชีวิตคริสเตียนอาข่า</option>
+              <option value="เพลงคริสเตียนทั่วไป">เพลงคริสเตียนทั่วไป</option>
+              <option value="เพลงคริสต์มาส">เพลงคริสต์มาส</option>
+              <option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
+              <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option>
+              <option value="เพลงสรรเสริญ">เพลงสรรเสริญ</option>
+              <option value="เพลงนมัสการ">เพลงนมัสการ</option>
+              <option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
             </select>
-            <label>ชื่อเพลง (อาข่า/ไทย) <span style="color:red">*</span></label><input type="text" id="form-title" placeholder="พิมพ์ชื่อเพลง...">
-            <div id="eng-title-group"><label>ชื่อเพลงภาษาอังกฤษ <span style="color:var(--text-muted); font-size:0.8rem;">(ถ้ามี)</span></label><input type="text" id="form-eng-title" placeholder="English title..."></div>
-            <label>ผู้แต่ง / เรียบเรียง</label><input type="text" id="form-author" placeholder="เว้นว่างได้...">
-            <div style="display:flex; gap:10px;"><div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div><div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div></div>
+            
+            <label>ชื่อเพลง (อาข่า/ไทย) <span style="color:red">*</span></label>
+            <input type="text" id="form-title" placeholder="พิมพ์ชื่อเพลง...">
+            
+            <div id="eng-title-group">
+              <label>ชื่อเพลงภาษาอังกฤษ <span style="color:var(--text-muted); font-size:0.8rem;">(ถ้ามี)</span></label>
+              <input type="text" id="form-eng-title" placeholder="English title...">
+            </div>
+            
+            <label>ผู้แต่ง / เรียบเรียง</label>
+            <input type="text" id="form-author" placeholder="เว้นว่างได้...">
+            
+            <div style="display:flex; gap:10px;">
+              <div style="flex:1;"><label>คอร์ดกีตาร์</label><input type="text" id="form-chords" placeholder="เช่น G, C..."></div>
+              <div style="flex:1;"><label>โน้ต/Key/จังหวะ</label><input type="text" id="form-notation" placeholder="d d m Key E 4/4"></div>
+            </div>
+            
             <hr class="pc-hidden-hr" style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
             
+            <!-- ส่วนอัปโหลด MP3 และ บันทึกเสียงร้อง (มี Preview) -->
             <label>🔗 ไฟล์เสียง MP3 / อัดเสียงร้อง (ถ้ามี)</label>
-            <div style="display:flex; gap:10px; margin-bottom:15px;">
+            <div style="display:flex; gap:10px; margin-bottom:5px;">
               <input type="text" id="form-audio" placeholder="วางลิงก์ หรืออัปโหลด/อัดเสียง..." style="margin-bottom:0; flex:1;">
               
+              <!-- ปุ่มอัปโหลดไฟล์จากเครื่อง -->
               <label class="btn-primary" style="display:flex; align-items:center; justify-content:center; cursor:pointer; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#3b82f6;" title="อัปโหลดไฟล์ MP3">
                 <i class="fa-solid fa-upload"></i>
                 <input type="file" accept="audio/*" style="display:none;" onchange="uploadMedia(event, 'form-audio', 'audio')">
               </label>
               
+              <!-- ปุ่มอัดเสียง (สีแดง) -->
               <button class="btn-primary record-btn" id="btn-record-audio" type="button" style="display:flex; align-items:center; justify-content:center; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#ef4444; border:none; transition: all 0.3s ease;" onclick="toggleRecording()" title="อัดเสียงจากไมค์">
                 <i class="fa-solid fa-microphone"></i>
               </button>
             </div>
             
-            <label>🌐 ลิงก์ภายนอก (YouTube / ข้อมูลเพิ่มเติม)</label><input type="text" id="form-link" placeholder="วางลิงก์เว็บ หรือ YouTube">
+            <!-- แถบพรีวิวเสียงหลังจากอัดเสร็จ (ซ่อนไว้ก่อน) -->
+            <div id="audio-preview-box" class="hidden" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
+              <div style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">🎧 ลองฟังเสียงที่อัดไว้:</div>
+              <audio id="audio-preview-element" controls style="width:100%; height:40px; outline:none;"></audio>
+              <div style="display:flex; gap:10px;">
+                <button type="button" class="btn-primary" style="flex:1; background:#10b981; font-size:0.85rem; padding:8px; border-radius:6px; box-shadow:none;" onclick="uploadRecordedAudio()"><i class="fa-solid fa-cloud-arrow-up"></i> ยืนยันและอัปโหลด</button>
+                <button type="button" class="btn-primary" style="flex:1; background:#94a3b8; font-size:0.85rem; padding:8px; border-radius:6px; box-shadow:none;" onclick="cancelRecordedAudio()"><i class="fa-solid fa-trash-can"></i> ลบทิ้ง/อัดใหม่</button>
+              </div>
+            </div>
+            
+            <label>🌐 ลิงก์ภายนอก (YouTube / ข้อมูลเพิ่มเติม)</label>
+            <input type="text" id="form-link" placeholder="วางลิงก์เว็บ หรือ YouTube">
             
             <label>🖼️ ลิงก์รูปภาพเนื้อเพลง / โน้ตเพลง (ถ้ามี)</label>
             <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -135,14 +172,18 @@
             <textarea id="form-inspiration" rows="3" placeholder="เช่น สดุดี 23:1..."></textarea>
           </div>
 
+          <!-- ฝั่งขวา (เนื้อเพลง) -->
           <div class="form-col-right">
             <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
+            
             <div class="lyrics-toggle" style="margin: 0 0 15px 0; width: 100%; display: flex; justify-content: space-between;">
               <button class="lyrics-toggle-btn active" id="btn-edit-lyric-old" onclick="switchAdminLyricView('old')" style="flex:1; border-radius:8px;">อาข่าแบบเก่า (ข้อมูลเดิม)</button>
               <button class="lyrics-toggle-btn" id="btn-edit-lyric-new" onclick="switchAdminLyricView('new')" style="flex:1; border-radius:8px;">อาข่าแบบใหม่</button>
             </div>
             
+            <!-- แถบเครื่องมือเดี่ยวจัดรูปแบบข้อความ -->
             <div id="main-editor-toolbar" class="editor-toolbar">
+              <!-- เลือกรูปแบบฟอนต์ -->
               <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;">
                 <option value="">-- รูปแบบ --</option>
                 <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
@@ -219,6 +260,7 @@
                 <option value="'Caveat', cursive">Caveat</option>
               </select>
               
+              <!-- เลือกขนาดอักษร -->
               <select class="editor-select" onchange="formatTextAdmin('fontSize', this.value)" style="width:auto; min-width:85px;">
                 <option value="">-- ขนาด --</option>
                 <option value="1">เล็กสุด</option>
@@ -229,17 +271,24 @@
                 <option value="6">ยักษ์</option>
               </select>
               <div class="editor-divider"></div>
+
+              <!-- B I U -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('bold')" title="ตัวหนา"><i class="fa-solid fa-bold"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('italic')" title="ตัวเอียง"><i class="fa-solid fa-italic"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('underline')" title="ขีดเส้นใต้"><i class="fa-solid fa-underline"></i></button>
               <div class="editor-divider"></div>
+
+              <!-- จัดหน้า -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyLeft')" title="ชิดซ้าย"><i class="fa-solid fa-align-left"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyCenter')" title="กึ่งกลาง"><i class="fa-solid fa-align-center"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyRight')" title="ชิดขวา"><i class="fa-solid fa-align-right"></i></button>
               <div class="editor-divider"></div>
+              
+              <!-- ล้างรูปแบบ -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('removeFormat')" title="ล้างรูปแบบ"><i class="fa-solid fa-eraser"></i></button>
             </div>
             
+            <!-- กล่องเนื้อเพลง -->
             <div id="form-lyrics-old" class="rich-editor" contenteditable="true" style="text-align: center;"></div>
             <div id="form-lyrics-new" class="rich-editor hidden" contenteditable="true" style="text-align: center;"></div>
             
@@ -248,6 +297,7 @@
       </div>
     </div>
 
+    <!-- ส่วนของการจัดการผู้ใช้ (Admin User Form) -->
     <div id="view-users" class="hidden fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-users"></i> ผู้ใช้งาน</h2>
@@ -268,14 +318,17 @@
         <label>เบอร์โทรศัพท์ (ไอดีเข้าสู่ระบบ) <span style="color:red">*</span></label><input type="tel" id="form-user-phone" maxlength="10">
         <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
         <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
+        
         <label>จำนวนรอบที่ต่ออายุ</label>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
           <input type="number" id="form-user-count" min="1" style="flex:1;">
           <button class="btn-primary" type="button" style="background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="document.getElementById('form-user-count').value = parseInt(document.getElementById('form-user-count').value || 0) + 1">+1 รอบ</button>
         </div>
+
         <div id="form-user-slip-box" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
           <a id="form-user-slip-link" href="#" target="_blank" class="btn-link" style="background:#10b981; width:100%; text-align:center;"><i class="fa-solid fa-image"></i> กดดูสลิปโอนเงิน</a>
         </div>
+        
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
           <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="addDaysToExpiry(30)">+ 30 วัน</button>
@@ -283,9 +336,12 @@
         </div>
       </div>
     </div>
+
   </div>
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
-  <script src="admin.js?v=5"></script>
+
+  <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
+  <script src="admin.js?v=6"></script>
 </body>
 </html>
