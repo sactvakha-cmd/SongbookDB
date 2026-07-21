@@ -304,7 +304,7 @@ function openSong(id) {
     const mediaBox = document.getElementById('detail-media-container'); 
     let mediaHtml = ""; 
     
-    // ตั้งค่าแถบ Audio บน Top Bar
+   // ตั้งค่าแถบ Audio บน Top Bar
     const topAudio = document.getElementById('top-audio-player');
     const topEmpty = document.getElementById('top-audio-empty');
     const audioEl = document.getElementById('song-audio-element');
@@ -313,7 +313,7 @@ function openSong(id) {
       topAudio.classList.remove('hidden');
       topEmpty.classList.add('hidden');
       audioEl.src = currentSong.AudioUrl;
-      audioEl.pause();
+      audioEl.load(); // [เพิ่มใหม่] บังคับโหลดข้อมูลเสียงทันที
       document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
       document.getElementById('audio-fill').style.width = '0%';
       document.getElementById('audio-time').innerText = '0:00';
@@ -322,7 +322,6 @@ function openSong(id) {
       topEmpty.classList.remove('hidden');
       audioEl.src = "";
     }
-    
     // Video YouTube แสดงด้านล่าง
     if(currentSong.ExternalLink) {
       const ytMatch = currentSong.ExternalLink.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
@@ -370,8 +369,14 @@ function toggleAudio() {
   if(!audioEl.src) return;
   
   if(audioEl.paused) {
-    audioEl.play();
-    playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    // [แก้ไข] ใช้ Promise เพื่อให้รู้ว่าเล่นสำเร็จ หรือติดบล็อก
+    audioEl.play().then(() => {
+      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    }).catch(err => {
+      console.error("Audio Play Error:", err);
+      showToast("ไฟล์เสียงกำลังโหลด หรือไม่รองรับบนอุปกรณ์นี้", "warning");
+      playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    });
   } else {
     audioEl.pause();
     playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
@@ -390,15 +395,30 @@ function seekAudio(e) {
 
 const songAudioEl = document.getElementById('song-audio-element');
 if(songAudioEl) {
+  // เพิ่ม Event เมื่อเบราว์เซอร์โหลดข้อมูลไฟล์เสียงได้แล้ว (จะแสดงเวลาทั้งหมด)
+  songAudioEl.addEventListener('loadedmetadata', () => {
+    if(!isNaN(songAudioEl.duration) && songAudioEl.duration !== Infinity) {
+      let mins = Math.floor(songAudioEl.duration / 60);
+      let secs = Math.floor(songAudioEl.duration % 60);
+      if(secs < 10) secs = '0' + secs;
+      document.getElementById('audio-time').innerText = '0:00 / ' + mins + ':' + secs;
+    }
+  });
+
   songAudioEl.addEventListener('timeupdate', () => {
     if(isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
     const percent = (songAudioEl.currentTime / songAudioEl.duration) * 100;
     document.getElementById('audio-fill').style.width = percent + '%';
     
-    let mins = Math.floor(songAudioEl.currentTime / 60);
-    let secs = Math.floor(songAudioEl.currentTime % 60);
-    if(secs < 10) secs = '0' + secs;
-    document.getElementById('audio-time').innerText = mins + ':' + secs;
+    let curMins = Math.floor(songAudioEl.currentTime / 60);
+    let curSecs = Math.floor(songAudioEl.currentTime % 60);
+    if(curSecs < 10) curSecs = '0' + curSecs;
+    
+    let totalMins = Math.floor(songAudioEl.duration / 60);
+    let totalSecs = Math.floor(songAudioEl.duration % 60);
+    if(totalSecs < 10) totalSecs = '0' + totalSecs;
+    
+    document.getElementById('audio-time').innerText = curMins + ':' + curSecs + ' / ' + totalMins + ':' + totalSecs;
   });
 
   songAudioEl.addEventListener('ended', () => {
