@@ -268,23 +268,39 @@ function uploadMedia(event, targetId, fileType) {
   reader.readAsDataURL(file);
 }
 
+/* --- ระบบอัดเสียงผ่านไมโครโฟนสำหรับ Admin --- */
 let mediaRecorder;
 let audioChunks = [];
 let isRecording = false;
 
 async function toggleRecording() {
-  const btn = document.getElementById('btn-record-audio');
-  const icon = btn.querySelector('i');
-  
-  if (!isRecording) {
-    try {
+  try {
+    const btn = document.getElementById('btn-record-audio');
+    const icon = btn.querySelector('i');
+    
+    if (!isRecording) {
+      // 1. เช็คว่าบราวเซอร์รองรับการอัดเสียงหรือไม่ (และรันบน HTTPS หรือไม่)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานไมค์ หรือไม่ได้เข้าใช้งานผ่าน HTTPS");
+        return;
+      }
+      
+      // 2. ขออนุญาตใช้งานไมค์ (ถ้าผู้ใช้บล็อกไว้ จะเด้งลงไปที่ catch ทันที)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // 3. เช็คว่ามือถือรองรับ MediaRecorder API หรือไม่ (เช่น iOS รุ่นเก่ามากๆ อาจไม่มี)
+      if (typeof MediaRecorder === 'undefined') {
+        alert("อุปกรณ์นี้ไม่รองรับระบบบันทึกเสียงครับ");
+        return;
+      }
+
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
       
       mediaRecorder.start();
       isRecording = true;
       
+      // เปลี่ยน UI ให้รู้ว่ากำลังอัด
       btn.style.background = "var(--danger)";
       btn.classList.add('recording-pulse');
       icon.classList.remove('fa-microphone');
@@ -292,7 +308,9 @@ async function toggleRecording() {
       showToast("กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
 
       mediaRecorder.addEventListener("dataavailable", event => {
-        audioChunks.push(event.data);
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
       });
 
       mediaRecorder.addEventListener("stop", () => {
@@ -310,19 +328,33 @@ async function toggleRecording() {
             if(res.status === 'success') {
               document.getElementById('form-audio').value = res.url;
               showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
-            } else { showToast(res.msg, "error"); }
+            } else { 
+              showToast(res.msg, "error"); 
+            }
           }).catch(err => showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"));
         };
         reader.readAsDataURL(audioBlob);
+        
+        // คืนค่าไมค์ให้ระบบ
         stream.getTracks().forEach(track => track.stop());
       });
       
-    } catch (err) { alert("ไม่สามารถใช้งานไมโครโฟนได้: " + err.message); }
-  } else {
-    mediaRecorder.stop();
-    isRecording = false;
-    btn.classList.remove('recording-pulse');
-    icon.classList.remove('fa-stop');
-    icon.classList.add('fa-microphone');
+    } else {
+      // สั่งหยุดอัด
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+      }
+      isRecording = false;
+      
+      // คืนค่าปุ่ม UI กลับเป็นเหมือนเดิม
+      btn.style.background = "#ef4444";
+      btn.classList.remove('recording-pulse');
+      icon.classList.remove('fa-stop');
+      icon.classList.add('fa-microphone');
+    }
+  } catch (err) { 
+    // ถ้าระบบไมค์พัง หรือผู้ใช้ไม่อนุญาตไมค์ จะแจ้งเตือนตรงนี้
+    alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); 
+    console.error(err);
   }
 }
