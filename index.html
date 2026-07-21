@@ -115,7 +115,7 @@
         
         <!-- แถบเครื่องเล่นเพลง (อยู่ตรงกลาง) -->
         <div id="top-audio-player" class="top-audio-ui hidden">
-          <audio id="song-audio-element"></audio>
+         <audio id="song-audio-element" preload="auto" crossorigin="anonymous"></audio>
           <button class="btn-play-pause" id="btn-play-pause" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
           <div class="audio-track" onclick="seekAudio(event)">
             <div class="audio-fill" id="audio-fill"></div>
