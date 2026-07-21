@@ -260,57 +260,64 @@ function uploadMedia(event, targetId, fileType) {
   };
   reader.readAsDataURL(file);
 }
-
+/* --- ระบบอัดเสียงผ่านไมโครโฟนสำหรับ Admin แบบมี Preview --- */
 let mediaRecorder;
 let audioChunks = [];
 let isRecording = false;
+let recordedBlob = null; // เก็บไฟล์เสียงที่เพิ่งอัดเสร็จไว้สำหรับ Preview
 
 async function toggleRecording() {
   try {
     const btn = document.getElementById('btn-record-audio');
     const icon = btn.querySelector('i');
+    const previewBox = document.getElementById('audio-preview-box');
+    
+    // ซ่อนกล่องพรีวิวและล้างเสียงเก่าเสมอเมื่อเริ่มกดไมค์ใหม่
+    previewBox.classList.add('hidden');
+    document.getElementById('audio-preview-element').src = "";
+    recordedBlob = null;
     
     if (!isRecording) {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานไมค์ หรือไม่ได้เข้าใช้งานผ่าน HTTPS"); return;
       }
+      
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (typeof MediaRecorder === 'undefined') { alert("อุปกรณ์นี้ไม่รองรับระบบบันทึกเสียงครับ"); return; }
 
-      mediaRecorder = new MediaRecorder(stream);
+      // บังคับให้บราวเซอร์อัดในฟอร์แมตที่เสถียรที่สุดเท่าที่จะทำได้
+      let options = {};
+      if (MediaRecorder.isTypeSupported('audio/webm')) { options = { mimeType: 'audio/webm' }; }
+      else if (MediaRecorder.isTypeSupported('audio/mp4')) { options = { mimeType: 'audio/mp4' }; }
+
+      mediaRecorder = new MediaRecorder(stream, options);
       audioChunks = [];
       mediaRecorder.start();
       isRecording = true;
       
       btn.style.background = "var(--danger)"; btn.classList.add('recording-pulse');
       icon.classList.remove('fa-microphone'); icon.classList.add('fa-stop');
-      showToast("กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
+      showToast("🔴 กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
 
-      mediaRecorder.addEventListener("dataavailable", event => { if (event.data.size > 0) audioChunks.push(event.data); });
+      mediaRecorder.addEventListener("dataavailable", event => { 
+        if (event.data.size > 0) audioChunks.push(event.data); 
+      });
 
       mediaRecorder.addEventListener("stop", () => {
-        showToast("กำลังประมวลผลและอัปโหลดเสียง...", "warning");
-        const mimeType = mediaRecorder.mimeType;
-        const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('webm') ? 'webm' : 'mp3';
+        // เมื่อกดหยุด ให้สร้าง Blob และแสดงให้แอดมินฟังกด Preview
+        const mimeType = mediaRecorder.mimeType || 'audio/mp4'; 
+        recordedBlob = new Blob(audioChunks, { type: mimeType });
         
-        const audioBlob = new Blob(audioChunks, { type: mimeType });
-        const reader = new FileReader();
+        // สร้าง URL ชั่วคราวให้แอดมินลองฟัง
+        const audioUrl = URL.createObjectURL(recordedBlob);
+        document.getElementById('audio-preview-element').src = audioUrl;
         
-        reader.onload = function(e) {
-          const base64 = e.target.result;
-          fetchAPI('uploadAdminFile', { 
-              base64Data: base64, 
-              fileType: 'audio', 
-              extension: ext 
-          }).then(res => {
-            if(res.status === 'success') {
-              document.getElementById('form-audio').value = res.url;
-              showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
-            } else { showToast(res.msg, "error"); }
-          }).catch(err => showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"));
-        };
-        reader.readAsDataURL(audioBlob);
-        stream.getTracks().forEach(track => track.stop());
+        // แสดงกล่อง Preview
+        previewBox.classList.remove('hidden');
+        previewBox.style.display = "flex";
+        
+        showToast("หยุดบันทึกแล้ว กรุณาลองฟังและกดยืนยันอัปโหลด", "success");
+        stream.getTracks().forEach(track => track.stop()); // ปิดไมค์
       });
     } else {
       if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
@@ -318,5 +325,44 @@ async function toggleRecording() {
       btn.style.background = "#ef4444"; btn.classList.remove('recording-pulse');
       icon.classList.remove('fa-stop'); icon.classList.add('fa-microphone');
     }
-  } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); console.error(err); }
+  } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
+}
+
+// แอดมินกด "ยืนยันและอัปโหลด"
+function uploadRecordedAudio() {
+  if (!recordedBlob) {
+    showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return;
+  }
+  
+  showToast("กำลังอัปโหลดเสียง...", "warning");
+  const reader = new FileReader();
+  
+  // แปลงนามสกุลตาม MimeType (บังคับ mp3 เสมือนเพื่อให้ URL สวยงาม)
+  const ext = recordedBlob.type.includes('mp4') ? 'm4a' : recordedBlob.type.includes('webm') ? 'webm' : 'mp3';
+  
+  reader.onload = function(e) {
+    const base64 = e.target.result;
+    fetchAPI('uploadAdminFile', { 
+        base64Data: base64, 
+        fileType: 'audio', 
+        extension: ext 
+    }).then(res => {
+      if(res.status === 'success') {
+        document.getElementById('form-audio').value = res.url;
+        showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
+        // ซ่อนกล่องพรีวิว
+        document.getElementById('audio-preview-box').classList.add('hidden');
+        document.getElementById('audio-preview-element').src = "";
+      } else { showToast(res.msg, "error"); }
+    }).catch(err => showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"));
+  };
+  reader.readAsDataURL(recordedBlob);
+}
+
+// แอดมินกด "ลบทิ้ง/อัดใหม่"
+function cancelRecordedAudio() {
+  recordedBlob = null;
+  document.getElementById('audio-preview-element').src = "";
+  document.getElementById('audio-preview-box').classList.add('hidden');
+  showToast("ลบเสียงชั่วคราวแล้ว สามารถกดอัดใหม่ได้เลย", "success");
 }
