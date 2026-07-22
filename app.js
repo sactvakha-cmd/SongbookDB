@@ -260,7 +260,6 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
-    // ปิดเพลงอัตโนมัติเวลากดย้อนกลับ
     if(view !== 'song') {
       const audioEl = document.getElementById('song-audio-element');
       if(audioEl && !audioEl.paused) { toggleAudio(); }
@@ -304,7 +303,6 @@ function openSong(id) {
     const mediaBox = document.getElementById('detail-media-container'); 
     let mediaHtml = ""; 
     
-    // ตั้งค่าแถบ Audio บน Top Bar (เพิ่ม preload/load ดักปัญหาเล่นไม่ได้)
     const topAudio = document.getElementById('top-audio-player');
     const topEmpty = document.getElementById('top-audio-empty');
     const audioEl = document.getElementById('song-audio-element');
@@ -313,7 +311,7 @@ function openSong(id) {
       topAudio.classList.remove('hidden');
       topEmpty.classList.add('hidden');
       audioEl.src = currentSong.AudioUrl;
-      audioEl.load(); // บังคับโหลดไฟล์ทันที
+      audioEl.load(); 
       document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
       document.getElementById('audio-fill').style.width = '0%';
       document.getElementById('audio-time').innerText = '0:00';
@@ -323,7 +321,6 @@ function openSong(id) {
       audioEl.src = "";
     }
     
-    // Video YouTube แสดงด้านล่าง
     if(currentSong.ExternalLink) {
       const ytMatch = currentSong.ExternalLink.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
       if (ytMatch && ytMatch[1]) {
@@ -363,7 +360,6 @@ function saveUiSettings() {
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
 }
 
-/* --- ระบบเครื่องเล่นเพลงบน Top Bar (มีระบบแจ้งเตือนถ้าเล่นไม่ได้) --- */
 function toggleAudio() {
   const audioEl = document.getElementById('song-audio-element');
   const playBtn = document.getElementById('btn-play-pause');
@@ -374,7 +370,7 @@ function toggleAudio() {
       playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
     }).catch(err => {
       console.error("Audio Play Error:", err);
-      showToast("ไฟล์เสียงกำลังโหลด หรือถูกบล็อกจากเซิร์ฟเวอร์", "warning");
+      showToast("ไฟล์เสียงกำลังโหลด หรือไม่รองรับ", "warning");
       playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
     });
   } else {
