@@ -113,8 +113,23 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .song-image-box { text-align: center; margin-bottom: 20px; }
 .song-image-box img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-.reader-lyrics { font-family: var(--font-lyrics); font-size: 1.2rem; line-height: 2.0; text-align: center; white-space: pre-wrap; padding: 0 10px; transition: font-size 0.2s, line-height 0.2s; color: var(--text-main); }
+.reader-lyrics { 
+  font-family: var(--font-lyrics); 
+  font-size: 1.2rem; 
+  line-height: 1.5; /* ปรับลดจาก 2.0 ให้แคบลง */
+  text-align: center; 
+  white-space: pre-wrap; 
+  padding: 0 10px; 
+  transition: font-size 0.2s, line-height 0.2s; 
+  color: var(--text-main); 
+}
 .reader-lyrics * { font-family: inherit; } 
+
+/* เพิ่มโค้ดนี้ เพื่อบังคับลบระยะห่าง (Margin) ที่เกิดจากการกด Enter ในฝั่งแอดมิน */
+.reader-lyrics p, .reader-lyrics div {
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
 .reader-inspiration { background: #f1f5f9; border-left: 4px solid var(--primary); padding: 15px; margin-top: 40px; border-radius: 0 10px 10px 0; color: var(--text-muted); font-size: 0.9rem !important; font-style: italic; line-height: 1.6; }
 .media-box { margin-top: 25px; padding-top: 20px; border-top: 1px dashed #e2e8f0; text-align: center; }
