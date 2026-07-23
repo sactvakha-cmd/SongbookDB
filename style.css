@@ -285,3 +285,39 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 #view-dashboard .cat-card h3 {
     font-size: 0.85rem !important;  /* ปรับขนาดฟอนต์ชื่อหมวดหมู่ให้พอดี */
 }
+/* =========================================================
+   ปรับแต่งเฉพาะ "ปุ่มหมวดหมู่เพลง" ในแถบนำทางด้านล่าง
+========================================================= */
+
+/* 1. บีบระยะห่างระหว่างปุ่มให้ชิดกันมากขึ้นอย่างสมดุล */
+#main-bottom-nav .nav-scroll-area {
+    gap: 4px !important; 
+}
+
+/* 2. ปรับขนาดความกว้างของแต่ละปุ่มให้เล็กลงเล็กน้อย */
+#main-bottom-nav .nav-scroll-area .nav-item {
+    width: 52px !important; 
+}
+
+/* 3. ปรับขนาดและสีของ 'ไอคอน' หมวดหมู่ให้ต่างจากปุ่มหลัก */
+#main-bottom-nav .nav-scroll-area .nav-item i {
+    font-size: 1.05rem !important; /* เล็กลงกว่าปุ่มหน้าแรก (1.3rem) */
+    color: #94a3b8 !important;     /* สีเทาอมฟ้า (ดูซอฟต์ลง) */
+    transition: all 0.3s ease;
+}
+
+/* 4. ปรับขนาด 'ข้อความ' ใต้ไอคอนหมวดหมู่ให้สมดุลกับไอคอน */
+#main-bottom-nav .nav-scroll-area .nav-item span {
+    font-size: 0.6rem !important; 
+    color: #94a3b8 !important;
+}
+
+/* 5. เอฟเฟกต์เมื่อหมวดหมู่นั้นถูก "เลือก" (Active) */
+#main-bottom-nav .nav-scroll-area .nav-item.active i {
+    color: var(--primary) !important; /* กลับมาใช้สีหลัก */
+    transform: translateY(-2px) scale(1.1) !important;
+}
+#main-bottom-nav .nav-scroll-area .nav-item.active span {
+    color: var(--primary) !important;
+    font-weight: 600 !important;
+}
