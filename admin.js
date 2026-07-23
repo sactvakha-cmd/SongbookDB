@@ -51,7 +51,11 @@ function fetchAllData() {
       const resSongs = results[1];
       
       if(resUsers.status === 'success') allUsers = resUsers.users || [];
-      if(resSongs.status === 'success') allSongs = resSongs.songs || [];
+      if(resSongs.status === 'success') {
+        allSongs = resSongs.songs || [];
+        // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง ในหน้าแอดมิน
+        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+      }
       
       showToast("เข้าสู่ระบบแอดมินสำเร็จ");
       document.getElementById('app').classList.remove('hidden');
