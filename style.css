@@ -180,7 +180,7 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .fade-in { animation: fadeIn 0.4s ease forwards; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- Admin UI & Editor --- */
+/* --- Admin UI --- */
 .admin-form-grid { display: flex; flex-direction: column; gap: 0; }
 @media (min-width: 768px) {
   .admin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
@@ -200,15 +200,15 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .recording-pulse { animation: pulse-red 1.5s infinite; }
 
 /* =========================================================
-   Music Player Full (ล็อคหน้าเต็ม 100%, ดันทุกอย่างลงล่าง)
+   Music Player Full (ล็อคหน้าเต็ม 100% แบ่งครึ่งบน-ล่าง)
 ========================================================= */
 #view-music {
-    position: fixed; /* ทำให้ทับทุกหน้าจอ ไม่ล้นไปข้างล่าง */
+    position: fixed; 
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
-    height: 100dvh; /* ป้องกันปัญหากับเบราว์เซอร์มือถือที่มีแถบเครื่องมือลอย */
+    height: 100dvh; 
     background: var(--bg-main);
     z-index: 1000;
     display: flex;
@@ -233,33 +233,45 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 }
 .music-cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-glow); }
 
-/* ตั้งค่าให้พื้นที่เนื้อหากินพื้นที่เหลือเต็ม 100% */
-#music-list-container,
-#music-lyric-container {
+/* หน้า Playlist */
+#music-list-container {
     flex: 1;
     overflow-y: auto;
     padding: 15px 20px;
 }
 
-/* คอนเทนเนอร์หน้ากำลังเล่น (Now Playing) */
-/* เมื่อไม่ใช่คลาส hidden ให้โชว์แบบ flex แล้วจัด content ให้อยู่ข้างล่าง */
-#music-play-container:not(.hidden) {
+/* คอนเทนเนอร์หน้ากำลังเล่น และ หน้าเนื้อเพลง (รวมกัน) */
+#music-player-container:not(.hidden) {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* ดันเนื้อหาลงล่างสุด */
-    align-items: center;
-    padding: 20px 20px 50px 20px; /* เว้นล่างไว้เล็กน้อยให้สวย */
-    overflow-y: auto; /* เผื่อกรณีจอมือถือเล็กมากๆ จะได้เลื่อนได้ */
+    overflow: hidden; 
 }
 
-/* ปรับภาพปกให้บาลานซ์กับหน้าจอทุกขนาด */
+/* --- พื้นที่แสดงผลส่วนบน (ดึงพื้นที่ที่เหลือทั้งหมด) --- */
+#music-display-area {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+/* วิวรูปปกวงกลมหมุน */
+#music-cover-view {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .music-cover-wrapper { 
     width: 280px; 
     height: 280px; 
     max-width: 35vh; 
     max-height: 35vh;
-    margin: auto auto 40px auto; /* Margin-top auto ช่วยผลักภาพลงมาตรงกลาง */
     border-radius: 50%; 
     box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
     overflow: hidden; 
@@ -270,14 +282,61 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .spin-slow { animation: spinRotate 10s linear infinite; }
 @keyframes spinRotate { 100% { transform: rotate(360deg); } }
 
-#music-title-display {
-    width: 100%; text-align: center; font-size: 1.5rem; margin-bottom: 5px; color: var(--primary);
+/* วิวกล่องเนื้อเพลงฉากหลังเบลอ */
+#music-lyric-view {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    right: 20px;
+    bottom: 10px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
-#music-artist-display {
-    width: 100%; text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px;
+.lyric-bg {
+    position: absolute;
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background-size: cover;
+    background-position: center;
+    filter: blur(15px); /* เบลอภาพปก */
+    z-index: 1;
+}
+.lyric-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); /* กันสีดำทับเพื่อให้เนื้อเพลงเด่น */
+    z-index: 2;
+}
+#music-lyric-content {
+    position: relative;
+    z-index: 3;
+    height: 100%;
+    overflow-y: auto;
+    padding: 30px 20px;
+    color: #ffffff; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); 
+}
+#music-lyric-content * {
+    color: #ffffff !important; /* บังคับตัวหนังสือสีขาว */
 }
 
-/* บีบความกว้างแถบควบคุมและแถบเวลาให้อยู่ตรงกลางเสมอ */
+
+/* --- พื้นที่ควบคุมส่วนล่าง (ความสูงคงที่ ไม่ขยายตามจอ) --- */
+#music-control-area {
+    flex-shrink: 0;
+    padding: 20px 20px 50px 20px; /* เว้นด้านล่างให้สวย */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#music-title-display {
+    width: 100%; text-align: center; font-size: 1.5rem; margin-bottom: 5px; color: var(--primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90vw;
+}
+#music-artist-display {
+    width: 100%; text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;
+}
 .music-progress-wrapper,
 .music-controls {
     width: 100%;
@@ -285,7 +344,4 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 }
 .music-controls { padding: 0 10px; }
 
-#music-lyric-container {
-    background: var(--bg-surface); border-radius: 16px; margin: 10px 20px; border: 1px solid #f1f5f9; text-align: center; height: auto;
-}
 .song-item.playing { background: rgba(37, 99, 235, 0.05) !important; border-left: 4px solid var(--primary) !important;}
