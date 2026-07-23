@@ -248,3 +248,22 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
   100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
 .recording-pulse { animation: pulse-red 1.5s infinite; }
+/* =========================================================
+   แก้ไขเฉพาะหน้าเนื้อเพลง (ลดช่องว่าง & ชิดขอบ 100%)
+========================================================= */
+
+/* 1. ดึงแถบด้านล่างของ MP3 ให้ช่องว่างหายไป */
+#view-song .top-bar {
+    margin-bottom: 0 !important; 
+}
+
+/* 2. ขยายกล่องเนื้อเพลงให้ชิดซ้าย-ขวา 100% และดันขึ้นไปชิดแถบ MP3 */
+#view-song .reader-card {
+    margin-top: 0 !important;        /* เอาช่องว่างด้านบนออก */
+    margin-left: -20px !important;   /* ขยายชิดขอบซ้าย */
+    margin-right: -20px !important;  /* ขยายชิดขอบขวา */
+    border-radius: 0 !important;     /* เอาขอบโค้งออกเพื่อให้เนบสนิทกับจอ */
+    border-left: none !important;    /* เอาเส้นขอบซ้ายออก */
+    border-right: none !important;   /* เอาเส้นขอบขวาออก */
+    box-shadow: none !important;     /* เอาเงาออกเพื่อให้ดูเป็นแผ่นเดียวกัน */
+}
