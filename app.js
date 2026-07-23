@@ -188,13 +188,23 @@ function submitPayment() {
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
 function updateBottomNav(view) {
-  const nav = document.getElementById('main-bottom-nav'); if (!nav) return;
+  const nav = document.getElementById('main-bottom-nav'); 
+  if (!nav) return;
+  
+  // ซ่อนแถบเมนูทันทีถ้าอยู่หน้าฟังเพลง (ตามคำขอ)
+  if (view === 'music') {
+      nav.classList.add('hidden');
+      return;
+  }
+  
+  nav.classList.remove('hidden');
+  
   let html = '';
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
   
-  if (view === 'dashboard' || view === 'settings' || view === 'music') {
+  if (view === 'dashboard' || view === 'settings') {
     nav.classList.add('justify-center'); 
     html = homeBtn + musicBtn + profileBtn;
   } 
@@ -425,13 +435,13 @@ function saveUiSettings() {
 }
 
 // ----------------------------------------------------------------------
-// ระบบ AUDIO & MUSIC PLAYER แบบอัปเกรด (หมวดหมู่ & เนื้อเพลง)
+// ระบบ AUDIO & MUSIC PLAYER แบบอัปเกรด (หมวดหมู่ & เนื้อเพลง & เต็มจอ)
 // ----------------------------------------------------------------------
 const songAudioEl = document.getElementById('song-audio-element');
-let masterMusicList = [];    // เพลงที่มีไฟล์เสียงทั้งหมดในแอป
-let musicPlaylist = [];      // เพลงที่ถูกกรองตามหมวดหมู่ปัจจุบัน
+let masterMusicList = [];    
+let musicPlaylist = [];      
 let currentMusicCategory = 'ALL';
-let currentPlayingSongId = null; // เก็บ ID เพลงที่กำลังเล่นอยู่จริงๆ
+let currentPlayingSongId = null; 
 let isMusicPlayerActive = false;
 let isShuffle = false;
 let isRepeat = false;
@@ -448,7 +458,6 @@ function openMusicPlayer() {
   filterMusicByCategory(currentMusicCategory, false);
   
   switchView('music');
-  // ถ้าเปิดเข้ามาครั้งแรกให้ไปหน้า 'play' (กำลังเล่น)
   switchMusicTab('play'); 
 }
 
@@ -476,7 +485,6 @@ function renderMusicCategories() {
   let html = `<button class="music-cat-btn ${currentMusicCategory==='ALL'?'active':''}" onclick="filterMusicByCategory('ALL')">เพลงทั้งหมด</button>`;
   
   baseCategories.forEach(cat => {
-      // แสดงเฉพาะหมวดที่มีเพลง MP3 อยู่จริงๆ
       const countInCat = masterMusicList.filter(s => s.Category === cat.id).length;
       if(countInCat > 0) {
          html += `<button class="music-cat-btn ${currentMusicCategory===cat.id?'active':''}" onclick="filterMusicByCategory('${cat.id}')">${i18n[appLang][cat.i18n_nav]}</button>`;
@@ -487,7 +495,7 @@ function renderMusicCategories() {
 
 function filterMusicByCategory(catId, switchToList = true) {
   currentMusicCategory = catId;
-  renderMusicCategories(); // อัปเดตสีปุ่ม
+  renderMusicCategories(); 
   
   if(catId === 'ALL') {
       musicPlaylist = masterMusicList;
@@ -526,16 +534,13 @@ function playMusicIndex(index) {
   const song = musicPlaylist[index];
   currentPlayingSongId = song.ID;
   
-  // อัปเดต UI หน้ากำลังเล่น
   document.getElementById('music-title-display').innerText = song.Title;
   document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
   const coverImg = document.getElementById('music-cover-img');
   if(song.ImageUrl) { coverImg.src = song.ImageUrl; } else { coverImg.src = 'icon-512.png'; }
   
-  // อัปเดต UI หน้าเนื้อเพลง
   updateMusicLyrics(song);
   
-  // สั่งเล่นเพลง
   songAudioEl.src = song.AudioUrl;
   songAudioEl.play().then(() => {
      document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
@@ -544,7 +549,7 @@ function playMusicIndex(index) {
      const cdIcon = document.getElementById('music-indicator-icon');
      if(cdIcon) cdIcon.classList.add('fa-spin');
      
-     renderMusicList(); // อัปเดตไฮไลต์ในรายการ
+     renderMusicList(); 
      switchMusicTab('play');
   }).catch(e => showToast("เล่นเพลงล้มเหลว", "error"));
 }
@@ -612,7 +617,7 @@ function playMusicNext(isAuto = false) {
   if(isShuffle) { 
       nextIdx = Math.floor(Math.random() * musicPlaylist.length); 
   } else if(nextIdx >= musicPlaylist.length || currentIndex === -1) { 
-      nextIdx = 0; // วนกลับไปเพลงแรกของหมวด
+      nextIdx = 0; 
   }
   
   playMusicIndex(nextIdx);
