@@ -20,6 +20,9 @@ let currentCategory = ""; let currentSong = null;
 let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
+// ตัวแปรสำหรับจำตำแหน่ง Scroll หน้าจอผู้ใช้
+let currentActiveView = 'dashboard';
+let savedScrollPositions = {};
 
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
@@ -272,22 +275,47 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
-    // ปิดเพลงอัตโนมัติเวลากดย้อนกลับ (ไม่ว่าไปหน้าไหนที่ไม่ใช่หน้าเพลง)
+    // 1. บันทึกตำแหน่ง Scroll ของหน้าปัจจุบันก่อนที่จะสลับไปหน้าอื่น
+    savedScrollPositions[currentActiveView] = window.scrollY;
+
+    // 2. ปิดเพลงและ YouTube อัตโนมัติเวลากดย้อนกลับ (โค้ดเดิมที่ทำงานได้ดีอยู่แล้ว)
     if(view !== 'song') {
-      // 1. หยุดไฟล์ MP3
       const audioEl = document.getElementById('song-audio-element');
       if(audioEl && !audioEl.paused) { toggleAudio(); }
-      
-      // 2. หยุด YouTube (โดยการล้าง Iframe ทิ้งเพื่อไม่ให้เล่นอยู่เบื้องหลัง)
       const mediaBox = document.getElementById('detail-media-container');
       if(mediaBox) { mediaBox.innerHTML = ''; mediaBox.classList.add('hidden'); }
     }
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    ['view-dashboard', 'view-category', 'view-song', 'view-settings'].forEach(v => { document.getElementById(v).classList.add('hidden'); document.getElementById(v).classList.remove('fade-in'); });
-    let activeView = document.getElementById('view-' + view); if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
+    // 3. ทำการซ่อนหน้าทั้งหมด แล้วแสดงหน้าที่ต้องการ
+    ['view-dashboard', 'view-category', 'view-song', 'view-settings'].forEach(v => { 
+      document.getElementById(v).classList.add('hidden'); 
+      document.getElementById(v).classList.remove('fade-in'); 
+    });
+    
+    let activeView = document.getElementById('view-' + view); 
+    if(activeView) { 
+      activeView.classList.remove('hidden'); 
+      void activeView.offsetWidth; 
+      activeView.classList.add('fade-in'); 
+    }
+    
     if(view === 'dashboard') { currentCategory = ""; if(document.getElementById('global-search').value === "") document.getElementById('dashboard-content').classList.remove('hidden'); }
     updateBottomNav(view); 
+
+    // 4. จัดการเรื่องตำแหน่ง Scroll
+    if (view === 'song' || view === 'settings') {
+      // ถ้าเปิดหน้าเนื้อเพลง หรือตั้งค่า ให้เลื่อนขึ้นบนสุดเสมอ
+      window.scrollTo(0, 0);
+    } else {
+      // ถ้ากลับมาหน้ารายการเพลง (Category หรือ Dashboard) ให้เลื่อนกลับไปจุดเดิมที่จำไว้
+      setTimeout(() => {
+        window.scrollTo(0, savedScrollPositions[view] || 0);
+      }, 10); // หน่วง 10ms เพื่อให้เบราว์เซอร์จัดเรียงกล่องเสร็จก่อนค่อยเลื่อน
+    }
+
+    // 5. อัปเดตสถานะหน้าปัจจุบัน
+    currentActiveView = view;
+    
   } catch (e) { console.error("Switch View Error", e); }
 }
 
