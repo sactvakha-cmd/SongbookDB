@@ -188,6 +188,17 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" class="hidden fade-in" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 2px solid var(--primary); z-index: 9999; display: flex; align-items: center; gap: 15px; width: 90%; max-width: 400px; backdrop-filter: blur(10px);">
+    <img src="icon-192.png" alt="App Icon" style="width: 45px; height: 45px; border-radius: 12px;">
+    <div style="flex: 1;">
+      <h4 style="margin:0; font-size:1rem; color:var(--text-main);">ติดตั้งแอปลงเครื่อง</h4>
+      <p style="margin:0; font-size:0.8rem; color:var(--text-muted);" id="pwa-desc">เพื่อการใช้งานที่รวดเร็วขึ้น</p>
+    </div>
+    <button class="btn-primary" style="padding: 8px 15px; font-size: 0.9rem; box-shadow: none;" id="pwa-install-btn">ติดตั้ง</button>
+    <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
   <script src="app.js?v=99"></script>
   <script>
     if ('serviceWorker' in navigator) {
