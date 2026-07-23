@@ -177,6 +177,7 @@ function switchAdminLyricView(type) {
     document.getElementById('form-lyrics-old').classList.add('hidden'); document.getElementById('form-lyrics-new').classList.remove('hidden'); 
   }
 }
+
 function formatTextAdmin(command, value = null) {
   document.execCommand('styleWithCSS', false, true);
   document.execCommand(command, false, value);
@@ -185,7 +186,6 @@ function formatTextAdmin(command, value = null) {
   
   [editorOld, editorNew].forEach(editor => {
     if (!editor.classList.contains('hidden')) {
-      // แปลงแท็ก font size เก่าให้เป็น span ยุคใหม่ (วิธีนี้เสถียรที่สุด)
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
         const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
@@ -194,8 +194,6 @@ function formatTextAdmin(command, value = null) {
         span.innerHTML = f.innerHTML;
         f.replaceWith(span);
       });
-      
-      // แปลงแท็ก font face เก่าให้เป็น span ยุคใหม่
       const fontFaces = editor.querySelectorAll('font[face]');
       fontFaces.forEach(f => {
         const span = document.createElement('span');
