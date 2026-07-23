@@ -96,7 +96,7 @@
         <h3 style="margin-bottom:15px;" data-i18n="group_songs">กลุ่มเพลง</h3>
         <div class="grid-cats" id="grid-container"></div>
 
-        <!-- การ์ดฟังเพลง (เลียนแบบการ์ดด้านบน) -->
+        <!-- การ์ดฟังเพลง -->
         <h3 style="margin-bottom:15px; margin-top:25px;">เพลย์ลิสต์</h3>
         <div class="all-songs-card" style="background: linear-gradient(135deg, var(--accent) 0%, #0369a1 100%);" onclick="openMusicPlayer()">
           <div style="display:flex; align-items:center;">
@@ -120,7 +120,6 @@
       <div id="song-list"></div>
     </div>
 
-    <!-- ส่วนเนื้อเพลง และ Top Bar แบบใหม่สำหรับเล่น MP3 -->
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -159,24 +158,31 @@
       </div>
     </div>
     
-    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
+    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) - อัปเกรดใหม่ -->
     <div id="view-music" class="hidden fade-in">
-      <div class="top-bar" style="margin-bottom: 0;">
-        <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
-        <div class="lyrics-toggle" style="margin: 0;">
-            <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')">เพลย์ลิสต์</button>
-            <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')">กำลังเล่น</button>
+      <div class="top-bar" style="margin-bottom: 0; flex-direction: column; align-items: stretch; padding: 10px 20px 0 20px; gap: 10px;">
+        <!-- แถบด้านบน: ปุ่มกลับ, แท็บควบคุม 3 หน้า, ไอคอนแผ่นเสียง -->
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="lyrics-toggle" style="margin: 0; flex: 1; justify-content: center; display: flex;">
+                <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')">เพลย์ลิสต์</button>
+                <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')">กำลังเล่น</button>
+                <button id="tab-music-lyric" class="lyrics-toggle-btn" onclick="switchMusicTab('lyric')">เนื้อเพลง</button>
+            </div>
+            <button class="btn-icon" id="btn-music-indicator" style="cursor:default; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
+                <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
+            </button>
         </div>
-        <!-- [แก้ไข] เปลี่ยนจากปุ่มล่องหน เป็นไอคอนสถานะเพลง (CD Indicator) -->
-        <button class="btn-icon" id="btn-music-indicator" style="cursor:default; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
-            <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
-        </button>
+        <!-- แถบหมวดหมู่เพลง (เลื่อนซ้ายขวาได้) -->
+        <div id="music-category-scroll" class="music-cat-scroll">
+            <!-- ปุ่มหมวดหมู่จะถูกสร้างด้วย Javascript -->
+        </div>
       </div>
 
-      <!-- รายการเพลง MP3 ทั้งหมด -->
-      <div id="music-list-container" style="padding-top:15px;"></div>
+      <!-- รายการเพลง MP3 ทั้งหมด (กรองตามหมวดหมู่แล้ว) -->
+      <div id="music-list-container" style="padding-top:5px; padding-bottom:20px;"></div>
 
-      <!-- หน้าจอ Now Playing -->
+      <!-- หน้าจอ Now Playing (หน้าเล่นเพลงหลัก) -->
       <div id="music-play-container" class="hidden" style="text-align: center; padding: 20px 10px;">
          <div class="music-cover-wrapper">
              <img id="music-cover-img" src="icon-512.png" alt="Cover Art">
@@ -202,6 +208,14 @@
              </div>
              
              <button id="btn-music-repeat" class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.1rem; color:var(--text-muted);" onclick="toggleMusicRepeat()"><i class="fa-solid fa-repeat"></i></button>
+         </div>
+      </div>
+      
+      <!-- หน้าจอ Lyrics (หน้าดูเนื้อเพลงขณะฟัง) -->
+      <div id="music-lyric-container" class="hidden">
+         <h3 id="music-lyric-title" style="color:var(--primary); margin-bottom: 20px; font-size:1.3rem;">เนื้อเพลง</h3>
+         <div id="music-lyric-content" class="reader-lyrics" style="font-size: 1.25rem; line-height: 1.8 !important;">
+             <div style="text-align:center; color:var(--text-muted); margin-top:50px;">ยังไม่ได้เลือกเพลง</div>
          </div>
       </div>
     </div>
@@ -249,7 +263,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=106"></script>
+  <script src="app.js?v=107"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
