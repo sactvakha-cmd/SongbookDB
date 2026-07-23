@@ -112,8 +112,6 @@
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
-        
-        <!-- แถบเครื่องเล่นเพลง (อยู่ตรงกลาง) -->
         <div id="top-audio-player" class="top-audio-ui hidden">
          <audio id="song-audio-element" preload="auto" crossorigin="anonymous"></audio>
           <button class="btn-play-pause" id="btn-play-pause" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
@@ -122,9 +120,7 @@
           </div>
           <span class="audio-time" id="audio-time">0:00</span>
         </div>
-        <!-- กรณีไม่มีเพลง จะเว้นที่ว่างตรงกลางไว้ -->
         <div id="top-audio-empty" style="flex:1;"></div>
-
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
       
@@ -147,14 +143,56 @@
         <div id="detail-lyrics" class="reader-lyrics"></div>
         
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
-        <!-- media container (สำหรับวิดีโอเท่านั้น) -->
         <div id="detail-media-container" class="media-box hidden"></div>
       </div>
     </div>
     
+    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
+    <div id="view-music" class="hidden fade-in">
+      <div class="top-bar" style="margin-bottom: 0;">
+        <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="lyrics-toggle" style="margin: 0;">
+            <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')">เพลย์ลิสต์</button>
+            <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')">กำลังเล่น</button>
+        </div>
+        <button class="btn-icon" style="opacity:0; pointer-events:none;"><i class="fa-solid fa-compact-disc"></i></button>
+      </div>
+
+      <!-- รายการเพลง MP3 ทั้งหมด -->
+      <div id="music-list-container" style="padding-top:15px;"></div>
+
+      <!-- หน้าจอ Now Playing -->
+      <div id="music-play-container" class="hidden" style="text-align: center; padding: 20px 10px;">
+         <div class="music-cover-wrapper">
+             <img id="music-cover-img" src="icon-512.png" alt="Cover Art">
+         </div>
+         <h2 id="music-title-display" style="font-size: 1.5rem; margin-bottom: 5px; color: var(--primary);">เลือกเพลงเพื่อเริ่มฟัง</h2>
+         <p id="music-artist-display" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px;">Akha Songbook</p>
+         
+         <div class="music-progress-wrapper" style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; font-family: monospace; color: var(--text-muted); font-size: 0.85rem;">
+             <span id="music-time-current">0:00</span>
+             <div class="audio-track" style="flex:1; height: 8px; background: #e2e8f0; border-radius: 10px; cursor: pointer; position: relative;" onclick="seekMusicAudio(event)">
+                <div id="music-time-fill" style="height: 100%; width: 0%; background: var(--primary); border-radius: 10px; pointer-events: none; transition: width 0.1s linear;"></div>
+             </div>
+             <span id="music-time-total">0:00</span>
+         </div>
+         
+         <div class="music-controls" style="display: flex; align-items: center; justify-content: space-between; padding: 0 10px;">
+             <button id="btn-music-shuffle" class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.1rem; color:var(--text-muted);" onclick="toggleMusicShuffle()"><i class="fa-solid fa-shuffle"></i></button>
+             
+             <div style="display: flex; align-items: center; gap: 20px;">
+                <button class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.6rem; color:var(--text-main);" onclick="playMusicPrev()"><i class="fa-solid fa-backward-step"></i></button>
+                <button id="btn-music-play-pause" style="width:65px; height:65px; border-radius:50%; background:var(--primary); color:white; border:none; font-size:1.8rem; box-shadow:0 10px 20px var(--primary-glow); cursor:pointer;" onclick="toggleMusicAudio()"><i class="fa-solid fa-play"></i></button>
+                <button class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.6rem; color:var(--text-main);" onclick="playMusicNext()"><i class="fa-solid fa-forward-step"></i></button>
+             </div>
+             
+             <button id="btn-music-repeat" class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.1rem; color:var(--text-muted);" onclick="toggleMusicRepeat()"><i class="fa-solid fa-repeat"></i></button>
+         </div>
+      </div>
+    </div>
+
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
-      
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
         <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> บัญชีของคุณ</h3>
         <p>เบอร์โทรศัพท์: <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
@@ -164,16 +202,13 @@
           <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); box-shadow:none; border:1px solid #cbd5e1; font-size:0.9rem;" onclick="logoutUser()">ออกจากระบบ</button>
         </div>
       </div>
-
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--accent);">
         <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> การแสดงผล</h3>
-        
         <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">โหมดหน้าจอ</label>
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
           <button class="btn-primary" style="flex:1; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; box-shadow:none; font-size:0.9rem;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
           <button class="btn-primary" style="flex:1; background:#1e293b; color:#f8fafc; border:1px solid #0f172a; box-shadow:none; font-size:0.9rem;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
         </div>
-
         <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีหลักของแอป</label>
         <div style="display:flex; gap:15px; justify-content: center; flex-wrap: wrap;">
           <button style="width:45px; height:45px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
@@ -199,13 +234,11 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=99"></script>
+  <script src="app.js?v=105"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker ติดตั้งสำเร็จ!', reg))
-          .catch(err => console.log('ติดตั้ง Service Worker ล้มเหลว', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
       });
     }
   </script>
