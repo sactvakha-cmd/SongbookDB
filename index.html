@@ -96,7 +96,6 @@
         <h3 style="margin-bottom:15px;" data-i18n="group_songs">กลุ่มเพลง</h3>
         <div class="grid-cats" id="grid-container"></div>
 
-        <!-- การ์ดฟังเพลง -->
         <h3 style="margin-bottom:15px; margin-top:25px;">เพลย์ลิสต์</h3>
         <div class="all-songs-card" style="background: linear-gradient(135deg, var(--accent) 0%, #0369a1 100%);" onclick="openMusicPlayer()">
           <div style="display:flex; align-items:center;">
@@ -158,10 +157,10 @@
       </div>
     </div>
     
-    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) - อัปเกรดใหม่ -->
+    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
     <div id="view-music" class="hidden fade-in">
-      <div class="top-bar" style="margin-bottom: 0; flex-direction: column; align-items: stretch; padding: 10px 20px 0 20px; gap: 10px;">
-        <!-- แถบด้านบน: ปุ่มกลับ, แท็บควบคุม 3 หน้า, ไอคอนแผ่นเสียง -->
+      <div class="top-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
+        <!-- แถบควบคุมบนสุด -->
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
             <div class="lyrics-toggle" style="margin: 0; flex: 1; justify-content: center; display: flex;">
@@ -173,22 +172,20 @@
                 <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
             </button>
         </div>
-        <!-- แถบหมวดหมู่เพลง (เลื่อนซ้ายขวาได้) -->
-        <div id="music-category-scroll" class="music-cat-scroll">
-            <!-- ปุ่มหมวดหมู่จะถูกสร้างด้วย Javascript -->
-        </div>
+        <!-- แถบหมวดหมู่ -->
+        <div id="music-category-scroll" class="music-cat-scroll"></div>
       </div>
 
-      <!-- รายการเพลง MP3 ทั้งหมด (กรองตามหมวดหมู่แล้ว) -->
-      <div id="music-list-container" style="padding-top:5px; padding-bottom:20px;"></div>
+      <!-- รายการเพลง MP3 -->
+      <div id="music-list-container"></div>
 
-      <!-- หน้าจอ Now Playing (หน้าเล่นเพลงหลัก) -->
-      <div id="music-play-container" class="hidden" style="text-align: center; padding: 20px 10px;">
+      <!-- หน้าจอ Now Playing (จัดโครงสร้างให้ CSS คุมดันลงข้างล่าง) -->
+      <div id="music-play-container" class="hidden">
          <div class="music-cover-wrapper">
              <img id="music-cover-img" src="icon-512.png" alt="Cover Art">
          </div>
-         <h2 id="music-title-display" style="font-size: 1.5rem; margin-bottom: 5px; color: var(--primary);">เลือกเพลงเพื่อเริ่มฟัง</h2>
-         <p id="music-artist-display" style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px;">Akha Songbook</p>
+         <h2 id="music-title-display">เลือกเพลงเพื่อเริ่มฟัง</h2>
+         <p id="music-artist-display">Akha Songbook</p>
          
          <div class="music-progress-wrapper" style="display: flex; align-items: center; gap: 15px; margin-bottom: 30px; font-family: monospace; color: var(--text-muted); font-size: 0.85rem;">
              <span id="music-time-current">0:00</span>
@@ -198,7 +195,7 @@
              <span id="music-time-total">0:00</span>
          </div>
          
-         <div class="music-controls" style="display: flex; align-items: center; justify-content: space-between; padding: 0 10px;">
+         <div class="music-controls" style="display: flex; align-items: center; justify-content: space-between;">
              <button id="btn-music-shuffle" class="btn-icon" style="box-shadow:none; border:none; background:transparent; font-size:1.1rem; color:var(--text-muted);" onclick="toggleMusicShuffle()"><i class="fa-solid fa-shuffle"></i></button>
              
              <div style="display: flex; align-items: center; gap: 20px;">
@@ -211,7 +208,7 @@
          </div>
       </div>
       
-      <!-- หน้าจอ Lyrics (หน้าดูเนื้อเพลงขณะฟัง) -->
+      <!-- หน้าจอ Lyrics -->
       <div id="music-lyric-container" class="hidden">
          <h3 id="music-lyric-title" style="color:var(--primary); margin-bottom: 20px; font-size:1.3rem;">เนื้อเพลง</h3>
          <div id="music-lyric-content" class="reader-lyrics" style="font-size: 1.25rem; line-height: 1.8 !important;">
@@ -263,7 +260,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=107"></script>
+  <script src="app.js?v=108"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
