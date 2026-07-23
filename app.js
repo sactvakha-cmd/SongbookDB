@@ -320,10 +320,20 @@ function switchView(view) {
 }
 
 function switchReaderLyricView(type) {
-  document.getElementById('btn-lyric-new').classList.remove('active'); document.getElementById('btn-lyric-old').classList.remove('active'); document.getElementById('btn-lyric-'+type).classList.add('active');
+  document.getElementById('btn-lyric-new').classList.remove('active'); 
+  document.getElementById('btn-lyric-old').classList.remove('active'); 
+  document.getElementById('btn-lyric-'+type).classList.add('active');
+  
   const lyricsEl = document.getElementById('detail-lyrics');
-  if(type === 'new') { lyricsEl.innerHTML = currentSong.LyricsNew || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบใหม่ในระบบ</div>`; } 
-  else { lyricsEl.innerHTML = currentSong.Lyrics || `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลงอาข่าแบบเก่าในระบบ</div>`; }
+  let htmlContent = type === 'new' ? currentSong.LyricsNew : currentSong.Lyrics;
+  
+  if (htmlContent) {
+    // [ยาแรง 1] ลบช่องว่างและบรรทัดใหม่ (\n) ที่ซ่อนอยู่ระหว่างแท็ก HTML ที่ทำให้เกิดบรรทัดเบิ้ล
+    htmlContent = htmlContent.replace(/>\s+</g, '><');
+    lyricsEl.innerHTML = htmlContent;
+  } else {
+    lyricsEl.innerHTML = `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลง</div>`;
+  }
 }
 
 function openSong(id) {
@@ -341,8 +351,21 @@ function openSong(id) {
     const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
     
     const toggleBox = document.getElementById('lyrics-toggle-box');
-    if(currentSong.LyricsNew && currentSong.Lyrics) { toggleBox.classList.remove('hidden'); if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); } 
-    else { toggleBox.classList.add('hidden'); const lyricsEl = document.getElementById('detail-lyrics'); lyricsEl.innerHTML = currentSong.LyricsNew || currentSong.Lyrics || "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>"; }
+    if(currentSong.LyricsNew && currentSong.Lyrics) { 
+      toggleBox.classList.remove('hidden'); 
+      if(appLang === 'ao') switchReaderLyricView('old'); else switchReaderLyricView('new'); 
+    } else { 
+      toggleBox.classList.add('hidden'); 
+      const lyricsEl = document.getElementById('detail-lyrics'); 
+      let htmlContent = currentSong.LyricsNew || currentSong.Lyrics;
+      if (htmlContent) {
+        // [ยาแรง 1] ลบช่องว่างและบรรทัดใหม่ (\n) ที่ซ่อนอยู่ระหว่างแท็ก HTML
+        htmlContent = htmlContent.replace(/>\s+</g, '><');
+        lyricsEl.innerHTML = htmlContent;
+      } else {
+        lyricsEl.innerHTML = "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>";
+      }
+    }
     
     const inspDiv = document.getElementById('detail-inspiration'); if(currentSong.Inspiration) { inspDiv.innerHTML = `<i class="fa-solid fa-quote-left" style="opacity:0.3; margin-right:5px;"></i> ${currentSong.Inspiration.replace(/\n/g, '<br>')}`; inspDiv.classList.remove('hidden'); } else { inspDiv.classList.add('hidden'); }
     
