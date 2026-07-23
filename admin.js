@@ -177,32 +177,30 @@ function switchAdminLyricView(type) {
     document.getElementById('form-lyrics-old').classList.add('hidden'); document.getElementById('form-lyrics-new').classList.remove('hidden'); 
   }
 }
-
 function formatTextAdmin(command, value = null) {
-  document.execCommand('styleWithCSS', false, true);
-  document.execCommand(command, false, value);
-  const editorOld = document.getElementById('form-lyrics-old');
-  const editorNew = document.getElementById('form-lyrics-new');
-  
-  [editorOld, editorNew].forEach(editor => {
-    if (!editor.classList.contains('hidden')) {
-      const fontSizes = editor.querySelectorAll('font[size]');
-      fontSizes.forEach(f => {
-        const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
-        const span = document.createElement('span');
-        span.style.fontSize = sizeMap[f.getAttribute('size')] || '1.2rem';
-        span.innerHTML = f.innerHTML;
-        f.replaceWith(span);
-      });
-      const fontFaces = editor.querySelectorAll('font[face]');
-      fontFaces.forEach(f => {
-        const span = document.createElement('span');
-        span.style.fontFamily = f.getAttribute('face');
-        span.innerHTML = f.innerHTML;
-        f.replaceWith(span);
-      });
+  if (command === 'fontName' || command === 'fontSize') {
+    // ใช้เทคโนโลยี DOM Range ยุคใหม่แทน document.execCommand เพื่อสร้าง Span สะอาดๆ
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    const range = selection.getRangeAt(0);
+    if (range.collapsed) return; // ถ้าไม่ได้คลุมดำข้อความไว้ ให้ข้ามไป
+    
+    const span = document.createElement('span');
+    if (command === 'fontName') { span.style.fontFamily = value; }
+    if (command === 'fontSize') {
+      const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
+      span.style.fontSize = sizeMap[value] || '1.2rem';
     }
-  });
+    // ห่อหุ้มข้อความที่คลุมดำด้วย span ตัวใหม่
+    span.appendChild(range.extractContents());
+    range.insertNode(span);
+    // เคลียร์การคลุมดำหลังจัดรูปแบบเสร็จ
+    selection.removeAllRanges();
+  } else {
+    // สำหรับคำสั่งมาตรฐานอื่นๆ (ตัวหนา, ตัวเอียง, ขีดเส้นใต้, จัดหน้า)
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand(command, false, value);
+  }
 }
 
 function renderUsers() {
