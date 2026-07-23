@@ -2,7 +2,6 @@ const API_URL = "https://akhasongbook-api.sactvakha.workers.dev";
 let adminPassword = "";
 let allSongs = [];
 let allUsers = [];
-// ตัวแปรสำหรับจำตำแหน่ง Scroll หน้าจอ Admin
 let currentAdminView = 'dashboard';
 let adminScrollPositions = {};
 
@@ -56,7 +55,6 @@ function fetchAllData() {
       if(resUsers.status === 'success') allUsers = resUsers.users || [];
       if(resSongs.status === 'success') {
         allSongs = resSongs.songs || [];
-        // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง ในหน้าแอดมิน
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
       }
       
@@ -84,30 +82,23 @@ function updateBottomNav(view) {
 }
 
 function switchView(view) {
-  // 1. บันทึกตำแหน่ง Scroll ก่อนซ่อนหน้า
   adminScrollPositions[currentAdminView] = window.scrollY;
 
-  // 2. ซ่อน/แสดงหน้าเว็บ
   ['view-dashboard', 'view-admin-form', 'view-users', 'view-user-form'].forEach(v => document.getElementById(v).classList.add('hidden'));
   document.getElementById('view-' + view).classList.remove('hidden');
   
-  // 3. อัปเดตข้อมูลในหน้า (โค้ดเดิม)
   updateBottomNav(view);
   if(view === 'dashboard') filterAdminCat(currentAdminCategory);
   if(view === 'users') renderUsers();
 
-  // 4. จัดการตำแหน่ง Scroll
   if (view === 'admin-form' || view === 'user-form') {
-    // ถ้าเข้าหน้าแก้ไขเพลง หรือแก้ไขผู้ใช้ ให้เลื่อนขึ้นบนสุดเสมอ
     window.scrollTo(0, 0);
   } else {
-    // ถ้ากลับมาหน้ารายการเพลง หรือรายการผู้ใช้ ให้กลับไปจุดเดิม
     setTimeout(() => {
       window.scrollTo(0, adminScrollPositions[view] || 0);
     }, 10);
   }
 
-  // 5. อัปเดตสถานะหน้าปัจจุบัน
   currentAdminView = view;
 }
 
@@ -207,10 +198,35 @@ function formatTextAdmin(command, value = null) {
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
-  const results = allUsers.filter(u => (u.Phone||"").includes(q) || (u.Name||"").toLowerCase().includes(q));
+  
+  const results = allUsers.filter(u => {
+    const phone = (u.Phone || "").toLowerCase();
+    const name = (u.Name || "").toLowerCase();
+    const exp = (u.ExpiryDate || "").toLowerCase();
+    const status = (u.Status || "").toLowerCase();
+    
+    // แปลงสถานะเป็นภาษาไทยเพื่อให้แอดมินค้นหาได้
+    let statusThai = "";
+    if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
+    else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
+    
+    return phone.includes(q) || name.includes(q) || exp.includes(q) || status.includes(q) || statusThai.includes(q);
+  });
+
   document.getElementById('user-list').innerHTML = results.map(u => {
-    let isPending = u.Status === "pending" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
-    let statusText = isPending ? "รอตรวจสอบสลิป" : `หมดอายุ: ${u.ExpiryDate}`;
+    let isPending = u.Status === "pending_new" || u.Status === "pending_renew" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
+    
+    // แจกแจงข้อความสถานะให้แอดมินเห็นชัดเจน
+    let statusText = `หมดอายุ: ${u.ExpiryDate}`;
+    if (isPending) {
+        if (u.Status === "pending_renew") {
+            // ถ้าต่ออายุ ให้แสดงวันหมดอายุเดิมด้วยให้แอดมินรู้
+            statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
+        } else {
+            statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
+        }
+    }
+    
     let statusColor = isPending ? "#f59e0b" : "var(--primary)";
     let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; margin-left:5px;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
     return `<div class="song-item">
@@ -232,7 +248,7 @@ function openUserForm(phone = null) {
   if(phone) { 
     let u = allUsers.find(x => x.Phone === phone);
     document.getElementById('form-user-is-edit').value = "true"; document.getElementById('form-user-phone').value = u.Phone; document.getElementById('form-user-phone').disabled = true; document.getElementById('form-user-pin').value = u.PIN; document.getElementById('form-user-name').value = u.Name || ""; document.getElementById('form-user-count').value = u.RenewCount || 1;
-    if(u.ExpiryDate !== "รอตรวจสอบ") { let d = new Date(u.ExpiryDate); document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0]; } else { document.getElementById('form-user-expiry').value = ""; }
+    if(u.ExpiryDate && u.ExpiryDate !== "รอตรวจสอบ") { let d = new Date(u.ExpiryDate); document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0]; } else { document.getElementById('form-user-expiry').value = ""; }
     if(u.SlipUrl) { document.getElementById('form-user-slip-box').classList.remove('hidden'); document.getElementById('form-user-slip-link').href = u.SlipUrl; } else { document.getElementById('form-user-slip-box').classList.add('hidden'); }
     document.getElementById('user-form-title').innerText = "แก้ไข / อนุมัติ";
   } else { 
@@ -253,7 +269,7 @@ function saveUser() {
     Name: document.getElementById('form-user-name').value, 
     ExpiryDate: document.getElementById('form-user-expiry').value,
     RenewCount: parseInt(document.getElementById('form-user-count').value) || 1,
-    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending'
+    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
   };
   fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
 }
@@ -287,11 +303,11 @@ function uploadMedia(event, targetId, fileType) {
   };
   reader.readAsDataURL(file);
 }
-/* --- ระบบอัดเสียงผ่านไมโครโฟนสำหรับ Admin แบบมี Preview --- */
+
 let mediaRecorder;
 let audioChunks = [];
 let isRecording = false;
-let recordedBlob = null; // เก็บไฟล์เสียงที่เพิ่งอัดเสร็จไว้สำหรับ Preview
+let recordedBlob = null; 
 
 async function toggleRecording() {
   try {
@@ -299,7 +315,6 @@ async function toggleRecording() {
     const icon = btn.querySelector('i');
     const previewBox = document.getElementById('audio-preview-box');
     
-    // ซ่อนกล่องพรีวิวและล้างเสียงเก่าเสมอเมื่อเริ่มกดไมค์ใหม่
     previewBox.classList.add('hidden');
     document.getElementById('audio-preview-element').src = "";
     recordedBlob = null;
@@ -312,7 +327,6 @@ async function toggleRecording() {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (typeof MediaRecorder === 'undefined') { alert("อุปกรณ์นี้ไม่รองรับระบบบันทึกเสียงครับ"); return; }
 
-      // บังคับให้บราวเซอร์อัดในฟอร์แมตที่เสถียรที่สุดเท่าที่จะทำได้
       let options = {};
       if (MediaRecorder.isTypeSupported('audio/webm')) { options = { mimeType: 'audio/webm' }; }
       else if (MediaRecorder.isTypeSupported('audio/mp4')) { options = { mimeType: 'audio/mp4' }; }
@@ -331,20 +345,17 @@ async function toggleRecording() {
       });
 
       mediaRecorder.addEventListener("stop", () => {
-        // เมื่อกดหยุด ให้สร้าง Blob และแสดงให้แอดมินฟังกด Preview
         const mimeType = mediaRecorder.mimeType || 'audio/mp4'; 
         recordedBlob = new Blob(audioChunks, { type: mimeType });
         
-        // สร้าง URL ชั่วคราวให้แอดมินลองฟัง
         const audioUrl = URL.createObjectURL(recordedBlob);
         document.getElementById('audio-preview-element').src = audioUrl;
         
-        // แสดงกล่อง Preview
         previewBox.classList.remove('hidden');
         previewBox.style.display = "flex";
         
         showToast("หยุดบันทึกแล้ว กรุณาลองฟังและกดยืนยันอัปโหลด", "success");
-        stream.getTracks().forEach(track => track.stop()); // ปิดไมค์
+        stream.getTracks().forEach(track => track.stop()); 
       });
     } else {
       if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
@@ -355,7 +366,6 @@ async function toggleRecording() {
   } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
 }
 
-// แอดมินกด "ยืนยันและอัปโหลด"
 function uploadRecordedAudio() {
   if (!recordedBlob) {
     showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return;
@@ -364,7 +374,6 @@ function uploadRecordedAudio() {
   showToast("กำลังอัปโหลดเสียง...", "warning");
   const reader = new FileReader();
   
-  // แปลงนามสกุลตาม MimeType (บังคับ mp3 เสมือนเพื่อให้ URL สวยงาม)
   const ext = recordedBlob.type.includes('mp4') ? 'm4a' : recordedBlob.type.includes('webm') ? 'webm' : 'mp3';
   
   reader.onload = function(e) {
@@ -377,7 +386,6 @@ function uploadRecordedAudio() {
       if(res.status === 'success') {
         document.getElementById('form-audio').value = res.url;
         showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
-        // ซ่อนกล่องพรีวิว
         document.getElementById('audio-preview-box').classList.add('hidden');
         document.getElementById('audio-preview-element').src = "";
       } else { showToast(res.msg, "error"); }
@@ -386,7 +394,6 @@ function uploadRecordedAudio() {
   reader.readAsDataURL(recordedBlob);
 }
 
-// แอดมินกด "ลบทิ้ง/อัดใหม่"
 function cancelRecordedAudio() {
   recordedBlob = null;
   document.getElementById('audio-preview-element').src = "";
