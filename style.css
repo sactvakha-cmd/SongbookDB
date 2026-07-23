@@ -160,19 +160,28 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .lyrics-toggle-btn { padding: 8px 20px; border: none; background: transparent; border-radius: 6px; font-family: var(--font-main); font-weight: 600; color: var(--text-muted); cursor: pointer; transition: var(--transition); }
 .lyrics-toggle-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-/* --- แก้ไขเนื้อเพลงห่าง ให้ชิดกัน --- */
+/* --- แก้ไขเนื้อเพลงห่าง ให้แสดงผลเหมือนที่แอดมินจัดเป๊ะๆ --- */
 .reader-lyrics { 
   font-family: var(--font-lyrics); 
   font-size: 1.2rem; 
-  line-height: 1.5; /* เปลี่ยนจาก 2.0 เป็น 1.5 */
+  line-height: 1.6; /* ระยะบรรทัดปกติ สวยงามอ่านง่าย */
   text-align: center; 
-  white-space: pre-wrap; 
+  
+  /* ลบ white-space: pre-wrap; ออก แล้วเปลี่ยนเป็น normal เพื่อป้องกันช่องว่างเบิ้ล */
+  white-space: normal; 
+  
   padding: 0 10px; 
   transition: font-size 0.2s, line-height 0.2s; 
   color: var(--text-main); 
+  word-break: break-word;
 }
 .reader-lyrics * { font-family: inherit; } 
-.reader-lyrics p, .reader-lyrics div { margin: 0 !important; padding: 0 !important; }
+
+/* บังคับล้างระยะขอบแฝง ที่เกิดจากการที่เบราว์เซอร์สร้างแท็ก p หรือ div ตอนแอดมินกด Enter */
+.reader-lyrics p, .reader-lyrics div { 
+  margin: 0 !important; 
+  padding: 0 !important; 
+}
 
 .song-image-box { text-align: center; margin-bottom: 20px; }
 .song-image-box img { max-width: 100%; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
