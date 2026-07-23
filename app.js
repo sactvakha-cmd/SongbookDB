@@ -99,7 +99,6 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
       
-      // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง (G001, G002, G003...)
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
       
@@ -222,7 +221,6 @@ function forceDataRefresh() {
   document.getElementById('app').classList.add('hidden'); document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
   fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => {
       if(res.status === 'success') {
-        // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         
@@ -275,10 +273,8 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
-    // 1. บันทึกตำแหน่ง Scroll ของหน้าปัจจุบันก่อนที่จะสลับไปหน้าอื่น
     savedScrollPositions[currentActiveView] = window.scrollY;
 
-    // 2. ปิดเพลงและ YouTube อัตโนมัติเวลากดย้อนกลับ (โค้ดเดิมที่ทำงานได้ดีอยู่แล้ว)
     if(view !== 'song') {
       const audioEl = document.getElementById('song-audio-element');
       if(audioEl && !audioEl.paused) { toggleAudio(); }
@@ -286,7 +282,6 @@ function switchView(view) {
       if(mediaBox) { mediaBox.innerHTML = ''; mediaBox.classList.add('hidden'); }
     }
 
-    // 3. ทำการซ่อนหน้าทั้งหมด แล้วแสดงหน้าที่ต้องการ
     ['view-dashboard', 'view-category', 'view-song', 'view-settings'].forEach(v => { 
       document.getElementById(v).classList.add('hidden'); 
       document.getElementById(v).classList.remove('fade-in'); 
@@ -302,18 +297,14 @@ function switchView(view) {
     if(view === 'dashboard') { currentCategory = ""; if(document.getElementById('global-search').value === "") document.getElementById('dashboard-content').classList.remove('hidden'); }
     updateBottomNav(view); 
 
-    // 4. จัดการเรื่องตำแหน่ง Scroll
     if (view === 'song' || view === 'settings') {
-      // ถ้าเปิดหน้าเนื้อเพลง หรือตั้งค่า ให้เลื่อนขึ้นบนสุดเสมอ
       window.scrollTo(0, 0);
     } else {
-      // ถ้ากลับมาหน้ารายการเพลง (Category หรือ Dashboard) ให้เลื่อนกลับไปจุดเดิมที่จำไว้
       setTimeout(() => {
         window.scrollTo(0, savedScrollPositions[view] || 0);
-      }, 10); // หน่วง 10ms เพื่อให้เบราว์เซอร์จัดเรียงกล่องเสร็จก่อนค่อยเลื่อน
+      }, 10);
     }
 
-    // 5. อัปเดตสถานะหน้าปัจจุบัน
     currentActiveView = view;
     
   } catch (e) { console.error("Switch View Error", e); }
@@ -328,7 +319,6 @@ function switchReaderLyricView(type) {
   let htmlContent = type === 'new' ? currentSong.LyricsNew : currentSong.Lyrics;
   
   if (htmlContent) {
-    // [ยาแรง 1] ลบช่องว่างและบรรทัดใหม่ (\n) ที่ซ่อนอยู่ระหว่างแท็ก HTML ที่ทำให้เกิดบรรทัดเบิ้ล
     htmlContent = htmlContent.replace(/>\s+</g, '><');
     lyricsEl.innerHTML = htmlContent;
   } else {
@@ -359,7 +349,6 @@ function openSong(id) {
       const lyricsEl = document.getElementById('detail-lyrics'); 
       let htmlContent = currentSong.LyricsNew || currentSong.Lyrics;
       if (htmlContent) {
-        // [ยาแรง 1] ลบช่องว่างและบรรทัดใหม่ (\n) ที่ซ่อนอยู่ระหว่างแท็ก HTML
         htmlContent = htmlContent.replace(/>\s+</g, '><');
         lyricsEl.innerHTML = htmlContent;
       } else {
@@ -491,3 +480,48 @@ if(songAudioEl) {
     document.getElementById('audio-time').innerText = '0:00';
   });
 }
+
+/* ==========================================
+   ระบบ PWA (Install App Prompt) แบบกำหนดเอง
+========================================== */
+let deferredPrompt;
+const pwaBanner = document.getElementById('pwa-install-banner');
+const pwaBtn = document.getElementById('pwa-install-btn');
+const pwaDesc = document.getElementById('pwa-desc');
+
+// 1. สำหรับ Android / Desktop (จับ Event เมื่อเครื่องพร้อมให้ลงแอป)
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault(); 
+  deferredPrompt = e;
+  if(pwaBanner) pwaBanner.classList.remove('hidden');
+});
+
+if(pwaBtn) {
+  pwaBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      // ฝั่ง Android
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') pwaBanner.classList.add('hidden');
+      deferredPrompt = null;
+    } else {
+      // ฝั่ง iOS 
+      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+      if (isIos) {
+        alert("📲 สำหรับ iPhone/iPad:\n1. แตะไอคอน 'แชร์' (สี่เหลี่ยมลูกศรชี้ขึ้น) ที่แถบด้านล่าง\n2. เลื่อนลงแล้วเลือก 'เพิ่มไปยังหน้าจอโฮม' (Add to Home Screen)");
+        pwaBanner.classList.add('hidden');
+      }
+    }
+  });
+}
+
+// 2. เช็คระบบ iOS อัตโนมัติ (ถ้าเปิดผ่าน Safari และยังไม่ได้เป็น App)
+window.addEventListener('load', () => {
+  const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  
+  if (isIos && !isStandalone && pwaBanner) {
+    pwaDesc.innerText = "แตะ 📤 แชร์ -> ➕ เพิ่มไปยังหน้าจอโฮม";
+    pwaBanner.classList.remove('hidden');
+  }
+});
