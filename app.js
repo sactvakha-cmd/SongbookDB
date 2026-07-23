@@ -191,18 +191,22 @@ function updateBottomNav(view) {
   const nav = document.getElementById('main-bottom-nav'); if (!nav) return;
   let html = '';
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
+  const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
   
-  if (view === 'dashboard' || view === 'settings') {
-    nav.classList.add('justify-center'); html = homeBtn + profileBtn;
-  } else {
-    nav.classList.remove('justify-center'); html += homeBtn;
+  // ถ้าอยู่หน้า Dashboard, Settings หรือ Music ให้แสดง 3 ปุ่มตรงกลาง
+  if (view === 'dashboard' || view === 'settings' || view === 'music') {
+    nav.classList.add('justify-center'); 
+    html = homeBtn + musicBtn + profileBtn;
+  } 
+  // ถ้าเข้าหน้า Category หรือ Song ให้แสดงปุ่มหมวดหมู่ตรงกลาง
+  else {
+    nav.classList.remove('justify-center'); 
+    html += homeBtn;
     html += `<div class="nav-scroll-area">`;
-    // แทรกปุ่มฟังก์ชัน "ฟังเพลง MP3 ทั้งหมด" ไว้ตรงกลางสุด
-    let isActiveMusic = (view === 'music') ? 'active' : '';
-    html += `<div class="nav-item ${isActiveMusic}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
     baseCategories.forEach(cat => { let isActive = (currentCategory === cat.id) ? 'active' : ''; html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; });
-    html += `</div>`; html += profileBtn;
+    html += `</div>`; 
+    html += profileBtn;
   }
   nav.innerHTML = html;
 }
@@ -231,7 +235,14 @@ function forceDataRefresh() {
 
 function renderDashboard() {
   try {
-    document.getElementById('total-count').innerText = allSongs.length; const grid = document.getElementById('grid-container');
+    document.getElementById('total-count').innerText = allSongs.length; 
+    
+    // นับจำนวนเพลงที่มีไฟล์เสียง MP3
+    const mp3Count = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "").length;
+    const mp3CountEl = document.getElementById('total-music-count');
+    if (mp3CountEl) mp3CountEl.innerText = mp3Count;
+
+    const grid = document.getElementById('grid-container');
     grid.innerHTML = baseCategories.map(cat => {
       const count = allSongs.filter(s => s.Category === cat.id).length; const catName = i18n[appLang][cat.i18n_cat];
       return `<div class="cat-card ${cat.bg}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><h3 style="font-size: 1rem;">${catName}</h3><div class="count">${count} ${i18n[appLang].song_unit}</div></div>`;
