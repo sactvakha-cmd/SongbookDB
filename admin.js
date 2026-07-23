@@ -2,6 +2,9 @@ const API_URL = "https://akhasongbook-api.sactvakha.workers.dev";
 let adminPassword = "";
 let allSongs = [];
 let allUsers = [];
+// ตัวแปรสำหรับจำตำแหน่ง Scroll หน้าจอ Admin
+let currentAdminView = 'dashboard';
+let adminScrollPositions = {};
 
 window.onload = () => {
   const savedCat = sessionStorage.getItem('adminCatTemp');
@@ -81,11 +84,31 @@ function updateBottomNav(view) {
 }
 
 function switchView(view) {
+  // 1. บันทึกตำแหน่ง Scroll ก่อนซ่อนหน้า
+  adminScrollPositions[currentAdminView] = window.scrollY;
+
+  // 2. ซ่อน/แสดงหน้าเว็บ
   ['view-dashboard', 'view-admin-form', 'view-users', 'view-user-form'].forEach(v => document.getElementById(v).classList.add('hidden'));
   document.getElementById('view-' + view).classList.remove('hidden');
+  
+  // 3. อัปเดตข้อมูลในหน้า (โค้ดเดิม)
   updateBottomNav(view);
   if(view === 'dashboard') filterAdminCat(currentAdminCategory);
   if(view === 'users') renderUsers();
+
+  // 4. จัดการตำแหน่ง Scroll
+  if (view === 'admin-form' || view === 'user-form') {
+    // ถ้าเข้าหน้าแก้ไขเพลง หรือแก้ไขผู้ใช้ ให้เลื่อนขึ้นบนสุดเสมอ
+    window.scrollTo(0, 0);
+  } else {
+    // ถ้ากลับมาหน้ารายการเพลง หรือรายการผู้ใช้ ให้กลับไปจุดเดิม
+    setTimeout(() => {
+      window.scrollTo(0, adminScrollPositions[view] || 0);
+    }, 10);
+  }
+
+  // 5. อัปเดตสถานะหน้าปัจจุบัน
+  currentAdminView = view;
 }
 
 function logout() { sessionStorage.removeItem('adminPassTemp'); location.reload(); }
