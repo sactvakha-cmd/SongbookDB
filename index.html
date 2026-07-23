@@ -167,7 +167,10 @@
             <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')">เพลย์ลิสต์</button>
             <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')">กำลังเล่น</button>
         </div>
-        <button class="btn-icon" style="opacity:0; pointer-events:none;"><i class="fa-solid fa-compact-disc"></i></button>
+        <!-- [แก้ไข] เปลี่ยนจากปุ่มล่องหน เป็นไอคอนสถานะเพลง (CD Indicator) -->
+        <button class="btn-icon" id="btn-music-indicator" style="cursor:default; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
+            <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
+        </button>
       </div>
 
       <!-- รายการเพลง MP3 ทั้งหมด -->
@@ -246,7 +249,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=105"></script>
+  <script src="app.js?v=106"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
