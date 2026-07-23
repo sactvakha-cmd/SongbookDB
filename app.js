@@ -425,47 +425,90 @@ function saveUiSettings() {
 }
 
 // ----------------------------------------------------------------------
-// ระบบ AUDIO & MUSIC PLAYER แบบเจาะลึก
+// ระบบ AUDIO & MUSIC PLAYER แบบอัปเกรด (หมวดหมู่ & เนื้อเพลง)
 // ----------------------------------------------------------------------
 const songAudioEl = document.getElementById('song-audio-element');
-let musicPlaylist = [];
-let currentMusicIndex = -1;
+let masterMusicList = [];    // เพลงที่มีไฟล์เสียงทั้งหมดในแอป
+let musicPlaylist = [];      // เพลงที่ถูกกรองตามหมวดหมู่ปัจจุบัน
+let currentMusicCategory = 'ALL';
+let currentPlayingSongId = null; // เก็บ ID เพลงที่กำลังเล่นอยู่จริงๆ
 let isMusicPlayerActive = false;
 let isShuffle = false;
 let isRepeat = false;
 
 function openMusicPlayer() {
   isMusicPlayerActive = true;
-  musicPlaylist = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
+  masterMusicList = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
+  
+  if(masterMusicList.length > 0 && !currentPlayingSongId) {
+      currentPlayingSongId = masterMusicList[0].ID; 
+  }
+  
+  renderMusicCategories();
+  filterMusicByCategory(currentMusicCategory, false);
+  
   switchView('music');
-  renderMusicList();
-  switchMusicTab(currentMusicIndex >= 0 ? 'play' : 'list');
+  // ถ้าเปิดเข้ามาครั้งแรกให้ไปหน้า 'play' (กำลังเล่น)
+  switchMusicTab('play'); 
 }
 
 function switchMusicTab(tab) {
   document.getElementById('tab-music-list').classList.remove('active');
   document.getElementById('tab-music-play').classList.remove('active');
+  document.getElementById('tab-music-lyric').classList.remove('active');
   document.getElementById('tab-music-'+tab).classList.add('active');
+  
+  document.getElementById('music-list-container').classList.add('hidden');
+  document.getElementById('music-play-container').classList.add('hidden');
+  document.getElementById('music-lyric-container').classList.add('hidden');
   
   if(tab === 'list') {
     document.getElementById('music-list-container').classList.remove('hidden');
-    document.getElementById('music-play-container').classList.add('hidden');
-  } else {
-    document.getElementById('music-list-container').classList.add('hidden');
+  } else if(tab === 'play') {
     document.getElementById('music-play-container').classList.remove('hidden');
+  } else if(tab === 'lyric') {
+    document.getElementById('music-lyric-container').classList.remove('hidden');
   }
+}
+
+function renderMusicCategories() {
+  const container = document.getElementById('music-category-scroll');
+  let html = `<button class="music-cat-btn ${currentMusicCategory==='ALL'?'active':''}" onclick="filterMusicByCategory('ALL')">เพลงทั้งหมด</button>`;
+  
+  baseCategories.forEach(cat => {
+      // แสดงเฉพาะหมวดที่มีเพลง MP3 อยู่จริงๆ
+      const countInCat = masterMusicList.filter(s => s.Category === cat.id).length;
+      if(countInCat > 0) {
+         html += `<button class="music-cat-btn ${currentMusicCategory===cat.id?'active':''}" onclick="filterMusicByCategory('${cat.id}')">${i18n[appLang][cat.i18n_nav]}</button>`;
+      }
+  });
+  container.innerHTML = html;
+}
+
+function filterMusicByCategory(catId, switchToList = true) {
+  currentMusicCategory = catId;
+  renderMusicCategories(); // อัปเดตสีปุ่ม
+  
+  if(catId === 'ALL') {
+      musicPlaylist = masterMusicList;
+  } else {
+      musicPlaylist = masterMusicList.filter(s => s.Category === catId);
+  }
+  
+  renderMusicList();
+  if(switchToList) switchMusicTab('list');
 }
 
 function renderMusicList() {
   const container = document.getElementById('music-list-container');
   if(musicPlaylist.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted);">ไม่มีเพลง MP3 ในระบบ 😢</div>`;
+    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted);">ไม่มีเพลงในหมวดหมู่นี้</div>`;
     return;
   }
   
   container.innerHTML = musicPlaylist.map((s, index) => {
-    const isPlaying = (index === currentMusicIndex);
-    return `<div class="song-item" style="border:none; border-bottom:1px solid #f1f5f9; border-radius:0; padding:15px; margin:0;" onclick="playMusicIndex(${index})">
+    const isPlaying = (s.ID === currentPlayingSongId);
+    return `<div class="song-item ${isPlaying ? 'playing' : ''}" style="border:none; border-bottom:1px solid #f1f5f9; border-radius:0; padding:15px; margin:0;" onclick="playMusicIndex(${index})">
       <div class="s-id" style="width:40px; text-align:center; color:${isPlaying ? 'var(--primary)' : 'var(--text-muted)'}; font-size:1.1rem;">
          ${isPlaying ? '<i class="fa-solid fa-chart-simple fa-fade"></i>' : (index+1)}
       </div>
@@ -473,35 +516,50 @@ function renderMusicList() {
          <div class="s-title" style="${isPlaying ? 'color:var(--primary);' : ''}">${s.Title}</div>
          <div class="s-meta">${s.Author || 'Akha Songbook'}</div>
       </div>
-      <i class="fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : '#cbd5e1'}; font-size:1rem;"></i>
+      <i class="fa-solid ${isPlaying && !songAudioEl.paused ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : '#cbd5e1'}; font-size:1rem;"></i>
     </div>`;
   }).join('');
 }
 
 function playMusicIndex(index) {
   if(index < 0 || index >= musicPlaylist.length) return;
-  currentMusicIndex = index;
   const song = musicPlaylist[index];
+  currentPlayingSongId = song.ID;
   
+  // อัปเดต UI หน้ากำลังเล่น
   document.getElementById('music-title-display').innerText = song.Title;
   document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
-  
   const coverImg = document.getElementById('music-cover-img');
-  if(song.ImageUrl) { coverImg.src = song.ImageUrl; } 
-  else { coverImg.src = 'icon-512.png'; }
+  if(song.ImageUrl) { coverImg.src = song.ImageUrl; } else { coverImg.src = 'icon-512.png'; }
   
+  // อัปเดต UI หน้าเนื้อเพลง
+  updateMusicLyrics(song);
+  
+  // สั่งเล่นเพลง
   songAudioEl.src = song.AudioUrl;
   songAudioEl.play().then(() => {
      document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
      coverImg.classList.add('spin-slow');
      
-     // ปรับ CD Indicator ไอคอนด้านบนให้หมุน
      const cdIcon = document.getElementById('music-indicator-icon');
      if(cdIcon) cdIcon.classList.add('fa-spin');
      
-     renderMusicList();
+     renderMusicList(); // อัปเดตไฮไลต์ในรายการ
      switchMusicTab('play');
   }).catch(e => showToast("เล่นเพลงล้มเหลว", "error"));
+}
+
+function updateMusicLyrics(song) {
+  const container = document.getElementById('music-lyric-content');
+  document.getElementById('music-lyric-title').innerText = song.Title;
+  
+  let lyricsHtml = (appLang === 'ao') ? (song.Lyrics || song.LyricsNew) : (song.LyricsNew || song.Lyrics);
+  if(lyricsHtml) {
+      lyricsHtml = lyricsHtml.replace(/>\s+</g, '><');
+      container.innerHTML = lyricsHtml;
+  } else {
+      container.innerHTML = `<div style="text-align:center; color:var(--text-muted); margin-top:50px;">ไม่มีข้อมูลเนื้อเพลง</div>`;
+  }
 }
 
 function toggleAudio() {
@@ -516,10 +574,11 @@ function toggleAudio() {
 }
 
 function toggleMusicAudio() {
-  if(currentMusicIndex === -1) { playMusicIndex(0); return; }
+  if(!currentPlayingSongId && musicPlaylist.length > 0) { playMusicIndex(0); return; }
   const playBtn = document.getElementById('btn-music-play-pause');
   const coverImg = document.getElementById('music-cover-img');
-  const cdIcon = document.getElementById('music-indicator-icon'); // ไอคอน CD
+  const cdIcon = document.getElementById('music-indicator-icon');
+  
   if(!songAudioEl.src) return;
   
   if(songAudioEl.paused) {
@@ -527,30 +586,45 @@ function toggleMusicAudio() {
         playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
         coverImg.classList.add('spin-slow');
         if(cdIcon) cdIcon.classList.add('fa-spin');
+        renderMusicList();
     });
   } else {
     songAudioEl.pause();
     playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
     coverImg.classList.remove('spin-slow');
     if(cdIcon) cdIcon.classList.remove('fa-spin');
+    renderMusicList();
   }
-  renderMusicList();
 }
 
 function playMusicNext(isAuto = false) {
   if(musicPlaylist.length === 0) return;
-  if(isAuto && isRepeat) { playMusicIndex(currentMusicIndex); return; }
   
-  let nextIdx = currentMusicIndex + 1;
-  if(isShuffle) { nextIdx = Math.floor(Math.random() * musicPlaylist.length); } 
-  else if(nextIdx >= musicPlaylist.length) { nextIdx = 0; }
+  let currentIndex = musicPlaylist.findIndex(s => s.ID === currentPlayingSongId);
+  
+  if(isAuto && isRepeat) { 
+      if(currentIndex >= 0) playMusicIndex(currentIndex); 
+      return; 
+  }
+  
+  let nextIdx = currentIndex + 1;
+  
+  if(isShuffle) { 
+      nextIdx = Math.floor(Math.random() * musicPlaylist.length); 
+  } else if(nextIdx >= musicPlaylist.length || currentIndex === -1) { 
+      nextIdx = 0; // วนกลับไปเพลงแรกของหมวด
+  }
+  
   playMusicIndex(nextIdx);
 }
 
 function playMusicPrev() {
   if(musicPlaylist.length === 0) return;
-  let prevIdx = currentMusicIndex - 1;
-  if(prevIdx < 0) prevIdx = musicPlaylist.length - 1;
+  let currentIndex = musicPlaylist.findIndex(s => s.ID === currentPlayingSongId);
+  
+  let prevIdx = currentIndex - 1;
+  if(prevIdx < 0 || currentIndex === -1) prevIdx = musicPlaylist.length - 1;
+  
   playMusicIndex(prevIdx);
 }
 
@@ -620,7 +694,6 @@ if(songAudioEl) {
     const coverImg = document.getElementById('music-cover-img');
     if(coverImg) coverImg.classList.remove('spin-slow');
     
-    // หยุดไอคอน CD หมุน
     const cdIcon = document.getElementById('music-indicator-icon');
     if(cdIcon) cdIcon.classList.remove('fa-spin');
     
