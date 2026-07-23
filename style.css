@@ -267,3 +267,21 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
     border-right: none !important;   /* เอาเส้นขอบขวาออก */
     box-shadow: none !important;     /* เอาเงาออกเพื่อให้ดูเป็นแผ่นเดียวกัน */
 }
+/* =========================================================
+   ปรับการ์ดหมวดหมู่หน้าแรกให้กระชับและสมดุล (6 หมวด)
+========================================================= */
+#view-dashboard .grid-cats {
+    gap: 10px !important; /* ลดช่องว่างระหว่างการ์ด */
+}
+#view-dashboard .cat-card {
+    min-height: 80px !important;    /* บีบความสูงลงให้กระชับ */
+    padding: 12px !important;       /* ลดขอบในลง */
+    border-radius: 14px !important; 
+}
+#view-dashboard .cat-card i {
+    font-size: 1.3rem !important;   /* ปรับไอคอนให้เล็กลงนิดนึงเข้ากับการ์ด */
+    margin-bottom: 4px !important;
+}
+#view-dashboard .cat-card h3 {
+    font-size: 0.85rem !important;  /* ปรับขนาดฟอนต์ชื่อหมวดหมู่ให้พอดี */
+}
