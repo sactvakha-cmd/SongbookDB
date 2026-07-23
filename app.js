@@ -20,7 +20,6 @@ let currentCategory = ""; let currentSong = null;
 let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
-// ตัวแปรสำหรับจำตำแหน่ง Scroll หน้าจอผู้ใช้
 let currentActiveView = 'dashboard';
 let savedScrollPositions = {};
 
@@ -96,10 +95,8 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     if(res.status === 'success') {
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
-      
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-      
       localStorage.setItem('offline_songs', JSON.stringify(allSongs));
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
@@ -201,6 +198,9 @@ function updateBottomNav(view) {
   } else {
     nav.classList.remove('justify-center'); html += homeBtn;
     html += `<div class="nav-scroll-area">`;
+    // แทรกปุ่มฟังก์ชัน "ฟังเพลง MP3 ทั้งหมด" ไว้ตรงกลางสุด
+    let isActiveMusic = (view === 'music') ? 'active' : '';
+    html += `<div class="nav-item ${isActiveMusic}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
     baseCategories.forEach(cat => { let isActive = (currentCategory === cat.id) ? 'active' : ''; html += `<div class="nav-item ${isActive}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><span>${i18n[appLang][cat.i18n_nav]}</span></div>`; });
     html += `</div>`; html += profileBtn;
   }
@@ -272,15 +272,18 @@ function searchGlobal() {
 function switchView(view) {
   try {
     savedScrollPositions[currentActiveView] = window.scrollY;
+    
+    // เคลียร์สถานะเมื่อออกจากหน้าเครื่องเล่นเพลง
+    if (view !== 'music') { isMusicPlayerActive = false; }
 
-    if(view !== 'song') {
+    if(view !== 'song' && view !== 'music') {
       const audioEl = document.getElementById('song-audio-element');
       if(audioEl && !audioEl.paused) { toggleAudio(); }
       const mediaBox = document.getElementById('detail-media-container');
       if(mediaBox) { mediaBox.innerHTML = ''; mediaBox.classList.add('hidden'); }
     }
 
-    ['view-dashboard', 'view-category', 'view-song', 'view-settings'].forEach(v => { 
+    ['view-dashboard', 'view-category', 'view-song', 'view-settings', 'view-music'].forEach(v => { 
       document.getElementById(v).classList.add('hidden'); 
       document.getElementById(v).classList.remove('fade-in'); 
     });
@@ -295,12 +298,10 @@ function switchView(view) {
     if(view === 'dashboard') { currentCategory = ""; if(document.getElementById('global-search').value === "") document.getElementById('dashboard-content').classList.remove('hidden'); }
     updateBottomNav(view); 
 
-    if (view === 'song' || view === 'settings') {
+    if (view === 'song' || view === 'settings' || view === 'music') {
       window.scrollTo(0, 0);
     } else {
-      setTimeout(() => {
-        window.scrollTo(0, savedScrollPositions[view] || 0);
-      }, 10);
+      setTimeout(() => { window.scrollTo(0, savedScrollPositions[view] || 0); }, 10);
     }
 
     currentActiveView = view;
@@ -416,36 +417,157 @@ function saveUiSettings() {
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
 }
 
-function toggleAudio() {
-  const audioEl = document.getElementById('song-audio-element');
-  const playBtn = document.getElementById('btn-play-pause');
-  if(!audioEl.src) return;
+// ----------------------------------------------------------------------
+// ระบบ AUDIO & MUSIC PLAYER แบบเจาะลึก
+// ----------------------------------------------------------------------
+const songAudioEl = document.getElementById('song-audio-element');
+let musicPlaylist = [];
+let currentMusicIndex = -1;
+let isMusicPlayerActive = false;
+let isShuffle = false;
+let isRepeat = false;
+
+// ฟังก์ชันเปิดหน้า Player
+function openMusicPlayer() {
+  isMusicPlayerActive = true;
+  musicPlaylist = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
+  switchView('music');
+  renderMusicList();
+  switchMusicTab(currentMusicIndex >= 0 ? 'play' : 'list');
+}
+
+// ฟังก์ชันสลับ Tab เพลย์ลิสต์ / หน้าเล่นเพลง
+function switchMusicTab(tab) {
+  document.getElementById('tab-music-list').classList.remove('active');
+  document.getElementById('tab-music-play').classList.remove('active');
+  document.getElementById('tab-music-'+tab).classList.add('active');
   
-  if(audioEl.paused) {
-    audioEl.play().then(() => {
-      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
-    }).catch(err => {
-      console.error("Audio Play Error:", err);
-      showToast("ไฟล์เสียงกำลังโหลด หรือไม่รองรับ", "warning");
-      playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-    });
+  if(tab === 'list') {
+    document.getElementById('music-list-container').classList.remove('hidden');
+    document.getElementById('music-play-container').classList.add('hidden');
   } else {
-    audioEl.pause();
+    document.getElementById('music-list-container').classList.add('hidden');
+    document.getElementById('music-play-container').classList.remove('hidden');
+  }
+}
+
+// เรนเดอร์รายการเพลง MP3
+function renderMusicList() {
+  const container = document.getElementById('music-list-container');
+  if(musicPlaylist.length === 0) {
+    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted);">ไม่มีเพลง MP3 ในระบบ 😢</div>`;
+    return;
+  }
+  
+  container.innerHTML = musicPlaylist.map((s, index) => {
+    const isPlaying = (index === currentMusicIndex);
+    return `<div class="song-item" style="border:none; border-bottom:1px solid #f1f5f9; border-radius:0; padding:15px; margin:0;" onclick="playMusicIndex(${index})">
+      <div class="s-id" style="width:40px; text-align:center; color:${isPlaying ? 'var(--primary)' : 'var(--text-muted)'}; font-size:1.1rem;">
+         ${isPlaying ? '<i class="fa-solid fa-chart-simple fa-fade"></i>' : (index+1)}
+      </div>
+      <div class="s-info">
+         <div class="s-title" style="${isPlaying ? 'color:var(--primary);' : ''}">${s.Title}</div>
+         <div class="s-meta">${s.Author || 'Akha Songbook'}</div>
+      </div>
+      <i class="fa-solid ${isPlaying ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : '#cbd5e1'}; font-size:1rem;"></i>
+    </div>`;
+  }).join('');
+}
+
+// เลือกเล่นเพลงจาก Index
+function playMusicIndex(index) {
+  if(index < 0 || index >= musicPlaylist.length) return;
+  currentMusicIndex = index;
+  const song = musicPlaylist[index];
+  
+  document.getElementById('music-title-display').innerText = song.Title;
+  document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
+  
+  const coverImg = document.getElementById('music-cover-img');
+  if(song.ImageUrl) { coverImg.src = song.ImageUrl; } 
+  else { coverImg.src = 'icon-512.png'; }
+  coverImg.classList.add('spin-slow');
+  
+  songAudioEl.src = song.AudioUrl;
+  songAudioEl.play().then(() => {
+     document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
+     renderMusicList();
+     switchMusicTab('play');
+  }).catch(e => showToast("เล่นเพลงล้มเหลว", "error"));
+}
+
+// ควบคุมปุ่ม Play/Pause ทั่วไป และ หน้า Music
+function toggleAudio() {
+  const playBtn = document.getElementById('btn-play-pause');
+  if(!songAudioEl.src) return;
+  if(songAudioEl.paused) {
+    songAudioEl.play().then(() => { playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; });
+  } else {
+    songAudioEl.pause();
     playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
   }
 }
 
-function seekAudio(e) {
-  const audioEl = document.getElementById('song-audio-element');
-  if(!audioEl.src || isNaN(audioEl.duration) || audioEl.duration === Infinity) return;
-  const track = e.currentTarget;
-  const rect = track.getBoundingClientRect();
-  const clickX = e.clientX - rect.left;
-  const percent = clickX / rect.width;
-  audioEl.currentTime = percent * audioEl.duration;
+function toggleMusicAudio() {
+  if(currentMusicIndex === -1) { playMusicIndex(0); return; }
+  const playBtn = document.getElementById('btn-music-play-pause');
+  const coverImg = document.getElementById('music-cover-img');
+  if(!songAudioEl.src) return;
+  
+  if(songAudioEl.paused) {
+    songAudioEl.play().then(() => { 
+        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
+        coverImg.classList.add('spin-slow');
+    });
+  } else {
+    songAudioEl.pause();
+    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    coverImg.classList.remove('spin-slow');
+  }
+  renderMusicList();
 }
 
-const songAudioEl = document.getElementById('song-audio-element');
+function playMusicNext(isAuto = false) {
+  if(musicPlaylist.length === 0) return;
+  if(isAuto && isRepeat) { playMusicIndex(currentMusicIndex); return; }
+  
+  let nextIdx = currentMusicIndex + 1;
+  if(isShuffle) { nextIdx = Math.floor(Math.random() * musicPlaylist.length); } 
+  else if(nextIdx >= musicPlaylist.length) { nextIdx = 0; }
+  playMusicIndex(nextIdx);
+}
+
+function playMusicPrev() {
+  if(musicPlaylist.length === 0) return;
+  let prevIdx = currentMusicIndex - 1;
+  if(prevIdx < 0) prevIdx = musicPlaylist.length - 1;
+  playMusicIndex(prevIdx);
+}
+
+function toggleMusicShuffle() {
+  isShuffle = !isShuffle;
+  document.getElementById('btn-music-shuffle').style.color = isShuffle ? 'var(--primary)' : 'var(--text-muted)';
+}
+function toggleMusicRepeat() {
+  isRepeat = !isRepeat;
+  document.getElementById('btn-music-repeat').style.color = isRepeat ? 'var(--primary)' : 'var(--text-muted)';
+}
+
+function seekAudio(e) {
+  if(!songAudioEl.src || isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
+  const track = e.currentTarget;
+  const clickX = e.clientX - track.getBoundingClientRect().left;
+  songAudioEl.currentTime = (clickX / track.getBoundingClientRect().width) * songAudioEl.duration;
+}
+
+function seekMusicAudio(e) {
+  if(!songAudioEl.src || isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
+  const track = e.currentTarget;
+  const clickX = e.clientX - track.getBoundingClientRect().left;
+  songAudioEl.currentTime = (clickX / track.getBoundingClientRect().width) * songAudioEl.duration;
+}
+
+// จัดการ Event อัปเดตเวลาทั้งหน้าอ่านเนื้อเพลง และ หน้า Music Player
 if(songAudioEl) {
   songAudioEl.addEventListener('loadedmetadata', () => {
     if(!isNaN(songAudioEl.duration) && songAudioEl.duration !== Infinity) {
@@ -453,41 +575,54 @@ if(songAudioEl) {
       let secs = Math.floor(songAudioEl.duration % 60);
       if(secs < 10) secs = '0' + secs;
       document.getElementById('audio-time').innerText = '0:00 / ' + mins + ':' + secs;
+      document.getElementById('music-time-total').innerText = mins + ':' + secs;
     }
   });
 
   songAudioEl.addEventListener('timeupdate', () => {
     if(isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
     const percent = (songAudioEl.currentTime / songAudioEl.duration) * 100;
-    document.getElementById('audio-fill').style.width = percent + '%';
+    
+    // อัปเดต UI หน้าอ่านเนื้อเพลง
+    const fillEl = document.getElementById('audio-fill');
+    if(fillEl) fillEl.style.width = percent + '%';
     
     let curMins = Math.floor(songAudioEl.currentTime / 60);
     let curSecs = Math.floor(songAudioEl.currentTime % 60);
     if(curSecs < 10) curSecs = '0' + curSecs;
-    
     let totalMins = Math.floor(songAudioEl.duration / 60);
     let totalSecs = Math.floor(songAudioEl.duration % 60);
     if(totalSecs < 10) totalSecs = '0' + totalSecs;
     
-    document.getElementById('audio-time').innerText = curMins + ':' + curSecs + ' / ' + totalMins + ':' + totalSecs;
+    const timeEl = document.getElementById('audio-time');
+    if(timeEl) timeEl.innerText = curMins + ':' + curSecs + ' / ' + totalMins + ':' + totalSecs;
+
+    // อัปเดต UI หน้า Music Player
+    const mFillEl = document.getElementById('music-time-fill');
+    if(mFillEl) mFillEl.style.width = percent + '%';
+    const mCurEl = document.getElementById('music-time-current');
+    if(mCurEl) mCurEl.innerText = curMins + ':' + curSecs;
   });
 
   songAudioEl.addEventListener('ended', () => {
     document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
     document.getElementById('audio-fill').style.width = '0%';
     document.getElementById('audio-time').innerText = '0:00';
+    
+    document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
+    const coverImg = document.getElementById('music-cover-img');
+    if(coverImg) coverImg.classList.remove('spin-slow');
+    
+    // เล่นอัตโนมัติหากอยู่ในโหมดฟังเพลง
+    if(isMusicPlayerActive && musicPlaylist.length > 0) { playMusicNext(true); }
   });
 }
 
-/* ==========================================
-   ระบบ PWA (Install App Prompt) แบบกำหนดเอง
-========================================== */
 let deferredPrompt;
 const pwaBanner = document.getElementById('pwa-install-banner');
 const pwaBtn = document.getElementById('pwa-install-btn');
 const pwaDesc = document.getElementById('pwa-desc');
 
-// 1. สำหรับ Android / Desktop (จับ Event เมื่อเครื่องพร้อมให้ลงแอป)
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault(); 
   deferredPrompt = e;
@@ -497,13 +632,11 @@ window.addEventListener('beforeinstallprompt', (e) => {
 if(pwaBtn) {
   pwaBtn.addEventListener('click', async () => {
     if (deferredPrompt) {
-      // ฝั่ง Android
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
       if (outcome === 'accepted') pwaBanner.classList.add('hidden');
       deferredPrompt = null;
     } else {
-      // ฝั่ง iOS 
       const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
       if (isIos) {
         alert("📲 สำหรับ iPhone/iPad:\n1. แตะไอคอน 'แชร์' (สี่เหลี่ยมลูกศรชี้ขึ้น) ที่แถบด้านล่าง\n2. เลื่อนลงแล้วเลือก 'เพิ่มไปยังหน้าจอโฮม' (Add to Home Screen)");
@@ -513,11 +646,9 @@ if(pwaBtn) {
   });
 }
 
-// 2. เช็คระบบ iOS อัตโนมัติ (ถ้าเปิดผ่าน Safari และยังไม่ได้เป็น App)
 window.addEventListener('load', () => {
   const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  
   if (isIos && !isStandalone && pwaBanner) {
     pwaDesc.innerText = "แตะ 📤 แชร์ -> ➕ เพิ่มไปยังหน้าจอโฮม";
     pwaBanner.classList.remove('hidden');
