@@ -95,7 +95,12 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     if(res.status === 'success') {
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
-      allSongs = res.songs || []; localStorage.setItem('offline_songs', JSON.stringify(allSongs));
+      
+      // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง (G001, G002, G003...)
+      allSongs = res.songs || [];
+      allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+      
+      localStorage.setItem('offline_songs', JSON.stringify(allSongs));
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
@@ -115,13 +120,16 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     document.getElementById('loader').classList.add('hidden');
     if(isSilentMode) {
       showToast("ใช้งานแบบออฟไลน์ (ข้อมูลล่าสุดที่เคยซิงค์)", "warning");
-      const savedSongs = localStorage.getItem('offline_songs'); if(savedSongs) allSongs = JSON.parse(savedSongs);
+      const savedSongs = localStorage.getItem('offline_songs'); 
+      if(savedSongs) {
+        allSongs = JSON.parse(savedSongs);
+        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+      }
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
       renderDashboard(); updateBottomNav('dashboard');
     } else { alert("การเชื่อมต่อล้มเหลว: " + err.message); }
   });
 }
-
 function showPaymentView() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden'); }
 function showLoginView() { document.getElementById('view-payment').classList.add('hidden'); document.getElementById('view-auth').classList.remove('hidden'); switchAuthTab('login');}
 
@@ -211,7 +219,11 @@ function forceDataRefresh() {
   document.getElementById('app').classList.add('hidden'); document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
   fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => {
       if(res.status === 'success') {
-        allSongs = res.songs || []; localStorage.setItem('offline_songs', JSON.stringify(allSongs)); renderDashboard(); 
+        // [แก้ไข] บังคับให้เรียงลำดับ ID เพลง
+        allSongs = res.songs || [];
+        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+        
+        localStorage.setItem('offline_songs', JSON.stringify(allSongs)); renderDashboard(); 
         if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
         document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
       } else { logoutUser(); }
@@ -260,9 +272,15 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
+    // ปิดเพลงอัตโนมัติเวลากดย้อนกลับ (ไม่ว่าไปหน้าไหนที่ไม่ใช่หน้าเพลง)
     if(view !== 'song') {
+      // 1. หยุดไฟล์ MP3
       const audioEl = document.getElementById('song-audio-element');
       if(audioEl && !audioEl.paused) { toggleAudio(); }
+      
+      // 2. หยุด YouTube (โดยการล้าง Iframe ทิ้งเพื่อไม่ให้เล่นอยู่เบื้องหลัง)
+      const mediaBox = document.getElementById('detail-media-container');
+      if(mediaBox) { mediaBox.innerHTML = ''; mediaBox.classList.add('hidden'); }
     }
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
