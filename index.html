@@ -84,7 +84,19 @@
       </div>
       <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()"></div>
       <div id="search-results" style="margin-top: 10px;"></div>
-     <!-- การ์ดฟังเพลง (เลียนแบบการ์ดด้านบน) -->
+    <div id="dashboard-content">
+        <div class="all-songs-card" onclick="openAllSongs()">
+          <div style="display:flex; align-items:center;">
+            <div class="icon-box"><i class="fa-solid fa-list-ul"></i></div>
+            <div><div style="font-size: 0.8rem; opacity:0.8;" data-i18n="manage_text">ดูและจัดการ</div><div data-i18n="total_songs">เพลงทั้งหมดในคลัง</div></div>
+          </div>
+          <div class="total-num" id="total-count">0</div>
+        </div>
+        
+        <h3 style="margin-bottom:15px;" data-i18n="group_songs">กลุ่มเพลง</h3>
+        <div class="grid-cats" id="grid-container"></div>
+
+        <!-- การ์ดฟังเพลง (เลียนแบบการ์ดด้านบน) -->
         <h3 style="margin-bottom:15px; margin-top:25px;">เพลย์ลิสต์</h3>
         <div class="all-songs-card" style="background: linear-gradient(135deg, var(--accent) 0%, #0369a1 100%);" onclick="openMusicPlayer()">
           <div style="display:flex; align-items:center;">
