@@ -31,8 +31,6 @@ const baseCategories = [
   { id: 'เพลงไว้อาลัย', i18n_cat: 'cat_sad', i18n_nav: 'nav_cat_sad', icon: 'fa-dove', bg: 'bg-g8' },
   { id: 'เพลงงานมงคลสมรส', i18n_cat: 'cat_wed', i18n_nav: 'nav_cat_wed', icon: 'fa-rings-wedding', bg: 'bg-g4' },
   { id: 'เพลงสรรเสริญ', i18n_cat: 'cat_praise', i18n_nav: 'nav_cat_praise', icon: 'fa-hands-praying', bg: 'bg-g3' },
-  { id: 'เพลงนมัสการ', i18n_cat: 'cat_worship', i18n_nav: 'nav_cat_worship', icon: 'fa-guitar', bg: 'bg-g6' },
-  { id: 'เพลงอื่นๆ', i18n_cat: 'cat_other', i18n_nav: 'nav_cat_other', icon: 'fa-icons', bg: 'bg-g7' }
 ];
 
 window.onload = () => {
