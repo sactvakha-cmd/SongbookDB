@@ -256,9 +256,17 @@
                 <option value="48">48</option>
               </select>
 
-              <!-- เมนูระยะบรรทัด -->
+              <!-- เมนูระยะบรรทัด (เพิ่มค่าน้อยกว่า 1.0) -->
               <select class="editor-select" onchange="applyCustomStyle('lineHeight', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างบรรทัด">
                 <option value="">-- บรรทัด --</option>
+                <option value="0.2">0.2</option>
+                <option value="0.3">0.3</option>
+                <option value="0.4">0.4</option>
+                <option value="0.5">0.5</option>
+                <option value="0.6">0.6</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8</option>
+                <option value="0.9">0.9</option>
                 <option value="1.0">1.0</option>
                 <option value="1.2">1.2</option>
                 <option value="1.5">1.5</option>
@@ -267,9 +275,12 @@
                 <option value="2.5">2.5</option>
               </select>
 
-              <!-- เมนูช่องไฟ -->
+              <!-- เมนูช่องไฟ (เพิ่มค่าติดลบเพื่อให้ชิดกันมากขึ้น) -->
               <select class="editor-select" onchange="applyCustomStyle('letterSpacing', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างตัวอักษร">
                 <option value="">-- ช่องไฟ --</option>
+                <option value="-3px">แคบสุด 3</option>
+                <option value="-2px">แคบ 2</option>
+                <option value="-1px">แคบ 1</option>
                 <option value="normal">ปกติ</option>
                 <option value="1px">กว้าง 1</option>
                 <option value="2px">กว้าง 2</option>
@@ -343,6 +354,6 @@
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
-  <script src="admin.js?v=104"></script>
+  <script src="admin.js?v=105"></script>
 </body>
 </html>
