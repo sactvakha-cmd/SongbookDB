@@ -157,7 +157,6 @@
       </div>
     </div>
     
-    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
     <div id="view-music" class="hidden fade-in">
       <div class="top-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -220,7 +219,6 @@
       
     </div>
 
-    <!-- แก้ไขหน้า Settings / Profile -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
@@ -230,7 +228,6 @@
         <p>วันหมดอายุ: <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()">ต่ออายุการใช้งาน</button>
-          <!-- แก้ไขปุ่มออกจากระบบ ให้ใช้คลาส btn-outline -->
           <button class="btn-outline" style="flex:1;" onclick="logoutUser()">ออกจากระบบ</button>
         </div>
       </div>
@@ -240,7 +237,6 @@
         <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">โหมดหน้าจอ</label>
         
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <!-- แก้ไขปุ่มเปลี่ยนธีม ให้ใช้คลาส btn-outline -->
           <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
           <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
         </div>
@@ -259,16 +255,15 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <!-- หมวดหมู่ Popup Bottom Sheet -->
+  <!-- หมวดหมู่ Popup (Floating Panel Layout) -->
   <div id="category-popup-overlay" class="popup-overlay hidden" onclick="toggleCategoryPopup()"></div>
   <div id="category-popup" class="category-popup hidden">
     <div class="popup-header">
-      <div class="popup-handle"></div>
       <h3 data-i18n="nav_categories">เลือกหมวดหมู่เพลง</h3>
       <button class="btn-icon-small" onclick="toggleCategoryPopup()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div class="popup-content" id="popup-category-list">
-      <!-- ข้อมูลหมวดหมู่จะถูกใส่ด้วย JS -->
+    <div id="popup-category-list">
+      <!-- โครงสร้าง Grid หมวดหมู่จะถูกใส่ด้วย JS -->
     </div>
   </div>
 
@@ -283,7 +278,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=112"></script>
+  <script src="app.js?v=113"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
