@@ -157,7 +157,6 @@
       </div>
     </div>
     
-    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
     <div id="view-music" class="hidden fade-in">
       <div class="top-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -252,6 +251,19 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
+  <!-- หมวดหมู่ Popup Bottom Sheet -->
+  <div id="category-popup-overlay" class="popup-overlay hidden" onclick="toggleCategoryPopup()"></div>
+  <div id="category-popup" class="category-popup hidden">
+    <div class="popup-header">
+      <div class="popup-handle"></div>
+      <h3 data-i18n="nav_categories">เลือกหมวดหมู่เพลง</h3>
+      <button class="btn-icon-small" onclick="toggleCategoryPopup()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="popup-content" id="popup-category-list">
+      <!-- ข้อมูลหมวดหมู่จะถูกใส่ด้วย JS -->
+    </div>
+  </div>
+
   <!-- PWA Install Banner -->
   <div id="pwa-install-banner" class="hidden fade-in" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 2px solid var(--primary); z-index: 9999; display: flex; align-items: center; gap: 15px; width: 90%; max-width: 400px; backdrop-filter: blur(10px);">
     <img src="icon-192.png" alt="App Icon" style="width: 45px; height: 45px; border-radius: 12px;">
@@ -263,7 +275,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=110"></script>
+  <script src="app.js?v=111"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
