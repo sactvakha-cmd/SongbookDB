@@ -36,6 +36,9 @@ body { background-color: var(--bg-main); color: var(--text-main); font-family: v
 .container { max-width: 900px; margin: 0 auto; padding: 20px; padding-bottom: 100px; }
 h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.5px; }
 
+/* ล็อกหน้าจอไม่ให้เลื่อนเมื่อเปิด Popup */
+.no-scroll { overflow: hidden !important; touch-action: none; }
+
 /* --- Auth & Login --- */
 .auth-wrapper { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background: var(--bg-main); }
 .auth-card { background: var(--bg-surface); padding: 40px 30px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; border: 1px solid var(--border-color); animation: fadeInDown 0.4s ease; }
@@ -166,7 +169,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .btn-outline:active { transform: scale(0.98); }
 
 /* --- Bottom Navigation --- */
-/* สำคัญ: ให้ Bottom Nav มี z-index สูงสุดเสมอ */
 .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; height: 70px; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-around; z-index: 2000; overflow:hidden;}
 #main-bottom-nav.justify-center { padding: 0 10px; }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); height: 100%; width: 25%; }
@@ -178,19 +180,19 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 /* --- Popup Category (Floating Transparent Grid Style) --- */
 .popup-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.25); /* มืดลงนิดนึง */
-    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); /* เบลอหนักๆ แบบ iOS */
+    background: rgba(0,0,0,0.25); 
+    backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
     z-index: 1900; transition: opacity 0.3s ease; 
 }
 .category-popup { 
     position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; 
     background: transparent; border: none; box-shadow: none; z-index: 1950; 
     display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
-    padding-bottom: 100px; /* เว้นที่ให้ Bottom Nav ที่ลอยอยู่ */
+    padding-bottom: 100px; 
     opacity: 0; visibility: hidden; pointer-events: none; transition: all 0.3s ease; 
 }
 .category-popup.show { opacity: 1; visibility: visible; }
-.category-popup * { pointer-events: auto; } /* ให้ปุ่มในกล่องกดได้ */
+.category-popup * { pointer-events: auto; } 
 
 .popup-header { display: flex; align-items: center; justify-content: center; margin-bottom: 25px; width: 100%; padding: 0 20px; position: relative;}
 .popup-header h3 { font-size: 1.2rem; color: var(--text-main); margin: 0; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.15);}
@@ -203,9 +205,12 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 }
 [data-theme="dark"] .btn-icon-small { background: rgba(0,0,0,0.3); }
 
+/* ปรับปรุงโครงสร้าง Grid ให้ชิดกันมากขึ้น */
 #popup-category-list { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 25px 15px; 
-    width: 100%; max-width: 450px; padding: 0 20px 20px 20px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px 10px; /* ลดระยะห่างแนวตั้ง-แนวนอน */
+    width: 100%; max-width: 320px; /* ลดความกว้างสูงสุดลง เพื่อให้คอลัมน์บีบเข้าหากัน */
+    margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
+    padding: 0 20px 20px 20px;
     overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;
 }
 #popup-category-list::-webkit-scrollbar { display: none; }
@@ -215,18 +220,28 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
     gap: 10px; background: transparent !important; border: none !important; box-shadow: none !important;
     cursor: pointer; transition: transform 0.2s; padding: 0;
 }
-.cat-grid-item.full-width { grid-column: 1 / -1; }
+.cat-grid-item.full-width { grid-column: 1 / -1; margin-bottom: 5px; }
 .cat-grid-item:active { transform: scale(0.9); }
 .cat-grid-item .icon { 
-    width: 65px; height: 65px; border-radius: 50%; /* ไอคอนกลมลอยตัว */
+    width: 65px; height: 65px; border-radius: 50%; 
     display: flex; align-items: center; justify-content: center; 
     font-size: 1.8rem; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
+
+/* ปรับปรุงตัวอักษรให้มีพื้นหลังกระจกบางๆ */
 .cat-grid-item .name { 
-    font-size: 0.95rem; font-weight: 600; color: var(--text-main); 
-    line-height: 1.2; text-align: center; text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    font-size: 0.9rem; font-weight: 600; color: var(--text-main); 
+    line-height: 1.3; text-align: center; 
+    background: rgba(255, 255, 255, 0.6); /* พื้นหลังขาวบางๆ */
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); /* เบลอพื้นหลัง */
+    padding: 4px 12px; border-radius: 20px; /* เพิ่ม padding และขอบมน */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
-[data-theme="dark"] .cat-grid-item .name { text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+[data-theme="dark"] .cat-grid-item .name { 
+    background: rgba(0, 0, 0, 0.6); /* พื้นหลังดำบางๆ สำหรับโหมดมืด */
+    color: #f8fafc;
+    text-shadow: none; 
+}
 
 /* --- Utils --- */
 .loader-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); background: var(--bg-main); z-index: 9999; position: fixed; top: 0; left: 0; width: 100%;}
@@ -273,7 +288,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 #music-list-container { flex: 1; overflow-y: auto; padding: 15px 20px; }
 #music-player-container:not(.hidden) { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-/* --- พื้นที่แสดงผลส่วนบน --- */
 #music-display-area { flex: 1; position: relative; display: flex; flex-direction: column; justify-content: center; padding: 20px; overflow: hidden; }
 #music-cover-view { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 .music-cover-wrapper { width: 280px; height: 280px; max-width: 35vh; max-height: 35vh; border-radius: 50%; box-shadow: 0 15px 40px rgba(0,0,0,0.15); overflow: hidden; border: 5px solid var(--bg-surface); flex-shrink: 0; }
@@ -281,14 +295,12 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .spin-slow { animation: spinRotate 10s linear infinite; }
 @keyframes spinRotate { 100% { transform: rotate(360deg); } }
 
-/* วิวกล่องเนื้อเพลงฉากหลังเบลอ */
 #music-lyric-view { position: absolute; top: 10px; left: 20px; right: 20px; bottom: 10px; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 .lyric-bg { position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px; background-size: cover; background-position: center; filter: blur(15px); z-index: 1; }
 .lyric-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 2; }
 #music-lyric-content { position: relative; z-index: 3; height: 100%; overflow-y: auto; padding: 30px 20px; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 #music-lyric-content * { color: #ffffff !important; }
 
-/* --- พื้นที่ควบคุมส่วนล่าง --- */
 #music-control-area { flex-shrink: 0; padding: 20px 20px 50px 20px; display: flex; flex-direction: column; align-items: center; }
 #music-title-display { width: 100%; text-align: center; font-size: 1.5rem; margin-bottom: 5px; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90vw; }
 #music-artist-display { width: 100%; text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px; }
