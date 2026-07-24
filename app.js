@@ -188,7 +188,7 @@ function submitPayment() {
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
 // ----------------------------------------------------
-// ระบบ Popup หมวดหมู่เพลง (Bottom Sheet)
+// ระบบ Popup หมวดหมู่เพลง (Floating Panel แบบ Grid)
 // ----------------------------------------------------
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
@@ -198,16 +198,20 @@ function toggleCategoryPopup() {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
 
-    let html = `<div class="cat-list-item" onclick="selectCategoryFromPopup('ALL')">
-                  <div class="icon" style="background:var(--primary); color:white;"><i class="fa-solid fa-list-ul"></i></div>
+    // สร้างปุ่มรวมด้านบนสุด กว้างเต็มแถว
+    let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
+                  <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
                   <div class="name">${i18n[appLang].total_songs}</div>
                 </div>`;
+                
+    // สร้างปุ่มหมวดหมู่ย่อย แบ่งเป็น 2 คอลัมน์ (ควบคุมด้วย CSS Grid)
     baseCategories.forEach(cat => {
-      html += `<div class="cat-list-item" onclick="selectCategoryFromPopup('${cat.id}')">
+      html += `<div class="cat-grid-item" onclick="selectCategoryFromPopup('${cat.id}')">
                  <div class="icon ${cat.bg}"><i class="fa-solid ${cat.icon}"></i></div>
                  <div class="name">${i18n[appLang][cat.i18n_nav]}</div>
                </div>`;
     });
+    
     document.getElementById('popup-category-list').innerHTML = html;
 
     setTimeout(() => popup.classList.add('show'), 10);
@@ -216,7 +220,7 @@ function toggleCategoryPopup() {
     setTimeout(() => {
       popup.classList.add('hidden');
       overlay.classList.add('hidden');
-    }, 300);
+    }, 300); // รอให้ Transition เล่นจบก่อนถึงจะติด class hidden
   }
 }
 
@@ -306,7 +310,7 @@ function renderList(songs, container) {
     if(songs.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลเพลง 😢</div>`; return; }
     container.innerHTML = songs.map(s => {
       let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; 
-      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info" style="min-width:0;"><div class="s-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:#cbd5e1;"></i></div>`
+      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info" style="min-width:0;"><div class="s-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
     }).join('');
   } catch(e) { console.error("Render List Error", e); }
 }
@@ -566,7 +570,7 @@ function renderMusicList() {
          <div class="s-title" style="${isPlaying ? 'color:var(--primary);' : ''}">${s.Title}</div>
          <div class="s-meta">${s.Author || 'Akha Songbook'}</div>
       </div>
-      <i class="fa-solid ${isPlaying && !songAudioEl.paused ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : '#cbd5e1'}; font-size:1rem;"></i>
+      <i class="fa-solid ${isPlaying && !songAudioEl.paused ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : 'var(--border-color)'}; font-size:1rem;"></i>
     </div>`;
   }).join('');
 }
