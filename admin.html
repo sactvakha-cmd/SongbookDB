@@ -158,9 +158,8 @@
             
             <div id="main-editor-toolbar" class="editor-toolbar">
               
-              <!-- คืนค่ารายชื่อฟอนต์ทั้งหมด 100% ตรงนี้ครับ -->
-              <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;">
-                <option value="">-- รูปแบบ --</option>
+              <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;" title="รูปแบบฟอนต์">
+                <option value="">-- ฟอนต์ --</option>
                 <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
                 <option value="'Kanit', sans-serif">ฟอนต์ระบบ (Kanit)</option>
                 <option value="sans-serif">มาตรฐาน</option>
@@ -235,11 +234,48 @@
                 <option value="'Caveat', cursive">Caveat</option>
               </select>
               
-              <select class="editor-select" onchange="formatTextAdmin('fontSize', this.value)" style="width:auto; min-width:85px;">
+              <!-- เมนูขนาดอักษรแบบใหม่ (ระบุตัวเลข pt) -->
+              <select class="editor-select" onchange="applyCustomStyle('fontSize', this.value)" style="width:auto; min-width:85px;" title="ขนาดอักษร">
                 <option value="">-- ขนาด --</option>
-                <option value="1">เล็กสุด</option><option value="2">เล็ก</option><option value="3">ปกติ</option>
-                <option value="4">ใหญ่</option><option value="5">ใหญ่มาก</option><option value="6">ยักษ์</option>
+                <option value="8">8</option>
+                <option value="8.5">8.5</option>
+                <option value="9">9</option>
+                <option value="9.5">9.5</option>
+                <option value="10">10</option>
+                <option value="10.5">10.5</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+                <option value="18">18</option>
+                <option value="20">20</option>
+                <option value="24">24</option>
+                <option value="28">28</option>
+                <option value="32">32</option>
+                <option value="36">36</option>
+                <option value="48">48</option>
               </select>
+
+              <!-- เมนูระยะบรรทัด -->
+              <select class="editor-select" onchange="applyCustomStyle('lineHeight', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างบรรทัด">
+                <option value="">-- บรรทัด --</option>
+                <option value="1.0">1.0</option>
+                <option value="1.2">1.2</option>
+                <option value="1.5">1.5</option>
+                <option value="1.8">1.8</option>
+                <option value="2.0">2.0</option>
+                <option value="2.5">2.5</option>
+              </select>
+
+              <!-- เมนูช่องไฟ -->
+              <select class="editor-select" onchange="applyCustomStyle('letterSpacing', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างตัวอักษร">
+                <option value="">-- ช่องไฟ --</option>
+                <option value="normal">ปกติ</option>
+                <option value="1px">กว้าง 1</option>
+                <option value="2px">กว้าง 2</option>
+                <option value="3px">กว้าง 3</option>
+              </select>
+
               <div class="editor-divider"></div>
 
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('bold')" title="ตัวหนา"><i class="fa-solid fa-bold"></i></button>
@@ -307,6 +343,6 @@
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
-  <script src="admin.js?v=102"></script>
+  <script src="admin.js?v=103"></script>
 </body>
 </html>
