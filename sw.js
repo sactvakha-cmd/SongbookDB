@@ -1,4 +1,4 @@
-const CACHE_NAME = 'akha-songbook-pro-v28';
+const CACHE_NAME = 'akha-songbook-pro-v29';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
