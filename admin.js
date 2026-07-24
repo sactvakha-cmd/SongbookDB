@@ -197,7 +197,6 @@ function formatTextAdmin(command, value = null) {
   });
 }
 
-// อัปเกรดระบบให้บังคับระยะบรรทัด (Line Height) ทะลุกรอบได้ 100%
 function applyCustomStyle(property, value) {
   if (!value) return;
 
@@ -221,24 +220,23 @@ function applyCustomStyle(property, value) {
   const elements = activeEditor.querySelectorAll(`font[face="${marker}"], span[style*="${marker}"]`);
 
   elements.forEach(el => {
-    // 💡 พิเศษสำหรับ "ระยะบรรทัด": ต้องเอาไปใส่ในกล่อง Block (เช่น div) เท่านั้น ถึงจะบีบให้เล็กลงได้
     if (property === 'lineHeight') {
         let blockParent = el.closest('div, p');
         
-        // ถ้าข้อความอยู่ใน div อยู่แล้ว ให้ปรับที่ div นั้นเลย
         if (blockParent && activeEditor.contains(blockParent) && blockParent !== activeEditor) {
             blockParent.style.lineHeight = finalValue;
+            // ล้างค่าบรรทัดที่ซ่อนอยู่ข้างใน
+            blockParent.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
         } else {
-            // ถ้าข้อความลอยอยู่เฉยๆ ให้สร้าง div มาครอบมัน เพื่อให้บีบระยะบรรทัดได้ชัวร์ๆ
             const div = document.createElement('div');
             div.style.lineHeight = finalValue;
             div.innerHTML = el.innerHTML;
+            div.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
             el.replaceWith(div);
-            return; // จบการทำงานของรอบนี้ ข้ามการสร้าง span ด้านล่างไปเลย
+            return; 
         }
     }
 
-    // สำหรับ ขนาดอักษร (fontSize) และ ช่องไฟ (letterSpacing) ใช้ span ปกติ
     const span = document.createElement('span');
     if (el.tagName.toLowerCase() === 'span') {
         let css = el.style.cssText;
@@ -248,8 +246,24 @@ function applyCustomStyle(property, value) {
 
     span.style[property] = finalValue;
     span.innerHTML = el.innerHTML;
+
+    // ----- ไฮไลท์การแก้ไข: ล้างสไตล์เก่าที่ขัดแย้งที่แอบซ่อนอยู่ข้างใน -----
+    span.querySelectorAll('*').forEach(child => {
+        if (child.style) {
+            child.style[property] = ''; // ลบ style เดิม (เช่น fontSize) ออกเพื่อให้มันรับค่าจาก Span ตัวแม่แทน
+        }
+        // ถ้าเป็นการเปลี่ยนขนาด และมี Tag <font> โบราณซ่อนอยู่ ให้ลบทิ้งด้วย
+        if (property === 'fontSize' && child.tagName.toLowerCase() === 'font' && child.hasAttribute('size')) {
+            child.removeAttribute('size');
+        }
+    });
+    // -------------------------------------------------------------
+
     el.replaceWith(span);
   });
+  
+  // จัดระเบียบ DOM หลังทำงานเสร็จ
+  activeEditor.normalize();
 }
 
 function renderUsers() {
