@@ -135,11 +135,19 @@
       </div>
       
       <div class="reader-card">
+        <!-- ไฮไลท์การแก้ไข: จัดรหัส G017 ไปอยู่บรรทัดเดียวกับชื่อเพลง ทางซ้าย -->
         <div class="reader-header">
-          <h2 id="detail-title" class="reader-title">ชื่อเพลง</h2>
+          <div class="title-row">
+            <span id="detail-id" class="song-id-badge"></span>
+            <h2 id="detail-title" class="reader-title">ชื่อเพลง</h2>
+          </div>
           <h4 id="detail-eng-title" class="reader-eng-title hidden">English Title</h4>
-          <div class="reader-meta"><span><i class="fa-solid fa-hashtag"></i> <span id="detail-id"></span></span><span><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span></div>
+          <div class="reader-meta">
+            <span><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span>
+          </div>
         </div>
+        <!-- จบไฮไลท์ -->
+
         <div class="tags-wrapper">
           <div id="detail-chords-container" class="reader-chords">คอร์ด: <span id="detail-chords"></span></div>
           <div id="detail-notation-container" class="reader-notation hidden"></div>
@@ -255,19 +263,15 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <!-- หมวดหมู่ Popup (Floating Transparent Style) -->
   <div id="category-popup-overlay" class="popup-overlay hidden" onclick="toggleCategoryPopup()"></div>
   <div id="category-popup" class="category-popup hidden">
     <div class="popup-header">
       <h3 data-i18n="nav_categories">เลือกหมวดหมู่เพลง</h3>
       <button class="btn-icon-small" onclick="toggleCategoryPopup()"><i class="fa-solid fa-xmark"></i></button>
     </div>
-    <div id="popup-category-list">
-      <!-- โครงสร้าง Grid หมวดหมู่จะถูกใส่ด้วย JS -->
-    </div>
+    <div id="popup-category-list"></div>
   </div>
 
-  <!-- PWA Install Banner -->
   <div id="pwa-install-banner" class="hidden fade-in" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 2px solid var(--primary); z-index: 9999; display: flex; align-items: center; gap: 15px; width: 90%; max-width: 400px; backdrop-filter: blur(10px);">
     <img src="icon-192.png" alt="App Icon" style="width: 45px; height: 45px; border-radius: 12px;">
     <div style="flex: 1;">
@@ -278,7 +282,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=114"></script>
+  <script src="app.js?v=115"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
