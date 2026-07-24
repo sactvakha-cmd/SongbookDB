@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- โหลดฟอนต์ทั้งหมดในรายการ (ไทยและอังกฤษ) ให้เหมือนกับผู้ใช้ เพื่อการแสดงผลที่ตรงกัน -->
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -27,25 +26,11 @@
       .rich-editor { flex: 1; min-height: 60vh !important; margin-bottom: 0 !important; } 
     }
     
-    .rich-editor {
-      padding: 20px;
-      border-radius: 0 0 12px 12px !important;
-      outline: none;
-      overflow-y: auto;
-      font-size: 1.2rem;
-      line-height: 2.0;
-    }
-
+    .rich-editor { padding: 20px; border-radius: 0 0 12px 12px !important; outline: none; overflow-y: auto; font-size: 1.2rem; line-height: 2.0; }
     .admin-hide-scroll::-webkit-scrollbar { display: none; }
     .admin-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    .admin-cat-btn {
-      padding: 6px 16px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc;
-      color: #64748b; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500;
-      cursor: pointer; white-space: nowrap; transition: all 0.3s ease;
-    }
-    .admin-cat-btn.active {
-      background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-glow);
-    }
+    .admin-cat-btn { padding: 6px 16px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.3s ease; }
+    .admin-cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-glow); }
   </style>
 </head>
 <body>
@@ -95,7 +80,6 @@
         <input type="hidden" id="form-id">
         <div class="admin-form-grid">
           
-          <!-- ฝั่งซ้าย (ข้อมูลทั่วไป) -->
           <div class="form-col-left">
             <label>หมวดหมู่ <span style="color:red">*</span></label>
             <select id="form-cat">
@@ -125,24 +109,20 @@
             
             <hr class="pc-hidden-hr" style="border:0; border-top:1px dashed #cbd5e1; margin:15px 0;">
             
-            <!-- ส่วนอัปโหลด MP3 และ บันทึกเสียงร้อง (มี Preview) -->
             <label>🔗 ไฟล์เสียง MP3 / อัดเสียงร้อง (ถ้ามี)</label>
             <div style="display:flex; gap:10px; margin-bottom:5px;">
               <input type="text" id="form-audio" placeholder="วางลิงก์ หรืออัปโหลด/อัดเสียง..." style="margin-bottom:0; flex:1;">
               
-              <!-- ปุ่มอัปโหลดไฟล์จากเครื่อง -->
               <label class="btn-primary" style="display:flex; align-items:center; justify-content:center; cursor:pointer; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#3b82f6;" title="อัปโหลดไฟล์ MP3">
                 <i class="fa-solid fa-upload"></i>
                 <input type="file" accept="audio/*" style="display:none;" onchange="uploadMedia(event, 'form-audio', 'audio')">
               </label>
               
-              <!-- ปุ่มอัดเสียง (สีแดง) -->
               <button class="btn-primary record-btn" id="btn-record-audio" type="button" style="display:flex; align-items:center; justify-content:center; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#ef4444; border:none; transition: all 0.3s ease;" onclick="toggleRecording()" title="อัดเสียงจากไมค์">
                 <i class="fa-solid fa-microphone"></i>
               </button>
             </div>
             
-            <!-- แถบพรีวิวเสียงหลังจากอัดเสร็จ (ซ่อนไว้ก่อน) -->
             <div id="audio-preview-box" class="hidden" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
               <div style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">🎧 ลองฟังเสียงที่อัดไว้:</div>
               <audio id="audio-preview-element" controls style="width:100%; height:40px; outline:none;"></audio>
@@ -168,7 +148,6 @@
             <textarea id="form-inspiration" rows="3" placeholder="เช่น สดุดี 23:1..."></textarea>
           </div>
 
-          <!-- ฝั่งขวา (เนื้อเพลง) -->
           <div class="form-col-right">
             <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
             
@@ -177,117 +156,35 @@
               <button class="lyrics-toggle-btn" id="btn-edit-lyric-new" onclick="switchAdminLyricView('new')" style="flex:1; border-radius:8px;">อาข่าแบบใหม่</button>
             </div>
             
-            <!-- แถบเครื่องมือเดี่ยวจัดรูปแบบข้อความ -->
             <div id="main-editor-toolbar" class="editor-toolbar">
-              <!-- เลือกรูปแบบฟอนต์ -->
               <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;">
                 <option value="">-- รูปแบบ --</option>
                 <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
                 <option value="'Kanit', sans-serif">ฟอนต์ระบบ (Kanit)</option>
-                <option value="sans-serif">มาตรฐาน</option>
-                <option value="'Athiti', sans-serif">Athiti (อธิติ)</option>
-                <option value="'Bai Jamjuree', sans-serif">Bai Jamjuree (ใบจามจุรี)</option>
-                <option value="'Chakra Petch', sans-serif">Chakra Petch (จักรเพชร)</option>
-                <option value="'Charm', cursive">Charm (ชาร์ม)</option>
-                <option value="'Charmonman', cursive">Charmonman (ชาร์มอนแมน)</option>
-                <option value="'Chathura', sans-serif">Chathura (จตุรัส)</option>
-                <option value="'Chonburi', cursive">Chonburi (ชลบุรี)</option>
-                <option value="'Fahkwang', sans-serif">Fahkwang (ฟ้ากว้าง)</option>
-                <option value="'Itim', cursive">Itim (ไอติม)</option>
-                <option value="'K2D', sans-serif">K2D (เคทูดี)</option>
-                <option value="'Kanit', sans-serif">Kanit (คณิต)</option>
-                <option value="'KoHo', sans-serif">KoHo (โคโฮ)</option>
-                <option value="'Kodchasan', sans-serif">Kodchasan (คชสาร)</option>
-                <option value="'Krub', sans-serif">Krub (ครับ)</option>
-                <option value="'Maitree', serif">Maitree (ไมตรี)</option>
-                <option value="'Mali', cursive">Mali (มะลิ)</option>
-                <option value="'Mitr', sans-serif">Mitr (มิตร)</option>
-                <option value="'Niramit', sans-serif">Niramit (นิรมิต)</option>
-                <option value="'Noto Sans Thai', sans-serif">Noto Sans Thai</option>
-                <option value="'Noto Serif Thai', serif">Noto Serif Thai</option>
-                <option value="'Pattaya', sans-serif">Pattaya (พัทยา)</option>
-                <option value="'Pridi', serif">Pridi (ปรีดี)</option>
-                <option value="'Prompt', sans-serif">Prompt (พร้อม)</option>
-                <option value="'Sarabun', sans-serif">Sarabun (สารบรรณ)</option>
-                <option value="'Sriracha', cursive">Sriracha (ศรีราชา)</option>
-                <option value="'Srisakdi', cursive">Srisakdi (ศรีศักดิ์)</option>
-                <option value="'Taviraj', serif">Taviraj (ทวิราช)</option>
-                <option value="'Thasadith', sans-serif">Thasadith (ทัสดิธ)</option>
-                <option value="'Trirong', serif">Trirong (ไตรรงค์)</option>
-                <option value="'Roboto', sans-serif">Roboto</option>
-                <option value="'Open Sans', sans-serif">Open Sans</option>
-                <option value="'Lato', sans-serif">Lato</option>
-                <option value="'Montserrat', sans-serif">Montserrat</option>
-                <option value="'Oswald', sans-serif">Oswald</option>
-                <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
-                <option value="'Slabo 27px', serif">Slabo 27px</option>
-                <option value="'Raleway', sans-serif">Raleway</option>
-                <option value="'PT Sans', sans-serif">PT Sans</option>
-                <option value="'Merriweather', serif">Merriweather</option>
-                <option value="'Roboto Condensed', sans-serif">Roboto Condensed</option>
-                <option value="'Noto Sans', sans-serif">Noto Sans</option>
-                <option value="'Ubuntu', sans-serif">Ubuntu</option>
-                <option value="'Roboto Slab', serif">Roboto Slab</option>
-                <option value="'Lora', serif">Lora</option>
-                <option value="'Playfair Display', serif">Playfair Display</option>
-                <option value="'Nunito', sans-serif">Nunito</option>
-                <option value="'Poppins', sans-serif">Poppins</option>
-                <option value="'Arimo', sans-serif">Arimo</option>
-                <option value="'Titillium Web', sans-serif">Titillium Web</option>
-                <option value="'Muli', sans-serif">Muli</option>
-                <option value="'PT Serif', serif">PT Serif</option>
-                <option value="'Mukta', sans-serif">Mukta</option>
-                <option value="'Rubik', sans-serif">Rubik</option>
-                <option value="'Bitter', serif">Bitter</option>
-                <option value="'Anton', sans-serif">Anton</option>
-                <option value="'Fira Sans', sans-serif">Fira Sans</option>
-                <option value="'Dosis', sans-serif">Dosis</option>
-                <option value="'Inconsolata', monospace">Inconsolata</option>
-                <option value="'Oxygen', sans-serif">Oxygen</option>
-                <option value="'Fjalla One', sans-serif">Fjalla One</option>
-                <option value="'Hind', sans-serif">Hind</option>
-                <option value="'Josefin Sans', sans-serif">Josefin Sans</option>
-                <option value="'Cabin', sans-serif">Cabin</option>
-                <option value="'Arvo', serif">Arvo</option>
-                <option value="'Crimson Text', serif">Crimson Text</option>
-                <option value="'Signika', sans-serif">Signika</option>
-                <option value="'Pacifico', cursive">Pacifico</option>
-                <option value="'Inter', sans-serif">Inter</option>
-                <option value="'Caveat', cursive">Caveat</option>
               </select>
               
-              <!-- เลือกขนาดอักษร -->
               <select class="editor-select" onchange="formatTextAdmin('fontSize', this.value)" style="width:auto; min-width:85px;">
                 <option value="">-- ขนาด --</option>
-                <option value="1">เล็กสุด</option>
-                <option value="2">เล็ก</option>
-                <option value="3">ปกติ</option>
-                <option value="4">ใหญ่</option>
-                <option value="5">ใหญ่มาก</option>
-                <option value="6">ยักษ์</option>
+                <option value="1">เล็กสุด</option><option value="2">เล็ก</option><option value="3">ปกติ</option>
+                <option value="4">ใหญ่</option><option value="5">ใหญ่มาก</option><option value="6">ยักษ์</option>
               </select>
               <div class="editor-divider"></div>
 
-              <!-- B I U -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('bold')" title="ตัวหนา"><i class="fa-solid fa-bold"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('italic')" title="ตัวเอียง"><i class="fa-solid fa-italic"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('underline')" title="ขีดเส้นใต้"><i class="fa-solid fa-underline"></i></button>
               <div class="editor-divider"></div>
 
-              <!-- จัดหน้า -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyLeft')" title="ชิดซ้าย"><i class="fa-solid fa-align-left"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyCenter')" title="กึ่งกลาง"><i class="fa-solid fa-align-center"></i></button>
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('justifyRight')" title="ชิดขวา"><i class="fa-solid fa-align-right"></i></button>
               <div class="editor-divider"></div>
               
-              <!-- ล้างรูปแบบ -->
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('removeFormat')" title="ล้างรูปแบบ"><i class="fa-solid fa-eraser"></i></button>
             </div>
             
-            <!-- กล่องเนื้อเพลง -->
             <div id="form-lyrics-old" class="rich-editor" contenteditable="true" style="text-align: center;"></div>
             <div id="form-lyrics-new" class="rich-editor hidden" contenteditable="true" style="text-align: center;"></div>
-            
           </div>
         </div>
       </div>
@@ -325,10 +222,11 @@
           <a id="form-user-slip-link" href="#" target="_blank" class="btn-link" style="background:#10b981; width:100%; text-align:center;"><i class="fa-solid fa-image"></i> กดดูสลิปโอนเงิน</a>
         </div>
         
+        <!-- ส่วนนี้เปลี่ยนเป็นปุ่มคลิกเดียวจบ -->
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="addDaysToExpiry(30)">+ 30 วัน</button>
-          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); font-size:0.9rem;" onclick="addDaysToExpiry(365)">+ 1 ปี</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#10b981; color:white; font-size:0.9rem;" onclick="approveUserQuick(30)"><i class="fa-solid fa-check"></i> อนุมัติ 1 เดือน</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#2563eb; color:white; font-size:0.9rem;" onclick="approveUserQuick(365)"><i class="fa-solid fa-check-double"></i> อนุมัติ 1 ปี</button>
         </div>
       </div>
     </div>
@@ -338,6 +236,6 @@
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
-  <script src="admin.js?v=99"></script>
+  <script src="admin.js?v=100"></script>
 </body>
 </html>
