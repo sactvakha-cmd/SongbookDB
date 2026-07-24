@@ -201,6 +201,9 @@ function submitPayment() {
 
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
+// ===============================================
+// ไฮไลท์แก้ไข 1: ทำให้ปุ่มหมวดหมู่สีเปลี่ยนเมื่อเปิด Popup
+// ===============================================
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
   const overlay = document.getElementById('category-popup-overlay');
@@ -209,6 +212,9 @@ function toggleCategoryPopup() {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
     document.body.classList.add('no-scroll');
+
+    // บังคับเปลี่ยนสีปุ่ม Bottom Nav ทันทีที่เปิด Popup
+    updateBottomNav('category_popup'); 
 
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
                   <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
@@ -225,11 +231,28 @@ function toggleCategoryPopup() {
     document.getElementById('popup-category-list').innerHTML = html;
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
+    // ปิด Popup
     popup.classList.remove('show');
     document.body.classList.remove('no-scroll');
+    
+    // อัปเดตสีปุ่มกลับไปหน้าเดิม (หน้าก่อนที่จะกดเปิด Popup)
+    updateBottomNav(currentActiveView);
+    
     setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
 }
+
+// ไฮไลท์แก้ไข 2: สั่งให้ปิด Popup ตัวเองถ้าผู้ใช้กดสลับหน้าไปที่อื่น
+function closePopupIfOpen() {
+  const popup = document.getElementById('category-popup');
+  const overlay = document.getElementById('category-popup-overlay');
+  if (!popup.classList.contains('hidden')) {
+      popup.classList.remove('show');
+      document.body.classList.remove('no-scroll');
+      setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300);
+  }
+}
+// ===============================================
 
 function selectCategoryFromPopup(catId) {
   toggleCategoryPopup();
@@ -243,9 +266,10 @@ function updateBottomNav(view) {
   
   nav.classList.remove('hidden'); nav.classList.add('justify-center'); 
   
+  // เพิ่มเงื่อนไข category_popup เข้าไป
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
-  const catBtn = `<div class="nav-item ${view==='category'?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${i18n[appLang].nav_categories}</span></div>`;
+  const catBtn = `<div class="nav-item ${view==='category' || view==='category_popup' ?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${i18n[appLang].nav_categories}</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${i18n[appLang].nav_profile}</span></div>`;
   
   nav.innerHTML = homeBtn + musicBtn + catBtn + profileBtn;
@@ -364,6 +388,9 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
+    // ปิด Popup ทุกครั้งที่สลับหน้า
+    closePopupIfOpen();
+
     savedScrollPositions[currentActiveView] = window.scrollY;
     
     if (view !== 'music') { isMusicPlayerActive = false; }
@@ -514,9 +541,6 @@ let isMusicPlayerActive = false;
 let isShuffle = false;
 let isRepeat = false;
 
-// ===============================================
-// ไฮไลท์การแก้ไข: ให้ระบบสแตนด์บายเพลงแรกไว้เลยทันทีที่เข้าหน้าเครื่องเล่น
-// ===============================================
 function openMusicPlayer() {
   isMusicPlayerActive = true;
   masterMusicList = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
@@ -527,7 +551,6 @@ function openMusicPlayer() {
   switchView('music');
   switchMusicTab('play'); 
 
-  // ถ้าเข้าครั้งแรกและยังไม่มีเพลงกำลังเล่น ให้ตั้งค่าเพลงแรกสแตนด์บายไว้เลย
   if(masterMusicList.length > 0 && !currentPlayingSongId) { 
       currentPlayingSongId = masterMusicList[0].ID;
       
@@ -543,11 +566,9 @@ function openMusicPlayer() {
       updateMusicLyrics(song);
       
       songAudioEl.src = song.AudioUrl;
-      // load() เพื่อเตรียมพร้อม แต่ไม่สั่ง play() ทันที จนกว่า User จะกดเล่นเอง
       songAudioEl.load(); 
   }
 }
-// ===============================================
 
 function switchMusicTab(tab) {
   document.getElementById('tab-music-list').classList.remove('active');
