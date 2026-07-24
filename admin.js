@@ -171,8 +171,9 @@ function formatTextAdmin(command, value = null) {
     if (!editor.classList.contains('hidden')) {
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
-        const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
-        const span = document.createElement('span'); span.style.fontSize = sizeMap[f.getAttribute('size')] || '1.2rem';
+        // อัปเดตขนาดให้สอดคล้องกับเลข Pixel ที่เราตั้งไว้ใน HTML
+        const sizeMap = { '1':'13px', '2':'16px', '3':'19px', '4':'24px', '5':'28px', '6':'35px', '7':'44px' };
+        const span = document.createElement('span'); span.style.fontSize = sizeMap[f.getAttribute('size')] || '19px';
         span.innerHTML = f.innerHTML; f.replaceWith(span);
       });
       const fontFaces = editor.querySelectorAll('font[face]');
@@ -183,6 +184,52 @@ function formatTextAdmin(command, value = null) {
     }
   });
 }
+
+// -------------------------------------------------------------------------
+// [เพิ่มใหม่] ฟังก์ชันสำหรับเปลี่ยน ระยะบรรทัด และ ระยะช่องไฟ
+// -------------------------------------------------------------------------
+function applyCustomStyle(styleType, value) {
+  if(!value) return;
+  const selection = window.getSelection();
+  const editorOld = document.getElementById('form-lyrics-old');
+  const editorNew = document.getElementById('form-lyrics-new');
+  
+  // หาว่าตอนนี้กำลังทำงานที่กล่องข้อความไหน (เก่า หรือ ใหม่)
+  const activeEditor = editorOld.classList.contains('hidden') ? editorNew : editorOld;
+  
+  // กรณีมีการคลุมดำข้อความ
+  if (selection.rangeCount > 0 && selection.toString().length > 0) {
+      const range = selection.getRangeAt(0);
+      const parent = range.commonAncestorContainer;
+      
+      // ตรวจสอบว่าคลุมดำอยู่ภายในกล่องเนื้อเพลงหรือไม่
+      if (activeEditor.contains(parent) || activeEditor === parent) {
+          const span = document.createElement("span");
+          span.style[styleType] = value;
+          
+          try {
+              range.surroundContents(span);
+          } catch (e) {
+              // กรณีคลุมดำข้าม Tag หลายตัว จะต้องใช้ execCommand ผสมกับ CSS
+              document.execCommand('styleWithCSS', false, true);
+              document.execCommand('foreColor', false, 'rgba(0,0,0,0.01)'); // ซ่อนข้อความแปปนึงเป็นทริค
+              const fontTags = activeEditor.querySelectorAll('font[color="rgba(0,0,0,0.01)"]');
+              fontTags.forEach(f => {
+                  const newSpan = document.createElement('span');
+                  newSpan.style[styleType] = value;
+                  newSpan.innerHTML = f.innerHTML;
+                  f.replaceWith(newSpan);
+              });
+          }
+      }
+  } 
+  // กรณีไม่ได้คลุมดำข้อความ (เปลี่ยนทั้งกล่อง)
+  else {
+      activeEditor.style[styleType] = value;
+  }
+}
+// -------------------------------------------------------------------------
+
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
@@ -247,9 +294,6 @@ function addDaysToExpiry(days) {
   document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0];
 }
 
-// ---------------------------------------------------------------------------------
-// [ใหม่] ฟังก์ชันอนุมัติเร็ว (กดปุ่มเดียว เซ็ตวันที่และบันทึกทันที)
-// ---------------------------------------------------------------------------------
 function approveUserQuick(days) {
   addDaysToExpiry(days);
   saveUser();
@@ -275,9 +319,6 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ---------------------------------------------------------------------------------
-// [แก้ไขใหม่] ส่งไฟล์ตรงๆ ผ่าน FormData แก้ปัญหาอัปโหลด Base64 แล้วค้าง
-// ---------------------------------------------------------------------------------
 function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0];
   if(!file) return;
@@ -357,9 +398,6 @@ async function toggleRecording() {
   } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
 }
 
-// ---------------------------------------------------------------------------------
-// [แก้ไขใหม่] ส่งไฟล์อัดเสียงผ่าน FormData แก้ปัญหาอัปโหลด Base64 แล้วค้าง
-// ---------------------------------------------------------------------------------
 function uploadRecordedAudio() {
   if (!recordedBlob) { showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return; }
   showToast("กำลังอัปโหลดเสียง...", "warning");
