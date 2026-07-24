@@ -97,7 +97,6 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
       
-      // ดึงและตั้งค่าสีจากฐานข้อมูล (ถ้ามี)
       if(res.settings) {
         localStorage.setItem('songbook_settings', JSON.stringify(res.settings));
         document.documentElement.setAttribute('data-theme', res.settings.theme || 'light');
@@ -203,7 +202,7 @@ function submitPayment() {
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
 // ----------------------------------------------------
-// ระบบ Popup หมวดหมู่เพลง
+// ระบบ Popup หมวดหมู่เพลง (แก้ไขเรื่องการล็อกจอ)
 // ----------------------------------------------------
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
@@ -212,6 +211,9 @@ function toggleCategoryPopup() {
   if (popup.classList.contains('hidden')) {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
+    
+    // ล็อกจอไม่ให้พื้นหลังขยับ
+    document.body.classList.add('no-scroll');
 
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
                   <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
@@ -229,6 +231,9 @@ function toggleCategoryPopup() {
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
     popup.classList.remove('show');
+    // ปลดล็อกจอเมื่อปิด Popup
+    document.body.classList.remove('no-scroll');
+    
     setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
 }
@@ -293,7 +298,6 @@ function renderDashboard() {
 function openAllSongs() { currentCategory = "ALL"; document.getElementById('cat-title').innerText = i18n[appLang].total_songs; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
 function openCategory(catId, catRealId) { currentCategory = catId; const catConf = baseCategories.find(c => c.id === catId); document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
 
-// ระบบค้นหา หมวดหมู่เพลง (มีระบบลดการกระตุก Debounce)
 let searchCatTimeout = null;
 function searchCategory() {
   clearTimeout(searchCatTimeout);
@@ -322,7 +326,6 @@ function renderList(songs, container) {
   } catch(e) { console.error("Render List Error", e); }
 }
 
-// ระบบค้นหาทั่วแอป (มีระบบลดการกระตุก Debounce)
 let searchGlobalTimeout = null;
 function searchGlobal() {
   clearTimeout(searchGlobalTimeout);
@@ -465,9 +468,6 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ----------------------------------------------------
-// ระบบ การตั้งค่าและสีธีม (ส่งไปเซฟที่ Backend ด้วย)
-// ----------------------------------------------------
 function setTheme(theme) { document.documentElement.setAttribute('data-theme', theme); saveUiSettings(); }
 function setColor(color) {
   document.documentElement.style.setProperty('--primary', color);
@@ -484,14 +484,10 @@ function saveUiSettings() {
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
   
   if (userPhone) {
-    // ส่งข้อมูลไปเก็บที่ Backend
     fetchAPI('updateSettings', { phone: userPhone, settings: settings }).catch(e => console.log('Error saving settings'));
   }
 }
 
-// ----------------------------------------------------------------------
-// ระบบ AUDIO & MUSIC PLAYER 
-// ----------------------------------------------------------------------
 const songAudioEl = document.getElementById('song-audio-element');
 let masterMusicList = [];    
 let musicPlaylist = [];      
@@ -574,7 +570,6 @@ function playMusicIndex(index) {
   const song = musicPlaylist[index];
   currentPlayingSongId = song.ID;
   
-  // บันทึกสถิติ Play Count ไปยัง Backend
   if (userPhone) {
       fetchAPI('recordPlayCount', { songId: song.ID }).catch(e => console.log('Stats update err:', e));
   }
