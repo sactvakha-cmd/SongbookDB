@@ -296,8 +296,8 @@
         
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-primary" type="button" style="flex:1; background:#10b981; color:white; font-size:0.9rem;" onclick="approveUserQuick(30)"><i class="fa-solid fa-check"></i> อนุมัติ 1 เดือน</button>
-          <button class="btn-primary" type="button" style="flex:1; background:#2563eb; color:white; font-size:0.9rem;" onclick="approveUserQuick(365)"><i class="fa-solid fa-check-double"></i> อนุมัติ 1 ปี</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#10b981; color:white; font-size:0.9rem;" onclick="addDaysToExpiry(30)"><i class="fa-solid fa-check"></i> อนุมัติ 1 เดือน</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#2563eb; color:white; font-size:0.9rem;" onclick="addDaysToExpiry(365)"><i class="fa-solid fa-check-double"></i> อนุมัติ 1 ปี</button>
         </div>
       </div>
     </div>
@@ -307,6 +307,6 @@
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
-  <script src="admin.js?v=101"></script>
+  <script src="admin.js?v=102"></script>
 </body>
 </html>
