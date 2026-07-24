@@ -289,15 +289,12 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
-// ===============================================
-// ไฮไลท์การแก้ไข: ให้ดึงเพลงทันทีตอนกดเข้าหมวดหมู่ (ไม่หน่วง 300ms)
-// ===============================================
 function openAllSongs() { 
   currentCategory = "ALL"; 
   document.getElementById('cat-title').innerText = i18n[appLang].total_songs; 
   document.getElementById('cat-search').value = ""; 
   switchView('category'); 
-  searchCategory(true); // true = ทันที
+  searchCategory(true); 
 }
 
 function openCategory(catId, catRealId) { 
@@ -306,7 +303,7 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; 
   document.getElementById('cat-search').value = ""; 
   switchView('category'); 
-  searchCategory(true); // true = ทันที
+  searchCategory(true); 
 }
 
 let searchCatTimeout = null;
@@ -329,15 +326,12 @@ function searchCategory(isImmediate = false) {
   };
 
   if(isImmediate) {
-    // ลบของเก่าออกจากจอก่อนทันที กันปัญหาเห็นแว้บ
     document.getElementById('song-list').innerHTML = ""; 
     executeSearch();
   } else {
-    // หน่วง 300ms เฉพาะตอนพิมพ์ค้นหาในช่อง
     searchCatTimeout = setTimeout(executeSearch, 300);
   }
 }
-// ===============================================
 
 function renderList(songs, container) {
   try {
@@ -520,18 +514,40 @@ let isMusicPlayerActive = false;
 let isShuffle = false;
 let isRepeat = false;
 
+// ===============================================
+// ไฮไลท์การแก้ไข: ให้ระบบสแตนด์บายเพลงแรกไว้เลยทันทีที่เข้าหน้าเครื่องเล่น
+// ===============================================
 function openMusicPlayer() {
   isMusicPlayerActive = true;
   masterMusicList = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
-  
-  if(masterMusicList.length > 0 && !currentPlayingSongId) { currentPlayingSongId = masterMusicList[0].ID; }
   
   renderMusicCategories();
   filterMusicByCategory(currentMusicCategory, false);
   
   switchView('music');
   switchMusicTab('play'); 
+
+  // ถ้าเข้าครั้งแรกและยังไม่มีเพลงกำลังเล่น ให้ตั้งค่าเพลงแรกสแตนด์บายไว้เลย
+  if(masterMusicList.length > 0 && !currentPlayingSongId) { 
+      currentPlayingSongId = masterMusicList[0].ID;
+      
+      const song = masterMusicList[0];
+      document.getElementById('music-title-display').innerText = song.Title;
+      document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
+      
+      const coverImg = document.getElementById('music-cover-img');
+      const lyricBg = document.getElementById('lyric-bg-img');
+      const imgUrl = song.ImageUrl ? song.ImageUrl : 'icon-512.png';
+      
+      coverImg.src = imgUrl; lyricBg.style.backgroundImage = `url('${imgUrl}')`;
+      updateMusicLyrics(song);
+      
+      songAudioEl.src = song.AudioUrl;
+      // load() เพื่อเตรียมพร้อม แต่ไม่สั่ง play() ทันที จนกว่า User จะกดเล่นเอง
+      songAudioEl.load(); 
+  }
 }
+// ===============================================
 
 function switchMusicTab(tab) {
   document.getElementById('tab-music-list').classList.remove('active');
