@@ -156,9 +156,9 @@
               <button class="lyrics-toggle-btn" id="btn-edit-lyric-new" onclick="switchAdminLyricView('new')" style="flex:1; border-radius:8px;">อาข่าแบบใหม่</button>
             </div>
             
-            <!-- แถบเครื่องมือจัดรูปแบบข้อความ -->
             <div id="main-editor-toolbar" class="editor-toolbar">
               
+              <!-- คืนค่ารายชื่อฟอนต์ทั้งหมด 100% ตรงนี้ครับ -->
               <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;">
                 <option value="">-- รูปแบบ --</option>
                 <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
@@ -235,40 +235,11 @@
                 <option value="'Caveat', cursive">Caveat</option>
               </select>
               
-              <!-- [แก้ไข] ขนาดตัวอักษรเปลี่ยนเป็นตัวเลข (Pixel) -->
-              <select class="editor-select" onchange="formatTextAdmin('fontSize', this.value); this.selectedIndex=0;" style="width:auto; min-width:85px;" title="ขนาดตัวอักษร">
+              <select class="editor-select" onchange="formatTextAdmin('fontSize', this.value)" style="width:auto; min-width:85px;">
                 <option value="">-- ขนาด --</option>
-                <option value="1">13px</option>
-                <option value="2">16px</option>
-                <option value="3">19px (ปกติ)</option>
-                <option value="4">24px</option>
-                <option value="5">28px</option>
-                <option value="6">35px</option>
-                <option value="7">44px</option>
+                <option value="1">เล็กสุด</option><option value="2">เล็ก</option><option value="3">ปกติ</option>
+                <option value="4">ใหญ่</option><option value="5">ใหญ่มาก</option><option value="6">ยักษ์</option>
               </select>
-
-              <!-- [เพิ่มใหม่] ระยะห่างระหว่างบรรทัด (Line Spacing) -->
-              <select class="editor-select" onchange="applyCustomStyle('lineHeight', this.value); this.selectedIndex=0;" style="width:auto; min-width:85px;" title="ระยะบรรทัด">
-                <option value="">-- บรรทัด --</option>
-                <option value="1.0">1.0</option>
-                <option value="1.2">1.2</option>
-                <option value="1.5">1.5 (ปกติ)</option>
-                <option value="1.8">1.8</option>
-                <option value="2.0">2.0</option>
-                <option value="2.5">2.5</option>
-              </select>
-
-              <!-- [เพิ่มใหม่] ระยะห่างช่องไฟคำ (Letter Spacing) -->
-              <select class="editor-select" onchange="applyCustomStyle('letterSpacing', this.value); this.selectedIndex=0;" style="width:auto; min-width:85px;" title="ระยะช่องไฟ (ระหว่างคำ)">
-                <option value="">-- ช่องไฟ --</option>
-                <option value="normal">ปกติ</option>
-                <option value="1px">1px</option>
-                <option value="2px">2px</option>
-                <option value="3px">3px</option>
-                <option value="4px">4px</option>
-                <option value="5px">5px</option>
-              </select>
-              
               <div class="editor-divider"></div>
 
               <button class="editor-btn" type="button" onmousedown="event.preventDefault();" onclick="formatTextAdmin('bold')" title="ตัวหนา"><i class="fa-solid fa-bold"></i></button>
@@ -335,6 +306,7 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="admin.js?v=102"></script>
+  <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
+  <script src="admin.js?v=101"></script>
 </body>
 </html>
