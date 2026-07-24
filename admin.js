@@ -169,14 +169,17 @@ function switchAdminLyricView(type) {
   }
 }
 
+// ระบบจัดรูปแบบตัวอักษรและข้อความพื้นฐาน
 function formatTextAdmin(command, value = null) {
   document.execCommand('styleWithCSS', false, true);
   document.execCommand(command, false, value);
+  
   const editorOld = document.getElementById('form-lyrics-old');
   const editorNew = document.getElementById('form-lyrics-new');
   
   [editorOld, editorNew].forEach(editor => {
     if (!editor.classList.contains('hidden')) {
+      // แปลงแท็กขนาดและฟอนต์เก่า ให้เป็น span แบบ CSS
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
         const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
@@ -194,6 +197,63 @@ function formatTextAdmin(command, value = null) {
       });
     }
   });
+
+  // คืนค่า Dropdown ให้กลับไปที่ "-- รูปแบบ --" เพื่อให้กดซ้ำได้
+  if (value) {
+    document.querySelectorAll('.editor-select').forEach(sel => {
+      if (sel.value === value) sel.value = '';
+    });
+  }
+}
+
+// ระบบจัดการขนาด (pt), บรรทัด และช่องไฟ แบบเจาะจง (Pages/Word Style)
+function applyCustomStyle(property, value) {
+  if (!value) return;
+  
+  const selection = window.getSelection();
+  
+  // ตรวจสอบว่าแอดมินคลุมดำข้อความหรือยัง
+  if (!selection.rangeCount || selection.isCollapsed) {
+    showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning");
+    document.querySelectorAll('.editor-select').forEach(sel => { if(sel.value === value) sel.value = ''; });
+    return;
+  }
+
+  let finalValue = value;
+  if (property === 'fontSize') finalValue = value + 'pt'; // ถ้าเป็นขนาด ให้เติม pt
+
+  // เทคนิคพิเศษในการประยุกต์ Style โดยไม่พังโครงสร้าง HTML
+  const marker = 'MARKER' + Date.now();
+  document.execCommand('styleWithCSS', false, true);
+  document.execCommand('fontName', false, marker);
+
+  const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') ? 
+                       document.getElementById('form-lyrics-new') : 
+                       document.getElementById('form-lyrics-old');
+
+  // หาข้อความที่ถูกคลุมดำเมื่อสักครู่
+  const elements = activeEditor.querySelectorAll(`font[face="${marker}"], span[style*="${marker}"]`);
+  
+  elements.forEach(el => {
+    const span = document.createElement('span');
+    
+    // ดึง Style เดิมมาด้วย เผื่อข้อความนั้นมีสีหรือตัวหนาอยู่แล้ว
+    if (el.tagName.toLowerCase() === 'span') {
+        let css = el.style.cssText;
+        css = css.replace(new RegExp(`font-family:\\s*["']?${marker}["']?;?`, 'gi'), ''); // ลบตัวมาร์กเกอร์ทิ้ง
+        span.style.cssText = css;
+    }
+    
+    // ใส่ Style ใหม่ที่เราต้องการลงไป (ขนาดเป๊ะๆ, ระยะบรรทัด, ช่องไฟ)
+    span.style[property] = finalValue;
+    span.innerHTML = el.innerHTML;
+    
+    // วางแทนที่
+    el.replaceWith(span);
+  });
+
+  // คืนค่า Dropdown
+  document.querySelectorAll('.editor-select').forEach(sel => { if(sel.value === value) sel.value = ''; });
 }
 
 function renderUsers() {
@@ -216,11 +276,9 @@ function renderUsers() {
   document.getElementById('user-list').innerHTML = results.map(u => {
     let isPending = u.Status === "pending_new" || u.Status === "pending_renew" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
     
-    // แจกแจงข้อความสถานะให้แอดมินเห็นชัดเจน
     let statusText = `หมดอายุ: ${u.ExpiryDate}`;
     if (isPending) {
         if (u.Status === "pending_renew") {
-            // ถ้าต่ออายุ ให้แสดงวันหมดอายุเดิมด้วยให้แอดมินรู้
             statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
         } else {
             statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
