@@ -157,6 +157,7 @@
       </div>
     </div>
     
+    <!-- หน้าเครื่องเล่นเพลงรวม (Music Player Full) -->
     <div id="view-music" class="hidden fade-in">
       <div class="top-bar" style="flex-direction: column; align-items: stretch; gap: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -197,7 +198,7 @@
              
              <div class="music-progress-wrapper" style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; font-family: monospace; color: var(--text-muted); font-size: 0.85rem;">
                  <span id="music-time-current">0:00</span>
-                 <div class="audio-track" style="flex:1; height: 8px; background: #e2e8f0; border-radius: 10px; cursor: pointer; position: relative;" onclick="seekMusicAudio(event)">
+                 <div class="audio-track" style="flex:1; height: 8px; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 10px; cursor: pointer; position: relative;" onclick="seekMusicAudio(event)">
                     <div id="music-time-fill" style="height: 100%; width: 0%; background: var(--primary); border-radius: 10px; pointer-events: none; transition: width 0.1s linear;"></div>
                  </div>
                  <span id="music-time-total">0:00</span>
@@ -219,24 +220,31 @@
       
     </div>
 
+    <!-- แก้ไขหน้า Settings / Profile -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
+      
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
         <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> บัญชีของคุณ</h3>
         <p>เบอร์โทรศัพท์: <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
         <p>วันหมดอายุ: <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()">ต่ออายุการใช้งาน</button>
-          <button class="btn-primary" style="flex:1; background:#f1f5f9; color:var(--text-main); box-shadow:none; border:1px solid #cbd5e1; font-size:0.9rem;" onclick="logoutUser()">ออกจากระบบ</button>
+          <!-- แก้ไขปุ่มออกจากระบบ ให้ใช้คลาส btn-outline -->
+          <button class="btn-outline" style="flex:1;" onclick="logoutUser()">ออกจากระบบ</button>
         </div>
       </div>
+      
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--accent);">
         <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> การแสดงผล</h3>
         <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">โหมดหน้าจอ</label>
+        
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-primary" style="flex:1; background:#f8fafc; color:#0f172a; border:1px solid #cbd5e1; box-shadow:none; font-size:0.9rem;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
-          <button class="btn-primary" style="flex:1; background:#1e293b; color:#f8fafc; border:1px solid #0f172a; box-shadow:none; font-size:0.9rem;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
+          <!-- แก้ไขปุ่มเปลี่ยนธีม ให้ใช้คลาส btn-outline -->
+          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
+          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
         </div>
+        
         <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีหลักของแอป</label>
         <div style="display:flex; gap:15px; justify-content: center; flex-wrap: wrap;">
           <button style="width:45px; height:45px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
@@ -275,7 +283,7 @@
     <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
   </div>
 
-  <script src="app.js?v=111"></script>
+  <script src="app.js?v=112"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
