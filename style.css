@@ -45,20 +45,11 @@ h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.5px; }
 .auth-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
 
 /* --- Forms & Inputs --- */
-.search-container { position: relative; margin-bottom: 10px; } /* ลด margin */
-/* ลดความสูงของช่องค้นหาด้วย Padding และขนาดฟอนต์ */
+.search-container { position: relative; margin-bottom: 10px; }
 input[type="text"], input[type="password"], input[type="tel"], input[type="date"], input[type="number"], select, textarea { 
-    width: 100%; 
-    padding: 12px 16px 12px 42px; /* ลด Padding แนวตั้งลง */
-    background: var(--bg-surface); 
-    color: var(--text-main); 
-    border: 1px solid #e2e8f0; 
-    border-radius: var(--radius-ui); 
-    font-family: var(--font-main); 
-    font-size: 0.95rem; /* ลดฟอนต์ลงนิดนึงให้สมส่วน */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
-    transition: var(--transition); 
-    outline: none; 
+    width: 100%; padding: 12px 16px 12px 42px; background: var(--bg-surface); color: var(--text-main); 
+    border: 1px solid #e2e8f0; border-radius: var(--radius-ui); font-family: var(--font-main); font-size: 0.95rem; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: var(--transition); outline: none; 
 }
 input[type="number"] { padding: 12px 16px; }
 input[type="file"] { width: 100%; padding: 10px; background: #f1f5f9; border: 1px dashed var(--primary); border-radius: 12px; font-family: var(--font-main); font-size: 0.9rem; cursor: pointer;}
@@ -71,9 +62,7 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .hero-header { 
   position: sticky; top: 0; z-index: 50; 
   background: var(--bg-glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
-  margin: -20px -20px 10px -20px; /* ลดระยะขอบล่าง */
-  padding: 10px 20px 5px 20px; /* บีบพื้นที่ด้านบนและล่างให้กระชับขึ้น */
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  margin: -20px -20px 10px -20px; padding: 10px 20px 5px 20px; border-bottom: 1px solid rgba(0,0,0,0.05);
   display: flex; flex-direction: column; 
 }
 .hero-header p { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0px;}
@@ -88,47 +77,29 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .btn-icon { background: var(--bg-surface); border: 1px solid #e2e8f0; color: var(--text-main); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.03); transition: var(--transition); flex-shrink: 0;}
 .btn-icon:active { transform: scale(0.9); }
 
-.top-audio-ui {
-  flex: 1; display: flex; align-items: center; gap: 10px;
-  background: var(--bg-surface); border: 1px solid #e2e8f0; padding: 5px 12px;
-  border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin: 0 5px; transition: var(--transition);
-}
-.btn-play-pause {
-  background: var(--primary); color: white; border: none; width: 32px; height: 32px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem;
-  box-shadow: 0 2px 8px var(--primary-glow); flex-shrink: 0;
-}
+.top-audio-ui { flex: 1; display: flex; align-items: center; gap: 10px; background: var(--bg-surface); border: 1px solid #e2e8f0; padding: 5px 12px; border-radius: 50px; box-shadow: 0 4px 10px rgba(0,0,0,0.03); margin: 0 5px; transition: var(--transition);}
+.btn-play-pause { background: var(--primary); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.8rem; box-shadow: 0 2px 8px var(--primary-glow); flex-shrink: 0;}
 .audio-track { flex: 1; height: 6px; background: #e2e8f0; border-radius: 10px; cursor: pointer; position: relative; overflow: hidden;}
 .audio-fill { height: 100%; width: 0%; background: var(--primary); border-radius: 10px; pointer-events: none; transition: width 0.1s linear;}
 .audio-time { font-size: 0.7rem; color: var(--text-muted); font-family: monospace; font-weight: 600; min-width: 60px; text-align: right; letter-spacing: -0.5px;}
 
 /* --- Language Switcher --- */
-.lang-switcher { display: flex; background: #e2e8f0; border-radius: 10px; padding: 3px; margin-bottom: 10px; width: fit-content; } /* ลด margin */
+.lang-switcher { display: flex; background: #e2e8f0; border-radius: 10px; padding: 3px; margin-bottom: 10px; width: fit-content; }
 .lang-btn { padding: 5px 12px; border-radius: 8px; border: none; background: transparent; font-family: var(--font-main); font-size: 0.8rem; font-weight: 600; color: #64748b; cursor: pointer; transition: var(--transition); }
 .lang-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(37,99,235,0.3); }
 
 /* --- Dashboard Cards & Layout --- */
-#dashboard-content h3 {
-    margin-top: 15px !important;
-    margin-bottom: 10px !important;
-    font-size: 1.1rem;
-}
+#dashboard-content h3 { margin-top: 15px !important; margin-bottom: 10px !important; font-size: 1.1rem; }
 #search-results { margin-top: 10px; }
 
 .all-songs-card { 
-    display: flex; justify-content: space-between; align-items: center; 
-    background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%); color: white; 
-    padding: 12px 16px; /* บีบ padding ให้น้อยลง */
-    border-radius: 14px; font-size: 1rem; font-weight: 600; 
-    box-shadow: 0 10px 20px rgba(37,99,235,0.2); 
-    margin-bottom: 10px; /* ลด margin ล่างสุด */
-    cursor: pointer; transition: var(--transition); 
+    display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%); color: white; 
+    padding: 12px 16px; border-radius: 14px; font-size: 1rem; font-weight: 600; box-shadow: 0 10px 20px rgba(37,99,235,0.2); margin-bottom: 10px; cursor: pointer; transition: var(--transition); 
 }
 .all-songs-card:active { transform: scale(0.97); }
 .all-songs-card .icon-box { background: rgba(255,255,255,0.2); width: 34px; height: 34px; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; margin-right: 10px; }
 .all-songs-card .total-num { font-size: 1.3rem; font-weight: 700; background: rgba(0,0,0,0.2); padding: 3px 10px; border-radius: 30px; }
 
-/* Grid หมวดหมู่ */
 .grid-cats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px !important; margin-bottom: 10px; }
 .cat-card { position: relative; overflow: hidden; border-radius: 12px !important; padding: 10px !important; color: white; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 70px !important; transition: transform 0.3s ease, box-shadow 0.3s ease; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
 .cat-card:active { transform: scale(0.95); }
@@ -192,13 +163,26 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 
 /* --- Bottom Navigation --- */
 .bottom-nav { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 600px; height: 70px; background: var(--bg-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 35px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-around; z-index: 100; overflow:hidden;}
-.nav-scroll-area { display: flex; overflow-x: auto; width: 100%; padding: 0 15px; scrollbar-width: none; -ms-overflow-style: none; align-items: center; gap: 4px !important;}
-.nav-scroll-area::-webkit-scrollbar { display: none; }
-.nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); flex-shrink: 0; width: 52px !important; height: 100%; }
-.nav-item i { font-size: 1.05rem !important; color: #94a3b8 !important; transition: all 0.3s ease; margin-bottom: 2px;}
-.nav-item span { font-size: 0.6rem !important; color: #94a3b8 !important; font-weight: 500; text-align:center;}
-.nav-item.active i { color: var(--primary) !important; transform: translateY(-2px) scale(1.1) !important;}
-.nav-item.active span { color: var(--primary) !important; font-weight: 600 !important;}
+#main-bottom-nav.justify-center { padding: 0 10px; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); cursor: pointer; transition: var(--transition); height: 100%; width: 25%; }
+.nav-item i { font-size: 1.2rem; color: #94a3b8; transition: all 0.3s ease; margin-bottom: 4px;}
+.nav-item span { font-size: 0.65rem; color: #94a3b8; font-weight: 500; text-align:center;}
+.nav-item.active i { color: var(--primary); transform: translateY(-3px) scale(1.1);}
+.nav-item.active span { color: var(--primary); font-weight: 600;}
+
+/* --- Popup Category (Bottom Sheet) --- */
+.popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; backdrop-filter: blur(3px); transition: opacity 0.3s ease; }
+.category-popup { position: fixed; bottom: -100%; left: 0; width: 100%; background: var(--bg-surface); border-radius: 24px 24px 0 0; z-index: 2000; padding: 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); transition: bottom 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 80vh; display: flex; flex-direction: column; }
+.category-popup.show { bottom: 0; }
+.popup-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; position: relative; padding-top: 10px;}
+.popup-handle { position: absolute; top: -5px; left: 50%; transform: translateX(-50%); width: 40px; height: 5px; background: #cbd5e1; border-radius: 10px; }
+.popup-header h3 { font-size: 1.1rem; color: var(--text-main); margin: 0; flex: 1; text-align: center; }
+.popup-content { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+.cat-list-item { display: flex; align-items: center; gap: 15px; padding: 15px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s; border-radius: 12px; }
+.cat-list-item:active { background: #f8fafc; }
+.cat-list-item .icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: white; }
+.cat-list-item .name { font-size: 1rem; font-weight: 500; color: var(--text-main); }
+.btn-icon-small { background: #f1f5f9; border: none; width: 30px; height: 30px; border-radius: 50%; color: #64748b; display: flex; align-items: center; justify-content: center; position: absolute; right: 0; cursor: pointer; }
 
 /* --- Utils --- */
 .loader-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); background: var(--bg-main); z-index: 9999; position: fixed; top: 0; left: 0; width: 100%;}
@@ -233,10 +217,8 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
    Music Player Full (ล็อคหน้าเต็ม 100% แบ่งครึ่งบน-ล่าง)
 ========================================================= */
 #view-music {
-    position: fixed; 
-    top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh; 
-    background: var(--bg-main); z-index: 1000;
-    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; width: 100%; height: 100vh; height: 100dvh; 
+    background: var(--bg-main); z-index: 1000; display: flex; flex-direction: column;
 }
 #view-music .top-bar { margin: 0 !important; border-radius: 0; flex-shrink: 0; padding: 10px 20px 0 20px;}
 .music-cat-scroll { display: flex; overflow-x: auto; gap: 8px; width: 100%; padding: 10px 0; border-bottom: 1px solid #e2e8f0; scrollbar-width: none; -ms-overflow-style: none;}
