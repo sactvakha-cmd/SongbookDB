@@ -122,15 +122,15 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .bg-g8 { background: linear-gradient(135deg, #434343 0%, #000000 100%); }
 
 /* --- Song List Item --- */
-.song-item { display: flex; align-items: center; gap: 12px; background: var(--bg-surface); padding: 12px 16px; margin-bottom: 8px; border-radius: 12px; cursor: pointer; transition: var(--transition); box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+.song-item { display: flex; align-items: center; gap: 10px; background: var(--bg-surface); padding: 8px 14px; margin-bottom: 6px; border-radius: 10px; cursor: pointer; transition: var(--transition); box-shadow: 0 2px 5px rgba(0,0,0,0.02); border: 1px solid var(--border-color); }
 .song-item:hover { transform: translateX(5px); border-left: 4px solid var(--primary); }
-.song-item .s-id { font-weight: 700; color: var(--primary); width: 40px; font-size: 1rem; }
-.song-item .s-info { flex: 1; min-width: 0;}
-.song-item .s-title { font-size: 1rem; font-weight: 600; margin-bottom: 0px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.song-item .s-eng-title { font-size: 0.8rem; color: var(--text-muted); font-style: italic; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-.song-item .s-meta { font-size: 0.75rem; color: #94a3b8; }
+.song-item .s-id { font-weight: 700; color: var(--primary); width: 40px; font-size: 0.95rem; }
+.song-item .s-info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.song-item .s-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.song-item .s-eng-title { font-size: 0.75rem; color: var(--text-muted); font-style: italic; margin-top: 2px; margin-bottom: 0px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.song-item .s-meta { font-size: 0.75rem; color: #94a3b8; margin-top: 2px; line-height: 1; }
 .quick-actions { display: flex; gap: 8px; margin-left: 10px; }
-.btn-quick { width: 35px; height: 35px; border-radius: 8px; border: none; font-size: 0.9rem; cursor: pointer; transition: var(--transition); display: flex; justify-content: center; align-items: center; }
+.btn-quick { width: 32px; height: 32px; border-radius: 8px; border: none; font-size: 0.85rem; cursor: pointer; transition: var(--transition); display: flex; justify-content: center; align-items: center; }
 .btn-quick.edit { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
 .btn-quick.del { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
 
