@@ -179,7 +179,6 @@ function formatTextAdmin(command, value = null) {
   
   [editorOld, editorNew].forEach(editor => {
     if (!editor.classList.contains('hidden')) {
-      // แปลงแท็กขนาดและฟอนต์เก่า ให้เป็น span แบบ CSS
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
         const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
@@ -197,13 +196,7 @@ function formatTextAdmin(command, value = null) {
       });
     }
   });
-
-  // คืนค่า Dropdown ให้กลับไปที่ "-- รูปแบบ --" เพื่อให้กดซ้ำได้
-  if (value) {
-    document.querySelectorAll('.editor-select').forEach(sel => {
-      if (sel.value === value) sel.value = '';
-    });
-  }
+  // นำโค้ดที่รีเซ็ต Dropdown ออก เพื่อให้ Dropdown โชว์ค่าที่เพิ่งเลือกค้างไว้
 }
 
 // ระบบจัดการขนาด (pt), บรรทัด และช่องไฟ แบบเจาะจง (Pages/Word Style)
@@ -215,14 +208,15 @@ function applyCustomStyle(property, value) {
   // ตรวจสอบว่าแอดมินคลุมดำข้อความหรือยัง
   if (!selection.rangeCount || selection.isCollapsed) {
     showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning");
-    document.querySelectorAll('.editor-select').forEach(sel => { if(sel.value === value) sel.value = ''; });
+    // หากไม่ได้คลุมดำ ค่อยเคลียร์ค่าให้เป็นค่าว่างเพื่อเตือนแอดมิน
+    const targetSelect = document.querySelector(`.editor-select[onchange*="${property}"]`);
+    if(targetSelect) targetSelect.value = '';
     return;
   }
 
   let finalValue = value;
-  if (property === 'fontSize') finalValue = value + 'pt'; // ถ้าเป็นขนาด ให้เติม pt
+  if (property === 'fontSize') finalValue = value + 'pt';
 
-  // เทคนิคพิเศษในการประยุกต์ Style โดยไม่พังโครงสร้าง HTML
   const marker = 'MARKER' + Date.now();
   document.execCommand('styleWithCSS', false, true);
   document.execCommand('fontName', false, marker);
@@ -231,29 +225,23 @@ function applyCustomStyle(property, value) {
                        document.getElementById('form-lyrics-new') : 
                        document.getElementById('form-lyrics-old');
 
-  // หาข้อความที่ถูกคลุมดำเมื่อสักครู่
   const elements = activeEditor.querySelectorAll(`font[face="${marker}"], span[style*="${marker}"]`);
   
   elements.forEach(el => {
     const span = document.createElement('span');
     
-    // ดึง Style เดิมมาด้วย เผื่อข้อความนั้นมีสีหรือตัวหนาอยู่แล้ว
     if (el.tagName.toLowerCase() === 'span') {
         let css = el.style.cssText;
-        css = css.replace(new RegExp(`font-family:\\s*["']?${marker}["']?;?`, 'gi'), ''); // ลบตัวมาร์กเกอร์ทิ้ง
+        css = css.replace(new RegExp(`font-family:\\s*["']?${marker}["']?;?`, 'gi'), '');
         span.style.cssText = css;
     }
     
-    // ใส่ Style ใหม่ที่เราต้องการลงไป (ขนาดเป๊ะๆ, ระยะบรรทัด, ช่องไฟ)
     span.style[property] = finalValue;
     span.innerHTML = el.innerHTML;
     
-    // วางแทนที่
     el.replaceWith(span);
   });
-
-  // คืนค่า Dropdown
-  document.querySelectorAll('.editor-select').forEach(sel => { if(sel.value === value) sel.value = ''; });
+  // นำโค้ดที่รีเซ็ต Dropdown ออก เพื่อให้ Dropdown โชว์ค่าที่เพิ่งเลือกค้างไว้
 }
 
 function renderUsers() {
@@ -265,7 +253,6 @@ function renderUsers() {
     const exp = (u.ExpiryDate || "").toLowerCase();
     const status = (u.Status || "").toLowerCase();
     
-    // แปลงสถานะเป็นภาษาไทยเพื่อให้แอดมินค้นหาได้
     let statusThai = "";
     if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
     else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
@@ -340,7 +327,6 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// อัปเดตฟังก์ชัน uploadMedia ให้ส่งแบบ FormData เพื่อรองรับไฟล์ใหญ่
 async function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0];
   if(!file) return;
@@ -351,12 +337,12 @@ async function uploadMedia(event, targetId, fileType) {
   formData.append("password", adminPassword);
   formData.append("fileType", fileType);
   formData.append("extension", file.name.split('.').pop());
-  formData.append("file", file); // แนบไฟล์ต้นฉบับตรงๆ
+  formData.append("file", file); 
 
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      body: formData // เบราว์เซอร์จะเซ็ต Headers ให้เป็น multipart/form-data อัตโนมัติ
+      body: formData 
     });
     const res = await response.json();
     
@@ -431,7 +417,6 @@ async function toggleRecording() {
   } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
 }
 
-// อัปเดตฟังก์ชัน uploadRecordedAudio ให้ส่งแบบ FormData
 async function uploadRecordedAudio() {
   if (!recordedBlob) {
     showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return;
@@ -445,7 +430,7 @@ async function uploadRecordedAudio() {
   formData.append("password", adminPassword);
   formData.append("fileType", "audio");
   formData.append("extension", ext);
-  formData.append("file", recordedBlob, "record." + ext); // แนบ Blob เข้าไป
+  formData.append("file", recordedBlob, "record." + ext); 
 
   try {
     const response = await fetch(API_URL, {
