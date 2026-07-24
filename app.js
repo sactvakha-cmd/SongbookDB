@@ -92,16 +92,30 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
   .then(res => {
     if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
     document.getElementById('loader').classList.add('hidden');
+    
     if(res.status === 'success') {
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
+      
+      // ดึงและตั้งค่าสีจากฐานข้อมูล (ถ้ามี)
+      if(res.settings) {
+        localStorage.setItem('songbook_settings', JSON.stringify(res.settings));
+        document.documentElement.setAttribute('data-theme', res.settings.theme || 'light');
+        document.documentElement.style.setProperty('--primary', res.settings.color || '#2563eb');
+        let hex = (res.settings.color || '#2563eb').replace('#', '');
+        let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+        document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`);
+      }
+
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
       localStorage.setItem('offline_songs', JSON.stringify(allSongs));
+      
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
       document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
       updateBottomNav('dashboard'); renderDashboard();
+      
     } else if(res.status === 'expired') {
       showToast(res.msg, "error"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
       localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin); goToPayment(false); localStorage.removeItem('songbook_user');
@@ -127,6 +141,7 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     } else { alert("การเชื่อมต่อล้มเหลว: " + err.message); }
   });
 }
+
 function showPaymentView() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden'); }
 function showLoginView() { document.getElementById('view-payment').classList.add('hidden'); document.getElementById('view-auth').classList.remove('hidden'); switchAuthTab('login');}
 
@@ -188,7 +203,7 @@ function submitPayment() {
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
 // ----------------------------------------------------
-// ระบบ Popup หมวดหมู่เพลง (Floating Transparent Style)
+// ระบบ Popup หมวดหมู่เพลง
 // ----------------------------------------------------
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
@@ -198,7 +213,6 @@ function toggleCategoryPopup() {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
 
-    // โครงสร้างที่ไม่มีกล่อง/ขอบ มีแค่ไอคอนกลมๆ และชื่อ
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
                   <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
                   <div class="name">${i18n[appLang].total_songs}</div>
@@ -212,40 +226,24 @@ function toggleCategoryPopup() {
     });
     
     document.getElementById('popup-category-list').innerHTML = html;
-
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
     popup.classList.remove('show');
-    setTimeout(() => {
-      popup.classList.add('hidden');
-      overlay.classList.add('hidden');
-    }, 300); 
+    setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
 }
 
 function selectCategoryFromPopup(catId) {
   toggleCategoryPopup();
-  if (catId === 'ALL') {
-    openAllSongs();
-  } else {
-    openCategory(catId, catId);
-  }
+  if (catId === 'ALL') { openAllSongs(); } else { openCategory(catId, catId); }
 }
 
-// ----------------------------------------------------
-// Update Bottom Nav ให้มี 4 ปุ่มคงที่
-// ----------------------------------------------------
 function updateBottomNav(view) {
   const nav = document.getElementById('main-bottom-nav'); 
   if (!nav) return;
+  if (view === 'music') { nav.classList.add('hidden'); return; }
   
-  if (view === 'music') {
-      nav.classList.add('hidden');
-      return;
-  }
-  
-  nav.classList.remove('hidden');
-  nav.classList.add('justify-center'); 
+  nav.classList.remove('hidden'); nav.classList.add('justify-center'); 
   
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
@@ -280,7 +278,6 @@ function forceDataRefresh() {
 function renderDashboard() {
   try {
     document.getElementById('total-count').innerText = allSongs.length; 
-    
     const mp3Count = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "").length;
     const mp3CountEl = document.getElementById('total-music-count');
     if (mp3CountEl) mp3CountEl.innerText = mp3Count;
@@ -296,12 +293,23 @@ function renderDashboard() {
 function openAllSongs() { currentCategory = "ALL"; document.getElementById('cat-title').innerText = i18n[appLang].total_songs; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
 function openCategory(catId, catRealId) { currentCategory = catId; const catConf = baseCategories.find(c => c.id === catId); document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
 
+// ระบบค้นหา หมวดหมู่เพลง (มีระบบลดการกระตุก Debounce)
+let searchCatTimeout = null;
 function searchCategory() {
-  try {
-    const q = document.getElementById('cat-search').value.toLowerCase();
-    const results = allSongs.filter(s => { const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; return matchCat && (t1.includes(q) || t2.includes(q) || t3.includes(q)); });
-    document.getElementById('cat-total').innerText = results.length; renderList(results, document.getElementById('song-list'));
-  } catch(e) { console.error("Search Error", e); }
+  clearTimeout(searchCatTimeout);
+  searchCatTimeout = setTimeout(() => {
+    try {
+      const q = document.getElementById('cat-search').value.toLowerCase();
+      const results = allSongs.filter(s => { 
+        const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
+        const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
+        const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
+        const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
+        return matchCat && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+      });
+      document.getElementById('cat-total').innerText = results.length; renderList(results, document.getElementById('song-list'));
+    } catch(e) { console.error("Search Error", e); }
+  }, 300);
 }
 
 function renderList(songs, container) {
@@ -314,13 +322,24 @@ function renderList(songs, container) {
   } catch(e) { console.error("Render List Error", e); }
 }
 
+// ระบบค้นหาทั่วแอป (มีระบบลดการกระตุก Debounce)
+let searchGlobalTimeout = null;
 function searchGlobal() {
-  try {
-    const q = document.getElementById('global-search').value.toLowerCase(); const resDiv = document.getElementById('search-results'); const contentDiv = document.getElementById('dashboard-content');
-    if(!q) { resDiv.innerHTML = ""; contentDiv.classList.remove('hidden'); return; }
-    contentDiv.classList.add('hidden'); const results = allSongs.filter(s => { const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; return t1.includes(q) || t2.includes(q) || t3.includes(q); });
-    renderList(results, resDiv);
-  } catch(e) { console.error("Search Global Error", e); }
+  clearTimeout(searchGlobalTimeout);
+  searchGlobalTimeout = setTimeout(() => {
+    try {
+      const q = document.getElementById('global-search').value.toLowerCase(); const resDiv = document.getElementById('search-results'); const contentDiv = document.getElementById('dashboard-content');
+      if(!q) { resDiv.innerHTML = ""; contentDiv.classList.remove('hidden'); return; }
+      contentDiv.classList.add('hidden'); 
+      const results = allSongs.filter(s => { 
+        const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
+        const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
+        const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
+        return t1.includes(q) || t2.includes(q) || t3.includes(q); 
+      });
+      renderList(results, resDiv);
+    } catch(e) { console.error("Search Global Error", e); }
+  }, 300);
 }
 
 function switchView(view) {
@@ -342,23 +361,15 @@ function switchView(view) {
     });
     
     let activeView = document.getElementById('view-' + view); 
-    if(activeView) { 
-      activeView.classList.remove('hidden'); 
-      void activeView.offsetWidth; 
-      activeView.classList.add('fade-in'); 
-    }
+    if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
     
     if(view === 'dashboard') { currentCategory = ""; if(document.getElementById('global-search').value === "") document.getElementById('dashboard-content').classList.remove('hidden'); }
     updateBottomNav(view); 
 
-    if (view === 'song' || view === 'settings' || view === 'music') {
-      window.scrollTo(0, 0);
-    } else {
-      setTimeout(() => { window.scrollTo(0, savedScrollPositions[view] || 0); }, 10);
-    }
+    if (view === 'song' || view === 'settings' || view === 'music') { window.scrollTo(0, 0); } 
+    else { setTimeout(() => { window.scrollTo(0, savedScrollPositions[view] || 0); }, 10); }
 
     currentActiveView = view;
-    
   } catch (e) { console.error("Switch View Error", e); }
 }
 
@@ -454,6 +465,9 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// ----------------------------------------------------
+// ระบบ การตั้งค่าและสีธีม (ส่งไปเซฟที่ Backend ด้วย)
+// ----------------------------------------------------
 function setTheme(theme) { document.documentElement.setAttribute('data-theme', theme); saveUiSettings(); }
 function setColor(color) {
   document.documentElement.style.setProperty('--primary', color);
@@ -468,10 +482,15 @@ function saveUiSettings() {
   const settings = JSON.parse(localStorage.getItem('songbook_settings')) || {};
   settings.theme = theme; settings.color = color;
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
+  
+  if (userPhone) {
+    // ส่งข้อมูลไปเก็บที่ Backend
+    fetchAPI('updateSettings', { phone: userPhone, settings: settings }).catch(e => console.log('Error saving settings'));
+  }
 }
 
 // ----------------------------------------------------------------------
-// ระบบ AUDIO & MUSIC PLAYER แบบแยกส่วนล่าง/บน
+// ระบบ AUDIO & MUSIC PLAYER 
 // ----------------------------------------------------------------------
 const songAudioEl = document.getElementById('song-audio-element');
 let masterMusicList = [];    
@@ -486,9 +505,7 @@ function openMusicPlayer() {
   isMusicPlayerActive = true;
   masterMusicList = allSongs.filter(s => s.AudioUrl && s.AudioUrl.trim() !== "");
   
-  if(masterMusicList.length > 0 && !currentPlayingSongId) {
-      currentPlayingSongId = masterMusicList[0].ID; 
-  }
+  if(masterMusicList.length > 0 && !currentPlayingSongId) { currentPlayingSongId = masterMusicList[0].ID; }
   
   renderMusicCategories();
   filterMusicByCategory(currentMusicCategory, false);
@@ -509,55 +526,33 @@ function switchMusicTab(tab) {
   const lyricView = document.getElementById('music-lyric-view');
   
   if(tab === 'list') {
-    listContainer.classList.remove('hidden');
-    playerContainer.classList.add('hidden');
+    listContainer.classList.remove('hidden'); playerContainer.classList.add('hidden');
   } else {
-    listContainer.classList.add('hidden');
-    playerContainer.classList.remove('hidden');
-    
-    if(tab === 'play') {
-       coverView.classList.remove('hidden');
-       lyricView.classList.add('hidden');
-    } else if(tab === 'lyric') {
-       coverView.classList.add('hidden');
-       lyricView.classList.remove('hidden');
-    }
+    listContainer.classList.add('hidden'); playerContainer.classList.remove('hidden');
+    if(tab === 'play') { coverView.classList.remove('hidden'); lyricView.classList.add('hidden'); } 
+    else if(tab === 'lyric') { coverView.classList.add('hidden'); lyricView.classList.remove('hidden'); }
   }
 }
 
 function renderMusicCategories() {
   const container = document.getElementById('music-category-scroll');
   let html = `<button class="music-cat-btn ${currentMusicCategory==='ALL'?'active':''}" onclick="filterMusicByCategory('ALL')">เพลงทั้งหมด</button>`;
-  
   baseCategories.forEach(cat => {
       const countInCat = masterMusicList.filter(s => s.Category === cat.id).length;
-      if(countInCat > 0) {
-         html += `<button class="music-cat-btn ${currentMusicCategory===cat.id?'active':''}" onclick="filterMusicByCategory('${cat.id}')">${i18n[appLang][cat.i18n_nav]}</button>`;
-      }
+      if(countInCat > 0) { html += `<button class="music-cat-btn ${currentMusicCategory===cat.id?'active':''}" onclick="filterMusicByCategory('${cat.id}')">${i18n[appLang][cat.i18n_nav]}</button>`; }
   });
   container.innerHTML = html;
 }
 
 function filterMusicByCategory(catId, switchToList = true) {
-  currentMusicCategory = catId;
-  renderMusicCategories(); 
-  
-  if(catId === 'ALL') {
-      musicPlaylist = masterMusicList;
-  } else {
-      musicPlaylist = masterMusicList.filter(s => s.Category === catId);
-  }
-  
-  renderMusicList();
-  if(switchToList) switchMusicTab('list');
+  currentMusicCategory = catId; renderMusicCategories(); 
+  if(catId === 'ALL') { musicPlaylist = masterMusicList; } else { musicPlaylist = masterMusicList.filter(s => s.Category === catId); }
+  renderMusicList(); if(switchToList) switchMusicTab('list');
 }
 
 function renderMusicList() {
   const container = document.getElementById('music-list-container');
-  if(musicPlaylist.length === 0) {
-    container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted);">ไม่มีเพลงในหมวดหมู่นี้</div>`;
-    return;
-  }
+  if(musicPlaylist.length === 0) { container.innerHTML = `<div style="text-align:center; padding:50px; color:var(--text-muted);">ไม่มีเพลงในหมวดหมู่นี้</div>`; return; }
   
   container.innerHTML = musicPlaylist.map((s, index) => {
     const isPlaying = (s.ID === currentPlayingSongId);
@@ -579,6 +574,11 @@ function playMusicIndex(index) {
   const song = musicPlaylist[index];
   currentPlayingSongId = song.ID;
   
+  // บันทึกสถิติ Play Count ไปยัง Backend
+  if (userPhone) {
+      fetchAPI('recordPlayCount', { songId: song.ID }).catch(e => console.log('Stats update err:', e));
+  }
+  
   document.getElementById('music-title-display').innerText = song.Title;
   document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
   
@@ -586,27 +586,20 @@ function playMusicIndex(index) {
   const lyricBg = document.getElementById('lyric-bg-img');
   const imgUrl = song.ImageUrl ? song.ImageUrl : 'icon-512.png';
   
-  coverImg.src = imgUrl;
-  lyricBg.style.backgroundImage = `url('${imgUrl}')`;
-  
+  coverImg.src = imgUrl; lyricBg.style.backgroundImage = `url('${imgUrl}')`;
   updateMusicLyrics(song);
   
   songAudioEl.src = song.AudioUrl;
   songAudioEl.play().then(() => {
      document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
      coverImg.classList.add('spin-slow');
-     
-     const cdIcon = document.getElementById('music-indicator-icon');
-     if(cdIcon) cdIcon.classList.add('fa-spin');
-     
-     renderMusicList(); 
-     switchMusicTab('play');
+     const cdIcon = document.getElementById('music-indicator-icon'); if(cdIcon) cdIcon.classList.add('fa-spin');
+     renderMusicList(); switchMusicTab('play');
   }).catch(e => showToast("เล่นเพลงล้มเหลว", "error"));
 }
 
 function updateMusicLyrics(song) {
   const container = document.getElementById('music-lyric-content');
-  
   let lyricsHtml = (appLang === 'ao') ? (song.Lyrics || song.LyricsNew) : (song.LyricsNew || song.Lyrics);
   if(lyricsHtml) {
       lyricsHtml = lyricsHtml.replace(/>\s+</g, '><');
@@ -619,41 +612,28 @@ function updateMusicLyrics(song) {
 function toggleAudio() {
   const playBtn = document.getElementById('btn-play-pause');
   if(!songAudioEl.src) return;
-  if(songAudioEl.paused) {
-    songAudioEl.play().then(() => { playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; });
-  } else {
-    songAudioEl.pause();
-    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-  }
+  if(songAudioEl.paused) { songAudioEl.play().then(() => { playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; }); } 
+  else { songAudioEl.pause(); playBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; }
 }
 
 function toggleMusicAudio() {
   if(!currentPlayingSongId && musicPlaylist.length > 0) { playMusicIndex(0); return; }
-  const playBtn = document.getElementById('btn-music-play-pause');
-  const coverImg = document.getElementById('music-cover-img');
-  const cdIcon = document.getElementById('music-indicator-icon');
-  
+  const playBtn = document.getElementById('btn-music-play-pause'); const coverImg = document.getElementById('music-cover-img'); const cdIcon = document.getElementById('music-indicator-icon');
   if(!songAudioEl.src) return;
   
   if(songAudioEl.paused) {
     songAudioEl.play().then(() => { 
-        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; 
-        coverImg.classList.add('spin-slow');
-        if(cdIcon) cdIcon.classList.add('fa-spin');
-        renderMusicList();
+        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; coverImg.classList.add('spin-slow');
+        if(cdIcon) cdIcon.classList.add('fa-spin'); renderMusicList();
     });
   } else {
-    songAudioEl.pause();
-    playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-    coverImg.classList.remove('spin-slow');
-    if(cdIcon) cdIcon.classList.remove('fa-spin');
-    renderMusicList();
+    songAudioEl.pause(); playBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; coverImg.classList.remove('spin-slow');
+    if(cdIcon) cdIcon.classList.remove('fa-spin'); renderMusicList();
   }
 }
 
 function playMusicNext(isAuto = false) {
   if(musicPlaylist.length === 0) return;
-  
   let currentIndex = musicPlaylist.findIndex(s => s.ID === currentPlayingSongId);
   
   if(isAuto && isRepeat) { 
@@ -662,23 +642,19 @@ function playMusicNext(isAuto = false) {
   }
   
   let nextIdx = currentIndex + 1;
-  
   if(isShuffle) { 
       nextIdx = Math.floor(Math.random() * musicPlaylist.length); 
   } else if(nextIdx >= musicPlaylist.length || currentIndex === -1) { 
       nextIdx = 0; 
   }
-  
   playMusicIndex(nextIdx);
 }
 
 function playMusicPrev() {
   if(musicPlaylist.length === 0) return;
   let currentIndex = musicPlaylist.findIndex(s => s.ID === currentPlayingSongId);
-  
   let prevIdx = currentIndex - 1;
   if(prevIdx < 0 || currentIndex === -1) prevIdx = musicPlaylist.length - 1;
-  
   playMusicIndex(prevIdx);
 }
 
@@ -708,8 +684,7 @@ function seekMusicAudio(e) {
 if(songAudioEl) {
   songAudioEl.addEventListener('loadedmetadata', () => {
     if(!isNaN(songAudioEl.duration) && songAudioEl.duration !== Infinity) {
-      let mins = Math.floor(songAudioEl.duration / 60);
-      let secs = Math.floor(songAudioEl.duration % 60);
+      let mins = Math.floor(songAudioEl.duration / 60); let secs = Math.floor(songAudioEl.duration % 60);
       if(secs < 10) secs = '0' + secs;
       document.getElementById('audio-time').innerText = '0:00 / ' + mins + ':' + secs;
       document.getElementById('music-time-total').innerText = mins + ':' + secs;
@@ -720,23 +695,17 @@ if(songAudioEl) {
     if(isNaN(songAudioEl.duration) || songAudioEl.duration === Infinity) return;
     const percent = (songAudioEl.currentTime / songAudioEl.duration) * 100;
     
-    const fillEl = document.getElementById('audio-fill');
-    if(fillEl) fillEl.style.width = percent + '%';
+    const fillEl = document.getElementById('audio-fill'); if(fillEl) fillEl.style.width = percent + '%';
     
-    let curMins = Math.floor(songAudioEl.currentTime / 60);
-    let curSecs = Math.floor(songAudioEl.currentTime % 60);
+    let curMins = Math.floor(songAudioEl.currentTime / 60); let curSecs = Math.floor(songAudioEl.currentTime % 60);
     if(curSecs < 10) curSecs = '0' + curSecs;
-    let totalMins = Math.floor(songAudioEl.duration / 60);
-    let totalSecs = Math.floor(songAudioEl.duration % 60);
+    let totalMins = Math.floor(songAudioEl.duration / 60); let totalSecs = Math.floor(songAudioEl.duration % 60);
     if(totalSecs < 10) totalSecs = '0' + totalSecs;
     
-    const timeEl = document.getElementById('audio-time');
-    if(timeEl) timeEl.innerText = curMins + ':' + curSecs + ' / ' + totalMins + ':' + totalSecs;
+    const timeEl = document.getElementById('audio-time'); if(timeEl) timeEl.innerText = curMins + ':' + curSecs + ' / ' + totalMins + ':' + totalSecs;
 
-    const mFillEl = document.getElementById('music-time-fill');
-    if(mFillEl) mFillEl.style.width = percent + '%';
-    const mCurEl = document.getElementById('music-time-current');
-    if(mCurEl) mCurEl.innerText = curMins + ':' + curSecs;
+    const mFillEl = document.getElementById('music-time-fill'); if(mFillEl) mFillEl.style.width = percent + '%';
+    const mCurEl = document.getElementById('music-time-current'); if(mCurEl) mCurEl.innerText = curMins + ':' + curSecs;
   });
 
   songAudioEl.addEventListener('ended', () => {
@@ -745,11 +714,8 @@ if(songAudioEl) {
     document.getElementById('audio-time').innerText = '0:00';
     
     document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
-    const coverImg = document.getElementById('music-cover-img');
-    if(coverImg) coverImg.classList.remove('spin-slow');
-    
-    const cdIcon = document.getElementById('music-indicator-icon');
-    if(cdIcon) cdIcon.classList.remove('fa-spin');
+    const coverImg = document.getElementById('music-cover-img'); if(coverImg) coverImg.classList.remove('spin-slow');
+    const cdIcon = document.getElementById('music-indicator-icon'); if(cdIcon) cdIcon.classList.remove('fa-spin');
     
     if(isMusicPlayerActive && musicPlaylist.length > 0) { playMusicNext(true); }
   });
@@ -786,8 +752,5 @@ if(pwaBtn) {
 window.addEventListener('load', () => {
   const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
   const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  if (isIos && !isStandalone && pwaBanner) {
-    pwaDesc.innerText = "แตะ 📤 แชร์ -> ➕ เพิ่มไปยังหน้าจอโฮม";
-    pwaBanner.classList.remove('hidden');
-  }
+  if (isIos && !isStandalone && pwaBanner) { pwaDesc.innerText = "แตะ 📤 แชร์ -> ➕ เพิ่มไปยังหน้าจอโฮม"; pwaBanner.classList.remove('hidden'); }
 });
