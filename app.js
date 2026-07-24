@@ -188,7 +188,7 @@ function submitPayment() {
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
 // ----------------------------------------------------
-// ระบบ Popup หมวดหมู่เพลง (Floating Panel แบบ Grid)
+// ระบบ Popup หมวดหมู่เพลง (Floating Transparent Style)
 // ----------------------------------------------------
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
@@ -198,13 +198,12 @@ function toggleCategoryPopup() {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
 
-    // สร้างปุ่มรวมด้านบนสุด กว้างเต็มแถว
+    // โครงสร้างที่ไม่มีกล่อง/ขอบ มีแค่ไอคอนกลมๆ และชื่อ
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
                   <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
                   <div class="name">${i18n[appLang].total_songs}</div>
                 </div>`;
                 
-    // สร้างปุ่มหมวดหมู่ย่อย แบ่งเป็น 2 คอลัมน์ (ควบคุมด้วย CSS Grid)
     baseCategories.forEach(cat => {
       html += `<div class="cat-grid-item" onclick="selectCategoryFromPopup('${cat.id}')">
                  <div class="icon ${cat.bg}"><i class="fa-solid ${cat.icon}"></i></div>
@@ -220,7 +219,7 @@ function toggleCategoryPopup() {
     setTimeout(() => {
       popup.classList.add('hidden');
       overlay.classList.add('hidden');
-    }, 300); // รอให้ Transition เล่นจบก่อนถึงจะติด class hidden
+    }, 300); 
   }
 }
 
