@@ -197,6 +197,7 @@ function formatTextAdmin(command, value = null) {
   });
 }
 
+// === ไฮไลท์การแก้ไข: อัปเกรดระบบจัดรูปแบบให้ทะลวงลบโค้ดแฝงได้หมดจด ===
 function applyCustomStyle(property, value) {
   if (!value) return;
 
@@ -222,10 +223,9 @@ function applyCustomStyle(property, value) {
   elements.forEach(el => {
     if (property === 'lineHeight') {
         let blockParent = el.closest('div, p');
-        
         if (blockParent && activeEditor.contains(blockParent) && blockParent !== activeEditor) {
             blockParent.style.lineHeight = finalValue;
-            // ล้างค่าบรรทัดที่ซ่อนอยู่ข้างใน
+            // บังคับล้างบรรทัดเก่าทั้งหมดที่ซ่อนอยู่ข้างใน
             blockParent.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
         } else {
             const div = document.createElement('div');
@@ -247,24 +247,31 @@ function applyCustomStyle(property, value) {
     span.style[property] = finalValue;
     span.innerHTML = el.innerHTML;
 
-    // ----- ไฮไลท์การแก้ไข: ล้างสไตล์เก่าที่ขัดแย้งที่แอบซ่อนอยู่ข้างใน -----
+    // บังคับค้นหาและทำลาย (Bulldozer) สไตล์เก่าที่ซ่อนอยู่ลึกๆ
     span.querySelectorAll('*').forEach(child => {
+        // ล้างสไตล์เก่าที่เป็นตัวขัดแย้ง
         if (child.style) {
-            child.style[property] = ''; // ลบ style เดิม (เช่น fontSize) ออกเพื่อให้มันรับค่าจาก Span ตัวแม่แทน
+            child.style[property] = ''; 
         }
-        // ถ้าเป็นการเปลี่ยนขนาด และมี Tag <font> โบราณซ่อนอยู่ ให้ลบทิ้งด้วย
-        if (property === 'fontSize' && child.tagName.toLowerCase() === 'font' && child.hasAttribute('size')) {
-            child.removeAttribute('size');
+        
+        // พิเศษสำหรับการปรับขนาดอักษร: ต้องฆ่า Tag โบราณที่ซ่อนอยู่ด้วย
+        if (property === 'fontSize') {
+            if (child.style) child.style.fontSize = ''; // ลบ inline CSS ที่ซ่อนอยู่ (เช่น style="font-size: 10pt")
+            if (child.tagName.toLowerCase() === 'font') child.removeAttribute('size'); // ลบ HTML Attribute (เช่น size="2")
+            // ถ้าเจอ Tag แบบดื้อๆ เช่น <small> หรือ <big> ให้บังคับมันกลายร่าง
+            if (child.tagName.toLowerCase() === 'small' || child.tagName.toLowerCase() === 'big') {
+                child.style.fontSize = 'inherit'; 
+            }
         }
     });
-    // -------------------------------------------------------------
 
     el.replaceWith(span);
   });
   
-  // จัดระเบียบ DOM หลังทำงานเสร็จ
+  // จัดระเบียบโค้ด HTML ให้เป็นระเบียบหลังทำงานเสร็จ
   activeEditor.normalize();
 }
+// =========================================================
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
