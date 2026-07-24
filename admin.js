@@ -169,7 +169,6 @@ function switchAdminLyricView(type) {
   }
 }
 
-// ระบบจัดรูปแบบตัวอักษรและข้อความพื้นฐาน
 function formatTextAdmin(command, value = null) {
   document.execCommand('styleWithCSS', false, true);
   document.execCommand(command, false, value);
@@ -196,21 +195,15 @@ function formatTextAdmin(command, value = null) {
       });
     }
   });
-  // นำโค้ดที่รีเซ็ต Dropdown ออก เพื่อให้ Dropdown โชว์ค่าที่เพิ่งเลือกค้างไว้
 }
 
-// ระบบจัดการขนาด (pt), บรรทัด และช่องไฟ แบบเจาะจง (Pages/Word Style)
+// อัปเกรดระบบให้บังคับระยะบรรทัด (Line Height) ทะลุกรอบได้ 100%
 function applyCustomStyle(property, value) {
   if (!value) return;
-  
+
   const selection = window.getSelection();
-  
-  // ตรวจสอบว่าแอดมินคลุมดำข้อความหรือยัง
   if (!selection.rangeCount || selection.isCollapsed) {
     showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning");
-    // หากไม่ได้คลุมดำ ค่อยเคลียร์ค่าให้เป็นค่าว่างเพื่อเตือนแอดมิน
-    const targetSelect = document.querySelector(`.editor-select[onchange*="${property}"]`);
-    if(targetSelect) targetSelect.value = '';
     return;
   }
 
@@ -221,27 +214,42 @@ function applyCustomStyle(property, value) {
   document.execCommand('styleWithCSS', false, true);
   document.execCommand('fontName', false, marker);
 
-  const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') ? 
-                       document.getElementById('form-lyrics-new') : 
+  const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') ?
+                       document.getElementById('form-lyrics-new') :
                        document.getElementById('form-lyrics-old');
 
   const elements = activeEditor.querySelectorAll(`font[face="${marker}"], span[style*="${marker}"]`);
-  
+
   elements.forEach(el => {
+    // 💡 พิเศษสำหรับ "ระยะบรรทัด": ต้องเอาไปใส่ในกล่อง Block (เช่น div) เท่านั้น ถึงจะบีบให้เล็กลงได้
+    if (property === 'lineHeight') {
+        let blockParent = el.closest('div, p');
+        
+        // ถ้าข้อความอยู่ใน div อยู่แล้ว ให้ปรับที่ div นั้นเลย
+        if (blockParent && activeEditor.contains(blockParent) && blockParent !== activeEditor) {
+            blockParent.style.lineHeight = finalValue;
+        } else {
+            // ถ้าข้อความลอยอยู่เฉยๆ ให้สร้าง div มาครอบมัน เพื่อให้บีบระยะบรรทัดได้ชัวร์ๆ
+            const div = document.createElement('div');
+            div.style.lineHeight = finalValue;
+            div.innerHTML = el.innerHTML;
+            el.replaceWith(div);
+            return; // จบการทำงานของรอบนี้ ข้ามการสร้าง span ด้านล่างไปเลย
+        }
+    }
+
+    // สำหรับ ขนาดอักษร (fontSize) และ ช่องไฟ (letterSpacing) ใช้ span ปกติ
     const span = document.createElement('span');
-    
     if (el.tagName.toLowerCase() === 'span') {
         let css = el.style.cssText;
         css = css.replace(new RegExp(`font-family:\\s*["']?${marker}["']?;?`, 'gi'), '');
         span.style.cssText = css;
     }
-    
+
     span.style[property] = finalValue;
     span.innerHTML = el.innerHTML;
-    
     el.replaceWith(span);
   });
-  // นำโค้ดที่รีเซ็ต Dropdown ออก เพื่อให้ Dropdown โชว์ค่าที่เพิ่งเลือกค้างไว้
 }
 
 function renderUsers() {
