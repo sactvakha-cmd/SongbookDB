@@ -201,9 +201,6 @@ function submitPayment() {
 
 function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
 
-// ----------------------------------------------------
-// ระบบ Popup หมวดหมู่เพลง (แก้ไขเรื่องการล็อกจอ)
-// ----------------------------------------------------
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
   const overlay = document.getElementById('category-popup-overlay');
@@ -211,8 +208,6 @@ function toggleCategoryPopup() {
   if (popup.classList.contains('hidden')) {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
-    
-    // ล็อกจอไม่ให้พื้นหลังขยับ
     document.body.classList.add('no-scroll');
 
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
@@ -231,9 +226,7 @@ function toggleCategoryPopup() {
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
     popup.classList.remove('show');
-    // ปลดล็อกจอเมื่อปิด Popup
     document.body.classList.remove('no-scroll');
-    
     setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
 }
@@ -272,9 +265,10 @@ function forceDataRefresh() {
       if(res.status === 'success') {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-        
-        localStorage.setItem('offline_songs', JSON.stringify(allSongs)); renderDashboard(); 
-        if(currentCategory) searchCategory(); if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
+        localStorage.setItem('offline_songs', JSON.stringify(allSongs)); 
+        renderDashboard(); 
+        if(currentCategory) searchCategory(true); 
+        if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
         document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
       } else { logoutUser(); }
     }).catch(error => { alert("เกิดข้อผิดพลาด: " + error.message); document.getElementById('loader-text').innerText = "โหลดข้อมูลล้มเหลว"; });
@@ -295,13 +289,31 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
-function openAllSongs() { currentCategory = "ALL"; document.getElementById('cat-title').innerText = i18n[appLang].total_songs; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
-function openCategory(catId, catRealId) { currentCategory = catId; const catConf = baseCategories.find(c => c.id === catId); document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; document.getElementById('cat-search').value = ""; switchView('category'); searchCategory(); }
+// ===============================================
+// ไฮไลท์การแก้ไข: ให้ดึงเพลงทันทีตอนกดเข้าหมวดหมู่ (ไม่หน่วง 300ms)
+// ===============================================
+function openAllSongs() { 
+  currentCategory = "ALL"; 
+  document.getElementById('cat-title').innerText = i18n[appLang].total_songs; 
+  document.getElementById('cat-search').value = ""; 
+  switchView('category'); 
+  searchCategory(true); // true = ทันที
+}
+
+function openCategory(catId, catRealId) { 
+  currentCategory = catId; 
+  const catConf = baseCategories.find(c => c.id === catId); 
+  document.getElementById('cat-title').innerText = catConf ? i18n[appLang][catConf.i18n_cat] : catId; 
+  document.getElementById('cat-search').value = ""; 
+  switchView('category'); 
+  searchCategory(true); // true = ทันที
+}
 
 let searchCatTimeout = null;
-function searchCategory() {
+function searchCategory(isImmediate = false) {
   clearTimeout(searchCatTimeout);
-  searchCatTimeout = setTimeout(() => {
+  
+  const executeSearch = () => {
     try {
       const q = document.getElementById('cat-search').value.toLowerCase();
       const results = allSongs.filter(s => { 
@@ -311,17 +323,28 @@ function searchCategory() {
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
         return matchCat && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
-      document.getElementById('cat-total').innerText = results.length; renderList(results, document.getElementById('song-list'));
+      document.getElementById('cat-total').innerText = results.length; 
+      renderList(results, document.getElementById('song-list'));
     } catch(e) { console.error("Search Error", e); }
-  }, 300);
+  };
+
+  if(isImmediate) {
+    // ลบของเก่าออกจากจอก่อนทันที กันปัญหาเห็นแว้บ
+    document.getElementById('song-list').innerHTML = ""; 
+    executeSearch();
+  } else {
+    // หน่วง 300ms เฉพาะตอนพิมพ์ค้นหาในช่อง
+    searchCatTimeout = setTimeout(executeSearch, 300);
+  }
 }
+// ===============================================
 
 function renderList(songs, container) {
   try {
     if(songs.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลเพลง 😢</div>`; return; }
     container.innerHTML = songs.map(s => {
       let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; 
-      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info" style="min-width:0;"><div class="s-title" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
+      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info"><div class="s-title">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
     }).join('');
   } catch(e) { console.error("Render List Error", e); }
 }
