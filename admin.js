@@ -91,8 +91,13 @@ function switchView(view) {
   if(view === 'dashboard') filterAdminCat(currentAdminCategory);
   if(view === 'users') renderUsers();
 
-  if (view === 'admin-form' || view === 'user-form') { window.scrollTo(0, 0); } 
-  else { setTimeout(() => { window.scrollTo(0, adminScrollPositions[view] || 0); }, 10); }
+  if (view === 'admin-form' || view === 'user-form') {
+    window.scrollTo(0, 0);
+  } else {
+    setTimeout(() => {
+      window.scrollTo(0, adminScrollPositions[view] || 0);
+    }, 10);
+  }
 
   currentAdminView = view;
 }
@@ -120,7 +125,7 @@ function renderSongs() {
   document.getElementById('song-list').innerHTML = results.map(s => `
     <div class="song-item">
       <div class="s-id">${s.ID}</div>
-      <div class="s-info"><div class="s-title">${s.Title||'-'}</div><div class="s-meta">${s.Category}</div></div>
+      <div class="s-info"><div class="s-title">${s.Title||'-'}</div><div class="s-meta">${s.Category} | 🎧 ฟัง ${s.PlayCount || 0} ครั้ง</div></div>
       <div class="quick-actions">
         <button class="btn-quick edit" onclick="openAdminForm('${s.ID}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn-quick del" onclick="deleteSong('${s.ID}')"><i class="fa-solid fa-trash"></i></button>
@@ -157,8 +162,11 @@ function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('d
 
 function switchAdminLyricView(type) {
   document.getElementById('btn-edit-lyric-old').classList.remove('active'); document.getElementById('btn-edit-lyric-new').classList.remove('active'); document.getElementById('btn-edit-lyric-'+type).classList.add('active');
-  if(type === 'old') { document.getElementById('form-lyrics-old').classList.remove('hidden'); document.getElementById('form-lyrics-new').classList.add('hidden'); } 
-  else { document.getElementById('form-lyrics-old').classList.add('hidden'); document.getElementById('form-lyrics-new').classList.remove('hidden'); }
+  if(type === 'old') { 
+    document.getElementById('form-lyrics-old').classList.remove('hidden'); document.getElementById('form-lyrics-new').classList.add('hidden'); 
+  } else { 
+    document.getElementById('form-lyrics-old').classList.add('hidden'); document.getElementById('form-lyrics-new').classList.remove('hidden'); 
+  }
 }
 
 function formatTextAdmin(command, value = null) {
@@ -172,13 +180,17 @@ function formatTextAdmin(command, value = null) {
       const fontSizes = editor.querySelectorAll('font[size]');
       fontSizes.forEach(f => {
         const sizeMap = { '1':'0.85rem', '2':'1rem', '3':'1.2rem', '4':'1.5rem', '5':'1.8rem', '6':'2.2rem', '7':'2.8rem' };
-        const span = document.createElement('span'); span.style.fontSize = sizeMap[f.getAttribute('size')] || '1.2rem';
-        span.innerHTML = f.innerHTML; f.replaceWith(span);
+        const span = document.createElement('span');
+        span.style.fontSize = sizeMap[f.getAttribute('size')] || '1.2rem';
+        span.innerHTML = f.innerHTML;
+        f.replaceWith(span);
       });
       const fontFaces = editor.querySelectorAll('font[face]');
       fontFaces.forEach(f => {
-        const span = document.createElement('span'); span.style.fontFamily = f.getAttribute('face');
-        span.innerHTML = f.innerHTML; f.replaceWith(span);
+        const span = document.createElement('span');
+        span.style.fontFamily = f.getAttribute('face');
+        span.innerHTML = f.innerHTML;
+        f.replaceWith(span);
       });
     }
   });
@@ -193,6 +205,7 @@ function renderUsers() {
     const exp = (u.ExpiryDate || "").toLowerCase();
     const status = (u.Status || "").toLowerCase();
     
+    // แปลงสถานะเป็นภาษาไทยเพื่อให้แอดมินค้นหาได้
     let statusThai = "";
     if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
     else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
@@ -203,12 +216,14 @@ function renderUsers() {
   document.getElementById('user-list').innerHTML = results.map(u => {
     let isPending = u.Status === "pending_new" || u.Status === "pending_renew" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
     
+    // แจกแจงข้อความสถานะให้แอดมินเห็นชัดเจน
     let statusText = `หมดอายุ: ${u.ExpiryDate}`;
     if (isPending) {
         if (u.Status === "pending_renew") {
-            statusText = `รอตรวจสอบ (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
+            // ถ้าต่ออายุ ให้แสดงวันหมดอายุเดิมด้วยให้แอดมินรู้
+            statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
         } else {
-            statusText = "รอตรวจสอบ (สมัครใหม่)";
+            statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
         }
     }
     
@@ -247,14 +262,6 @@ function addDaysToExpiry(days) {
   document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0];
 }
 
-// ---------------------------------------------------------------------------------
-// [ใหม่] ฟังก์ชันอนุมัติเร็ว (กดปุ่มเดียว เซ็ตวันที่และบันทึกทันที)
-// ---------------------------------------------------------------------------------
-function approveUserQuick(days) {
-  addDaysToExpiry(days);
-  saveUser();
-}
-
 function saveUser() {
   const d = { 
     Phone: document.getElementById('form-user-phone').value, 
@@ -275,10 +282,8 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// ---------------------------------------------------------------------------------
-// [แก้ไขใหม่] ส่งไฟล์ตรงๆ ผ่าน FormData แก้ปัญหาอัปโหลด Base64 แล้วค้าง
-// ---------------------------------------------------------------------------------
-function uploadMedia(event, targetId, fileType) {
+// อัปเดตฟังก์ชัน uploadMedia ให้ส่งแบบ FormData เพื่อรองรับไฟล์ใหญ่
+async function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0];
   if(!file) return;
   showToast("กำลังอัปโหลดไฟล์...", "warning");
@@ -288,16 +293,22 @@ function uploadMedia(event, targetId, fileType) {
   formData.append("password", adminPassword);
   formData.append("fileType", fileType);
   formData.append("extension", file.name.split('.').pop());
-  formData.append("file", file);
+  formData.append("file", file); // แนบไฟล์ต้นฉบับตรงๆ
 
-  fetch(API_URL, { method: 'POST', body: formData })
-  .then(res => res.json())
-  .then(res => {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      body: formData // เบราว์เซอร์จะเซ็ต Headers ให้เป็น multipart/form-data อัตโนมัติ
+    });
+    const res = await response.json();
+    
     if(res.status === 'success') {
       document.getElementById(targetId).value = res.url;
       showToast("อัปโหลดสำเร็จ!", "success");
     } else { showToast(res.msg, "error"); }
-  }).catch(err => { showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); });
+  } catch (err) { 
+    showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); 
+  }
 }
 
 let mediaRecorder;
@@ -316,7 +327,9 @@ async function toggleRecording() {
     recordedBlob = null;
     
     if (!isRecording) {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานไมค์ หรือไม่ได้เข้าใช้งานผ่าน HTTPS"); return; }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานไมค์ หรือไม่ได้เข้าใช้งานผ่าน HTTPS"); return;
+      }
       
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       if (typeof MediaRecorder === 'undefined') { alert("อุปกรณ์นี้ไม่รองรับระบบบันทึกเสียงครับ"); return; }
@@ -334,7 +347,9 @@ async function toggleRecording() {
       icon.classList.remove('fa-microphone'); icon.classList.add('fa-stop');
       showToast("🔴 กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
 
-      mediaRecorder.addEventListener("dataavailable", event => { if (event.data.size > 0) audioChunks.push(event.data); });
+      mediaRecorder.addEventListener("dataavailable", event => { 
+        if (event.data.size > 0) audioChunks.push(event.data); 
+      });
 
       mediaRecorder.addEventListener("stop", () => {
         const mimeType = mediaRecorder.mimeType || 'audio/mp4'; 
@@ -343,7 +358,8 @@ async function toggleRecording() {
         const audioUrl = URL.createObjectURL(recordedBlob);
         document.getElementById('audio-preview-element').src = audioUrl;
         
-        previewBox.classList.remove('hidden'); previewBox.style.display = "flex";
+        previewBox.classList.remove('hidden');
+        previewBox.style.display = "flex";
         
         showToast("หยุดบันทึกแล้ว กรุณาลองฟังและกดยืนยันอัปโหลด", "success");
         stream.getTracks().forEach(track => track.stop()); 
@@ -357,13 +373,13 @@ async function toggleRecording() {
   } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
 }
 
-// ---------------------------------------------------------------------------------
-// [แก้ไขใหม่] ส่งไฟล์อัดเสียงผ่าน FormData แก้ปัญหาอัปโหลด Base64 แล้วค้าง
-// ---------------------------------------------------------------------------------
-function uploadRecordedAudio() {
-  if (!recordedBlob) { showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return; }
-  showToast("กำลังอัปโหลดเสียง...", "warning");
+// อัปเดตฟังก์ชัน uploadRecordedAudio ให้ส่งแบบ FormData
+async function uploadRecordedAudio() {
+  if (!recordedBlob) {
+    showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return;
+  }
   
+  showToast("กำลังอัปโหลดเสียง...", "warning");
   const ext = recordedBlob.type.includes('mp4') ? 'm4a' : recordedBlob.type.includes('webm') ? 'webm' : 'mp3';
   
   const formData = new FormData();
@@ -371,22 +387,29 @@ function uploadRecordedAudio() {
   formData.append("password", adminPassword);
   formData.append("fileType", "audio");
   formData.append("extension", ext);
-  formData.append("file", recordedBlob, `record.${ext}`);
+  formData.append("file", recordedBlob, "record." + ext); // แนบ Blob เข้าไป
 
-  fetch(API_URL, { method: 'POST', body: formData })
-  .then(res => res.json())
-  .then(res => {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      body: formData
+    });
+    const res = await response.json();
+    
     if(res.status === 'success') {
       document.getElementById('form-audio').value = res.url;
       showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
       document.getElementById('audio-preview-box').classList.add('hidden');
       document.getElementById('audio-preview-element').src = "";
     } else { showToast(res.msg, "error"); }
-  }).catch(err => showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"));
+  } catch (err) {
+    showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error");
+  }
 }
 
 function cancelRecordedAudio() {
-  recordedBlob = null; document.getElementById('audio-preview-element').src = "";
+  recordedBlob = null;
+  document.getElementById('audio-preview-element').src = "";
   document.getElementById('audio-preview-box').classList.add('hidden');
   showToast("ลบเสียงชั่วคราวแล้ว สามารถกดอัดใหม่ได้เลย", "success");
 }
