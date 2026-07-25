@@ -259,77 +259,77 @@
       
     </div>
 
-    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
+    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ที่บีบอัดให้กระชับขึ้น ===== -->
     <div id="view-settings" class="hidden fade-in">
-      <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
+      <div class="hero-header" style="padding-bottom:10px;"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
-      <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
-        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> <span data-i18n="setting_account">บัญชีของคุณ</span></h3>
-        <p><span data-i18n="setting_phone">เบอร์โทรศัพท์:</span> <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
-        <p><span data-i18n="setting_expire">วันหมดอายุ:</span> <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()" data-i18n="btn_renew">ต่ออายุการใช้งาน</button>
-          <button class="btn-outline" style="flex:1;" onclick="logoutUser()" data-i18n="btn_logout">ออกจากระบบ</button>
+      <div class="reader-card" style="margin-bottom: 12px; padding: 15px 20px; border-left: 5px solid var(--primary);">
+        <h3 style="margin-bottom: 8px;"><i class="fa-solid fa-circle-user"></i> <span data-i18n="setting_account">บัญชีของคุณ</span></h3>
+        <p style="margin-bottom: 2px; font-size: 0.95rem;"><span data-i18n="setting_phone">เบอร์โทรศัพท์:</span> <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
+        <p style="font-size: 0.95rem;"><span data-i18n="setting_expire">วันหมดอายุ:</span> <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
+        <div style="display:flex; gap:10px; margin-top:10px;">
+          <button class="btn-primary" style="flex:1; padding: 10px; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()" data-i18n="btn_renew">ต่ออายุ</button>
+          <button class="btn-outline" style="flex:1; padding: 10px;" onclick="logoutUser()" data-i18n="btn_logout">ออกจากระบบ</button>
         </div>
       </div>
       
-      <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--accent);">
-        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> <span data-i18n="setting_display">การแสดงผล</span></h3>
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_theme">โหมดหน้าจอ</label>
+      <div class="reader-card" style="margin-bottom: 12px; padding: 15px 20px; border-left: 5px solid var(--accent);">
+        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-palette"></i> <span data-i18n="setting_display">การแสดงผล</span></h3>
+        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_theme">โหมดหน้าจอ</label>
         
-        <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> <span data-i18n="theme_light">สว่าง</span></button>
-          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> <span data-i18n="theme_dark">มืด</span></button>
+        <div style="display:flex; gap:10px; margin-bottom: 12px;">
+          <button class="btn-outline" style="flex:1; padding: 8px; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> <span data-i18n="theme_light">สว่าง</span></button>
+          <button class="btn-outline" style="flex:1; padding: 8px; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> <span data-i18n="theme_dark">มืด</span></button>
         </div>
         
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_color">สีหลักของแอป</label>
-        <div style="display:flex; gap:15px; justify-content: center; flex-wrap: wrap;">
-          <button style="width:45px; height:45px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
-          <button style="width:45px; height:45px; border-radius:50%; background:#2563eb; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#2563eb')"></button>
-          <button style="width:45px; height:45px; border-radius:50%; background:#f59e0b; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#f59e0b')"></button>
-          <button style="width:45px; height:45px; border-radius:50%; background:#ef4444; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#ef4444')"></button>
-          <button style="width:45px; height:45px; border-radius:50%; background:#8b5cf6; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#8b5cf6')"></button>
+        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_color">สีหลักของแอป</label>
+        <div style="display:flex; gap:10px; justify-content: center; flex-wrap: wrap;">
+          <button style="width:35px; height:35px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
+          <button style="width:35px; height:35px; border-radius:50%; background:#2563eb; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#2563eb')"></button>
+          <button style="width:35px; height:35px; border-radius:50%; background:#f59e0b; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#f59e0b')"></button>
+          <button style="width:35px; height:35px; border-radius:50%; background:#ef4444; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#ef4444')"></button>
+          <button style="width:35px; height:35px; border-radius:50%; background:#8b5cf6; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#8b5cf6')"></button>
         </div>
       </div>
 
-      <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid #8b5cf6;">
-        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-gear"></i> <span data-i18n="setting_advanced">ตั้งค่าระบบเพิ่มเติม</span></h3>
+      <div class="reader-card" style="margin-bottom: 12px; padding: 15px 20px; border-left: 5px solid #8b5cf6;">
+        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-gear"></i> <span data-i18n="setting_advanced">ตั้งค่าระบบเพิ่มเติม</span></h3>
         
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_sys_lang">ภาษาระบบ (System Language)</label>
-        <select id="setting-sys-lang" onchange="changeSystemLang(this.value)" style="margin-bottom: 15px;">
+        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);" data-i18n="setting_sys_lang">ภาษาระบบ (System Language)</label>
+        <select id="setting-sys-lang" onchange="changeSystemLang(this.value)" style="margin-bottom: 12px; padding: 8px 16px 8px 16px;">
           <option value="th">ไทย (Thai)</option>
           <option value="en">English (อังกฤษ)</option>
           <option value="my">မြန်မာ (Burmese)</option>
           <option value="zh">中文 (Chinese)</option>
         </select>
 
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);"><span data-i18n="setting_zoom">ขนาดหน้าจอ (Zoom):</span> <span id="val-screen-scale" style="color:var(--primary);">50</span></label>
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
-          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('screen', -1)"><i class="fa-solid fa-minus"></i></button>
+        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);"><span data-i18n="setting_zoom">ขนาดหน้าจอ (Zoom):</span> <span id="val-screen-scale" style="color:var(--primary);">50</span></label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 12px;">
+          <button class="btn-icon" style="width:28px; height:28px; font-size:0.9rem; box-shadow:none; border-radius:6px;" onclick="adjustScale('screen', -1)"><i class="fa-solid fa-minus"></i></button>
           <input type="range" id="setting-screen-scale" min="25" max="100" step="1" value="50" oninput="updateScreenScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
-          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('screen', 1)"><i class="fa-solid fa-plus"></i></button>
+          <button class="btn-icon" style="width:28px; height:28px; font-size:0.9rem; box-shadow:none; border-radius:6px;" onclick="adjustScale('screen', 1)"><i class="fa-solid fa-plus"></i></button>
         </div>
 
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);"><span data-i18n="setting_font">ขนาดตัวอักษร (Font):</span> <span id="val-font-scale" style="color:var(--primary);">50</span></label>
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
-          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('font', -1)"><i class="fa-solid fa-minus"></i></button>
+        <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);"><span data-i18n="setting_font">ขนาดตัวอักษร (Font):</span> <span id="val-font-scale" style="color:var(--primary);">50</span></label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 12px;">
+          <button class="btn-icon" style="width:28px; height:28px; font-size:0.9rem; box-shadow:none; border-radius:6px;" onclick="adjustScale('font', -1)"><i class="fa-solid fa-minus"></i></button>
           <input type="range" id="setting-font-scale" min="25" max="100" step="1" value="50" oninput="updateFontScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
-          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('font', 1)"><i class="fa-solid fa-plus"></i></button>
+          <button class="btn-icon" style="width:28px; height:28px; font-size:0.9rem; box-shadow:none; border-radius:6px;" onclick="adjustScale('font', 1)"><i class="fa-solid fa-plus"></i></button>
         </div>
 
-        <div style="display:flex; gap:15px;">
+        <div style="display:flex; gap:10px;">
           <div style="flex:1;">
-            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_bg_main">สีพื้นหลัง</label>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <input type="color" id="setting-bg-main" onchange="updateBgColor('main', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
-              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('main')" data-i18n="btn_reset">คืนค่า</button>
+            <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);" data-i18n="setting_bg_main">สีพื้นหลัง</label>
+            <div style="display:flex; gap:5px; align-items:center;">
+              <input type="color" id="setting-bg-main" onchange="updateBgColor('main', this.value)" style="width: 35px; height: 35px; padding: 0; border: none; border-radius: 6px; cursor: pointer;">
+              <button class="btn-outline" style="padding: 5px 8px; font-size:0.75rem;" onclick="resetBgColor('main')" data-i18n="btn_reset">คืนค่า</button>
             </div>
           </div>
           <div style="flex:1;">
-            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_bg_card">สีการ์ด</label>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <input type="color" id="setting-bg-surface" onchange="updateBgColor('surface', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
-              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('surface')" data-i18n="btn_reset">คืนค่า</button>
+            <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);" data-i18n="setting_bg_card">สีการ์ด</label>
+            <div style="display:flex; gap:5px; align-items:center;">
+              <input type="color" id="setting-bg-surface" onchange="updateBgColor('surface', this.value)" style="width: 35px; height: 35px; padding: 0; border: none; border-radius: 6px; cursor: pointer;">
+              <button class="btn-outline" style="padding: 5px 8px; font-size:0.75rem;" onclick="resetBgColor('surface')" data-i18n="btn_reset">คืนค่า</button>
             </div>
           </div>
         </div>
@@ -362,7 +362,8 @@
     </div>
   </div>
 
-  <script src="app.js?v=130"></script>
+  <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
+  <script src="app.js?v=131"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
