@@ -144,32 +144,51 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .reader-eng-title { font-size: 0.95rem; color: var(--text-muted); font-weight: 400; font-style: italic; margin-bottom: 10px; margin-top: 5px; }
 .reader-meta { font-size: 0.8rem; color: var(--text-muted); opacity: 0.9; margin-bottom: 15px; display: flex; justify-content: center; gap: 15px; }
 
-/* === ปุ่ม Action Bar (คัดลอก/แชร์/พิมพ์) === */
-.btn-action-small {
-    background: var(--bg-surface);
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
-    padding: 8px 16px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    font-family: var(--font-main);
-    font-weight: 600;
+/* === ปุ่มเมนูจัดการเพลง (Dropdown มุมขวาบน) === */
+.song-menu-container { position: relative; }
+.btn-song-menu {
+    background: transparent;
+    color: var(--text-muted);
+    border: none;
+    font-size: 1.2rem;
+    padding: 5px 10px;
     cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    transition: var(--transition);
+}
+.btn-song-menu:active { color: var(--primary); transform: scale(0.9); }
+
+.song-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    min-width: 180px;
+    z-index: 100;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInDown 0.2s ease;
+}
+.song-dropdown button {
+    background: transparent;
+    border: none;
+    padding: 12px 15px;
+    text-align: left;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    color: var(--text-main);
+    cursor: pointer;
     transition: var(--transition);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 10px;
 }
-.btn-action-small:active {
-    background: var(--primary);
-    color: white;
-    border-color: var(--primary);
-    box-shadow: 0 4px 10px var(--primary-glow);
-    transform: scale(0.95);
-}
-.btn-action-small i { font-size: 1rem; color: var(--primary); transition: color 0.2s;}
-.btn-action-small:active i { color: white; }
+.song-dropdown button i { color: var(--primary); width: 16px; text-align: center; }
+.song-dropdown button:hover, .song-dropdown button:active { background: var(--bg-main); color: var(--primary); }
+.song-dropdown button:not(:last-child) { border-bottom: 1px solid var(--border-color); }
 /* ==================================== */
 
 .tags-wrapper { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 25px; }
@@ -389,10 +408,8 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
    Print Mode (โหมดสำหรับการสั่งพิมพ์)
 ========================================================= */
 @media print {
-    /* ซ่อนทุกอย่างที่คลาสระบุว่าห้ามปริ้นท์ */
     .no-print { display: none !important; }
 
-    /* รีเซ็ตหน้ากระดาษเป็นสีขาวทั้งหมด */
     body, .container, #app { 
         background: white !important; 
         color: black !important; 
@@ -401,10 +418,8 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
         overflow: visible !important;
     }
 
-    /* ซ่อนแถบเลื่อนบนมือถือ และเมนูด้านล่างให้เกลี้ยง */
     .bottom-nav, .top-bar, .hero-header { display: none !important; }
 
-    /* ปรับแต่งหน้า Card ให้โปร่งใส ไร้เงา ไร้ขอบ */
     .reader-card {
         box-shadow: none !important;
         border: none !important;
@@ -413,11 +428,9 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
         background: white !important;
     }
 
-    /* บังคับตัวหนังสือเป็นสีดำสนิทเพื่อความชัดเจนตอนพิมพ์ */
     .reader-title { color: black !important; font-size: 18pt !important; }
     .reader-lyrics, .reader-lyrics * { color: black !important; font-size: 14pt !important; line-height: 1.6 !important; }
     
-    /* ปรับกรอบคอร์ดให้เป็นเส้นบางๆ แทนสีพื้นหลังทึบ */
     .tags-wrapper div { 
         border: 1px solid #333 !important; 
         background: white !important; 
@@ -430,6 +443,5 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
         color: black !important;
     }
     
-    /* ลดระยะห่างด้านบนกระดาษ */
     @page { margin: 1.5cm; }
 }
