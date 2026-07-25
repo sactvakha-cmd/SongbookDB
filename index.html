@@ -273,21 +273,64 @@
     <div id="popup-category-list"></div>
   </div>
 
-  <div id="pwa-install-banner" class="hidden fade-in" style="position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--bg-surface); padding: 12px 20px; border-radius: var(--radius-ui); box-shadow: 0 10px 30px rgba(0,0,0,0.15); border: 2px solid var(--primary); z-index: 9999; display: flex; align-items: center; gap: 15px; width: 90%; max-width: 400px; backdrop-filter: blur(10px);">
-    <img src="icon-192.png" alt="App Icon" style="width: 45px; height: 45px; border-radius: 12px;">
-    <div style="flex: 1;">
-      <h4 style="margin:0; font-size:1rem; color:var(--text-main);">ติดตั้งแอปลงเครื่อง</h4>
-      <p style="margin:0; font-size:0.8rem; color:var(--text-muted);" id="pwa-desc">เพื่อการใช้งานที่รวดเร็วขึ้น</p>
+ <!-- PWA Install Banner (แสดงเฉพาะ Android + เบลอพื้นหลัง) -->
+  <div id="pwa-overlay-bg" class="pwa-overlay"></div>
+  <div id="pwa-install-banner" class="hidden fade-in">
+    <img src="icon-192.png" alt="App Icon">
+    <div>
+      <h4 id="pwa-title">ติดตั้งแอปลงเครื่อง</h4>
+      <p id="pwa-desc">เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น</p>
     </div>
-    <button class="btn-primary" style="padding: 8px 15px; font-size: 0.9rem; box-shadow: none;" id="pwa-install-btn">ติดตั้ง</button>
-    <button class="btn-icon" style="width: 25px; height: 25px; border:none; background:transparent; font-size:1.2rem; color:var(--text-muted); box-shadow:none;" onclick="document.getElementById('pwa-install-banner').classList.add('hidden')"><i class="fa-solid fa-xmark"></i></button>
+    <div class="pwa-btn-group">
+      <button class="pwa-btn-cancel" onclick="closePwaBanner()">ภายหลัง</button>
+      <button class="pwa-btn-install" id="pwa-install-btn">ติดตั้งเลย</button>
+    </div>
   </div>
 
-  <script src="app.js?v=115"></script>
+  <script src="app.js?v=118"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
+      });
+    }
+
+    let deferredPrompt;
+    const pwaBanner = document.getElementById('pwa-install-banner');
+    const pwaOverlay = document.getElementById('pwa-overlay-bg');
+    const pwaBtn = document.getElementById('pwa-install-btn');
+
+    // ฟังก์ชันเช็คระบบปฏิบัติการว่าเป็น Android หรือไม่
+    function isAndroid() {
+        return /android/i.test(navigator.userAgent.toLowerCase());
+    }
+
+    // ฟังก์ชันเปิด/ปิด Banner
+    function closePwaBanner() {
+        pwaBanner.classList.add('hidden');
+        pwaOverlay.classList.remove('show');
+    }
+
+    // ระบบตรวจจับว่าเบราว์เซอร์พร้อมให้ติดตั้ง (แสดงเฉพาะ Android)
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); 
+      deferredPrompt = e;
+      
+      // ถ้าเป็น Android ถึงจะโชว์ Banner ขึ้นมากลางจอพร้อมฉากเบลอ
+      if (isAndroid()) {
+          pwaBanner.classList.remove('hidden');
+          pwaOverlay.classList.add('show');
+      }
+    });
+
+    if(pwaBtn) {
+      pwaBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === 'accepted') closePwaBanner();
+          deferredPrompt = null;
+        }
       });
     }
   </script>
