@@ -21,14 +21,23 @@
     try {
       const savedUi = JSON.parse(localStorage.getItem('songbook_settings'));
       if(savedUi) {
-        document.documentElement.setAttribute('data-theme', savedUi.theme || 'dark');
-        document.documentElement.style.setProperty('--primary', savedUi.color || '#10b981');
-        document.documentElement.style.setProperty('--font-main', savedUi.font || "'Kanit', sans-serif");
-        document.documentElement.style.setProperty('--radius-ui', savedUi.radius || '16px');
-        document.documentElement.style.setProperty('--pad-ui', savedUi.pad || '20px');
-        let hex = (savedUi.color || '#10b981').replace('#', '');
+        document.documentElement.setAttribute('data-theme', savedUi.theme || 'light');
+        document.documentElement.style.setProperty('--primary', savedUi.color || '#2563eb');
+        
+        let hex = (savedUi.color || '#2563eb').replace('#', '');
         let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
         document.documentElement.style.setProperty('--primary-glow', `rgba(${r},${g},${b},0.4)`); 
+
+        if(savedUi.bgMain) document.documentElement.style.setProperty('--bg-main', savedUi.bgMain);
+        if(savedUi.bgSurface) document.documentElement.style.setProperty('--bg-surface', savedUi.bgSurface);
+        
+        let fScale = savedUi.fontScale || 50;
+        document.documentElement.style.fontSize = (fScale / 50 * 16) + 'px';
+        
+        let sScale = savedUi.screenScale || 50;
+        if (sScale !== 50) {
+          document.documentElement.style.zoom = (sScale / 50);
+        }
       }
     } catch(e){}
   </script>
@@ -140,15 +149,15 @@
           
           <div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center;">
             
-            <!-- ป้ายรหัสเพลง (ซ้ายบน) ปรับขนาดเล็กลง และจัดตำแหน่งชิดซ้ายคงที่ -->
+            <!-- ป้ายรหัสเพลง -->
             <div style="position: absolute; left: 0; top: 2px;">
               <span id="detail-id" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: var(--bg-main); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></span>
             </div>
             
-            <!-- ชื่อเพลง (ตรงกลาง) เพิ่ม Padding เป็น 70px เพื่อกันไม่ให้ทับป้ายรหัสเพลง -->
+            <!-- ชื่อเพลง -->
             <h2 id="detail-title" class="reader-title" style="margin: 0; padding: 0 70px; line-height: 1.4; font-size: 1.35rem; color: var(--primary); text-align: center; width: 100%; word-break: break-word;">ชื่อเพลง</h2>
 
-            <!-- ปุ่มเมนู Action แบบ Dropdown (ขวาบน) -->
+            <!-- ปุ่มเมนู Action แบบ Dropdown -->
             <div style="position: absolute; right: 0; top: 0;" class="no-print song-menu-container">
               <button class="btn-song-menu" onclick="toggleSongMenu(event)" title="จัดการเพลง">
                 <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -250,6 +259,7 @@
       
     </div>
 
+    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
@@ -281,6 +291,51 @@
           <button style="width:45px; height:45px; border-radius:50%; background:#8b5cf6; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#8b5cf6')"></button>
         </div>
       </div>
+
+      <!-- ส่วนตั้งค่าที่เพิ่มใหม่ -->
+      <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid #8b5cf6;">
+        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-gear"></i> ตั้งค่าระบบเพิ่มเติม</h3>
+        
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ภาษาระบบ (System Language)</label>
+        <select id="setting-sys-lang" onchange="changeSystemLang(this.value)" style="margin-bottom: 15px;">
+          <option value="th">ไทย (Thai)</option>
+          <option value="en">English (อังกฤษ)</option>
+          <option value="my">မြန်မာ (Burmese)</option>
+          <option value="zh">中文 (Chinese)</option>
+        </select>
+
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ขนาดหน้าจอ (Zoom): <span id="val-screen-scale" style="color:var(--primary);">50</span></label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
+          <span style="font-size:0.8rem; color:var(--text-muted);">25</span>
+          <input type="range" id="setting-screen-scale" min="25" max="100" step="5" value="50" oninput="updateScreenScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
+          <span style="font-size:0.8rem; color:var(--text-muted);">100</span>
+        </div>
+
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ขนาดตัวอักษร (Font): <span id="val-font-scale" style="color:var(--primary);">50</span></label>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
+          <span style="font-size:0.8rem; color:var(--text-muted);">25</span>
+          <input type="range" id="setting-font-scale" min="25" max="100" step="5" value="50" oninput="updateFontScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
+          <span style="font-size:0.8rem; color:var(--text-muted);">100</span>
+        </div>
+
+        <div style="display:flex; gap:15px;">
+          <div style="flex:1;">
+            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีพื้นหลัง</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="color" id="setting-bg-main" onchange="updateBgColor('main', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
+              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('main')">คืนค่า</button>
+            </div>
+          </div>
+          <div style="flex:1;">
+            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีการ์ด</label>
+            <div style="display:flex; gap:10px; align-items:center;">
+              <input type="color" id="setting-bg-surface" onchange="updateBgColor('surface', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
+              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('surface')">คืนค่า</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -308,7 +363,9 @@
     </div>
   </div>
 
-  <script src="app.js?v=126"></script>
+  <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
+  <script src="app.js?v=128"></script>
+  
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
