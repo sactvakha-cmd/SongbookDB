@@ -139,11 +139,27 @@
         <div class="reader-header" style="text-align: center; margin-bottom: 10px; position: relative;">
           
           <div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center;">
+            
+            <!-- ป้ายรหัสเพลง (ซ้ายบน) -->
             <div style="position: absolute; left: 0; top: 2px;">
               <span id="detail-id" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); background: var(--bg-main); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></span>
             </div>
             
-            <h2 id="detail-title" class="reader-title" style="margin: 0; padding: 0 60px; line-height: 1.4; font-size: 1.4rem; color: var(--primary); text-align: center; width: 100%;">ชื่อเพลง</h2>
+            <!-- ชื่อเพลง (ตรงกลาง) -->
+            <h2 id="detail-title" class="reader-title" style="margin: 0; padding: 0 50px; line-height: 1.4; font-size: 1.4rem; color: var(--primary); text-align: center; width: 100%;">ชื่อเพลง</h2>
+
+            <!-- ปุ่มเมนู Action แบบ Dropdown (ขวาบน ระดับเดียวกับรหัสเพลง) -->
+            <div style="position: absolute; right: 0; top: 0;" class="no-print song-menu-container">
+              <button class="btn-song-menu" onclick="toggleSongMenu(event)" title="จัดการเพลง">
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </button>
+              <div id="song-action-menu" class="song-dropdown hidden">
+                <button onclick="copySongLyrics()"><i class="fa-solid fa-copy"></i> คัดลอกเนื้อเพลง</button>
+                <button onclick="shareSong()"><i class="fa-solid fa-share-nodes"></i> แชร์เพลงนี้</button>
+                <button onclick="printSong()"><i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF</button>
+              </div>
+            </div>
+
           </div>
 
           <h4 id="detail-eng-title" class="reader-eng-title hidden" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 400; font-style: italic; margin-bottom: 10px; margin-top: 5px;">English Title</h4>
@@ -151,14 +167,6 @@
           <div class="reader-meta" style="font-size: 0.8rem; color: var(--text-muted); opacity: 0.9; margin-bottom: 5px; display: flex; justify-content: center; gap: 15px;">
             <span><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span>
           </div>
-
-          <!-- แถบปุ่ม Action (แชร์, คัดลอก, พิมพ์) -->
-          <div class="song-action-bar no-print" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
-             <button class="btn-action-small" onclick="copySongLyrics()" title="คัดลอกเนื้อเพลง"><i class="fa-solid fa-copy"></i> คัดลอก</button>
-             <button class="btn-action-small" onclick="shareSong()" title="แชร์เนื้อเพลง"><i class="fa-solid fa-share-nodes"></i> แชร์</button>
-             <button class="btn-action-small" onclick="printSong()" title="พิมพ์ / บันทึก PDF"><i class="fa-solid fa-print"></i> พิมพ์</button>
-          </div>
-
         </div>
 
         <div class="tags-wrapper">
@@ -300,7 +308,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=123"></script>
+  <script src="app.js?v=125"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
