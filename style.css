@@ -151,15 +151,11 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .reader-chords { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 4px 12px; border-radius: 6px; font-weight: 500; font-size: 0.85rem; display: inline-block;}
 .reader-notation { background: rgba(59, 130, 246, 0.1); color: var(--accent); padding: 6px 12px; border-radius: 6px; font-weight: 500; font-family: monospace; font-size: 0.85rem; display: inline-block; line-height: 1.3;}
 
-/* === ไฮไลท์การแก้ไข: ลดขนาดและเพิ่ม Margin ด้านซ้ายให้ปุ่ม Back ไม่โดนทับ === */
+/* === ป้องกันกล่องทับปุ่ม Back === */
 .lyrics-toggle { display: flex; background: var(--bg-main); border: 1px solid var(--border-color); border-radius: 8px; padding: 4px; margin: 15px auto; width: fit-content; max-width: 80%; }
-
-/* กรณีอยู่ในหน้าฟังเพลง (#view-music) ให้เพิ่ม margin-left อีกนิดนึง */
 #view-music .lyrics-toggle { margin-left: 8px; }
-
 .lyrics-toggle-btn { padding: 6px 15px; border: none; background: transparent; border-radius: 6px; font-family: var(--font-main); font-weight: 600; font-size: 0.85rem; color: var(--text-muted); cursor: pointer; transition: var(--transition); flex: 1; white-space: nowrap;}
 .lyrics-toggle-btn.active { background: var(--bg-surface); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-/* ======================================================= */
 
 .reader-lyrics { font-family: var(--font-lyrics); font-size: 1.2rem; line-height: 1.5; text-align: center; white-space: normal !important; padding: 0 10px; color: var(--text-main) !important; word-break: break-word;}
 .reader-lyrics * { margin: 0 !important; padding: 0 !important; color: var(--text-main) !important; background-color: transparent !important; }
@@ -186,7 +182,7 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 .nav-item.active i { color: var(--primary); transform: translateY(-3px) scale(1.1);}
 .nav-item.active span { color: var(--primary); font-weight: 600;}
 
-/* --- Popup Category (Floating Transparent Grid Style) --- */
+/* --- Popup Category --- */
 .popup-overlay { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.25); 
@@ -214,11 +210,10 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 }
 [data-theme="dark"] .btn-icon-small { background: rgba(0,0,0,0.3); }
 
-/* ปรับปรุงโครงสร้าง Grid ให้ชิดกันมากขึ้น */
 #popup-category-list { 
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px 10px; /* ลดระยะห่างแนวตั้ง-แนวนอน */
-    width: 100%; max-width: 320px; /* ลดความกว้างสูงสุดลง เพื่อให้คอลัมน์บีบเข้าหากัน */
-    margin: 0 auto; /* จัดให้อยู่กึ่งกลาง */
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px 10px; 
+    width: 100%; max-width: 320px; 
+    margin: 0 auto; 
     padding: 0 20px 20px 20px;
     overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;
 }
@@ -237,17 +232,16 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
     font-size: 1.8rem; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2);
 }
 
-/* ปรับปรุงตัวอักษรให้มีพื้นหลังกระจกบางๆ */
 .cat-grid-item .name { 
     font-size: 0.9rem; font-weight: 600; color: var(--text-main); 
     line-height: 1.3; text-align: center; 
-    background: rgba(255, 255, 255, 0.6); /* พื้นหลังขาวบางๆ */
-    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); /* เบลอพื้นหลัง */
-    padding: 4px 12px; border-radius: 20px; /* เพิ่ม padding และขอบมน */
+    background: rgba(255, 255, 255, 0.6); 
+    backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); 
+    padding: 4px 12px; border-radius: 20px; 
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 [data-theme="dark"] .cat-grid-item .name { 
-    background: rgba(0, 0, 0, 0.6); /* พื้นหลังดำบางๆ สำหรับโหมดมืด */
+    background: rgba(0, 0, 0, 0.6); 
     color: #f8fafc;
     text-shadow: none; 
 }
@@ -323,21 +317,19 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
 ========================================================= */
 .pwa-overlay {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-    background: rgba(0, 0, 0, 0.6); /* ปรับให้เข้มขึ้นนิดนึงเพื่อเน้น Banner */
+    background: rgba(0, 0, 0, 0.6); 
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); 
     z-index: 9998; 
-    display: none; 
     opacity: 0; transition: opacity 0.3s ease;
+    visibility: hidden;
 }
-.pwa-overlay.show { display: block; opacity: 1; }
+.pwa-overlay.show { opacity: 1; visibility: visible; }
 
 #pwa-install-banner {
     position: fixed; 
-    /* ล็อกตำแหน่งให้อยู่ตรงกลางจอ 100% */
     top: 50%; left: 50%; 
     transform: translate(-50%, -50%) !important; 
     margin: 0 !important;
-    
     background: var(--bg-surface); 
     padding: 24px; 
     border-radius: var(--radius-ui); 
@@ -346,12 +338,9 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
     z-index: 9999; 
     display: flex; flex-direction: column; align-items: center; gap: 15px; 
     width: 85%; max-width: 320px; text-align: center;
-    
-    /* ยกเลิกการ fade-in ที่ทำให้กล่องเบี้ยว */
     animation: none !important;
 }
 
-/* เพิ่มการแสดงผลแบบเด้งขึ้นมาตรงๆ แทน (Pop-up Animation) */
 .pwa-pop { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important; }
 @keyframes popIn { 
     from { opacity: 0; transform: translate(-50%, -40%) scale(0.9) !important; } 
