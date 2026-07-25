@@ -120,7 +120,7 @@
     </div>
 
     <div id="view-song" class="hidden fade-in">
-      <div class="top-bar">
+      <div class="top-bar no-print">
         <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
         <div id="top-audio-player" class="top-audio-ui hidden">
          <audio id="song-audio-element" preload="auto" crossorigin="anonymous"></audio>
@@ -134,44 +134,49 @@
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
       
-      <div class="reader-card">
+      <div class="reader-card" id="printable-song-area">
         
-        <!-- === ไฮไลท์การแก้ไข: รหัสเพลงชิดซ้ายสุด และ ชื่อเพลงกึ่งกลาง 100% === -->
-        <div class="reader-header" style="text-align: center; margin-bottom: 20px; position: relative;">
+        <div class="reader-header" style="text-align: center; margin-bottom: 10px; position: relative;">
           
           <div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center;">
-            <!-- รหัสเพลง (ตอกหมุดติดซ้ายบนสุด) -->
             <div style="position: absolute; left: 0; top: 2px;">
               <span id="detail-id" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); background: var(--bg-main); padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></span>
             </div>
             
-            <!-- ชื่อเพลง (อยู่ตรงกลางเป๊ะ และมี padding กันชนซ้าย-ขวา ไม่ให้ทับรหัสเพลง) -->
             <h2 id="detail-title" class="reader-title" style="margin: 0; padding: 0 60px; line-height: 1.4; font-size: 1.4rem; color: var(--primary); text-align: center; width: 100%;">ชื่อเพลง</h2>
           </div>
 
           <h4 id="detail-eng-title" class="reader-eng-title hidden" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 400; font-style: italic; margin-bottom: 10px; margin-top: 5px;">English Title</h4>
           
-          <div class="reader-meta" style="font-size: 0.8rem; color: var(--text-muted); opacity: 0.9; margin-bottom: 15px; display: flex; justify-content: center; gap: 15px;">
+          <div class="reader-meta" style="font-size: 0.8rem; color: var(--text-muted); opacity: 0.9; margin-bottom: 5px; display: flex; justify-content: center; gap: 15px;">
             <span><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span>
           </div>
 
+          <!-- แถบปุ่ม Action (แชร์, คัดลอก, พิมพ์) -->
+          <div class="song-action-bar no-print" style="display: flex; justify-content: center; gap: 10px; margin-top: 15px; margin-bottom: 15px;">
+             <button class="btn-action-small" onclick="copySongLyrics()" title="คัดลอกเนื้อเพลง"><i class="fa-solid fa-copy"></i> คัดลอก</button>
+             <button class="btn-action-small" onclick="shareSong()" title="แชร์เนื้อเพลง"><i class="fa-solid fa-share-nodes"></i> แชร์</button>
+             <button class="btn-action-small" onclick="printSong()" title="พิมพ์ / บันทึก PDF"><i class="fa-solid fa-print"></i> พิมพ์</button>
+          </div>
+
         </div>
-        <!-- ========================================================================= -->
 
         <div class="tags-wrapper">
           <div id="detail-chords-container" class="reader-chords">คอร์ด: <span id="detail-chords"></span></div>
           <div id="detail-notation-container" class="reader-notation hidden"></div>
         </div>
-        <div class="lyrics-toggle" id="lyrics-toggle-box">
+        
+        <div class="lyrics-toggle no-print" id="lyrics-toggle-box">
           <button class="lyrics-toggle-btn active" id="btn-lyric-new" onclick="switchReaderLyricView('new')">อาข่าแบบใหม่</button>
           <button class="lyrics-toggle-btn" id="btn-lyric-old" onclick="switchReaderLyricView('old')">อาข่าแบบเก่า</button>
         </div>
+        
         <div id="detail-image-container" class="song-image-box hidden"></div>
         
         <div id="detail-lyrics" class="reader-lyrics"></div>
         
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
-        <div id="detail-media-container" class="media-box hidden"></div>
+        <div id="detail-media-container" class="media-box hidden no-print"></div>
       </div>
     </div>
     
@@ -271,10 +276,10 @@
     </div>
   </div>
 
-  <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
+  <div class="bottom-nav justify-center hidden no-print" id="main-bottom-nav"></div>
 
-  <div id="category-popup-overlay" class="popup-overlay hidden" onclick="toggleCategoryPopup()"></div>
-  <div id="category-popup" class="category-popup hidden">
+  <div id="category-popup-overlay" class="popup-overlay hidden no-print" onclick="toggleCategoryPopup()"></div>
+  <div id="category-popup" class="category-popup hidden no-print">
     <div class="popup-header">
       <h3 data-i18n="nav_categories">เลือกหมวดหมู่เพลง</h3>
       <button class="btn-icon-small" onclick="toggleCategoryPopup()"><i class="fa-solid fa-xmark"></i></button>
@@ -282,9 +287,8 @@
     <div id="popup-category-list"></div>
   </div>
 
-  <!-- PWA Install Banner แบบมีฉากหลังเบลอ -->
-  <div id="pwa-overlay-bg" class="pwa-overlay"></div>
-  <div id="pwa-install-banner" class="hidden pwa-pop">
+  <div id="pwa-overlay-bg" class="pwa-overlay no-print"></div>
+  <div id="pwa-install-banner" class="hidden pwa-pop no-print">
     <img src="icon-192.png" alt="App Icon">
     <div>
       <h4 id="pwa-title">ติดตั้งแอปลงเครื่อง</h4>
@@ -296,7 +300,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=122"></script>
+  <script src="app.js?v=123"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -310,17 +314,14 @@
     const pwaInstallBtn = document.getElementById('pwa-install-btn');
     const pwaCancelBtn = document.getElementById('pwa-cancel-btn');
 
-    // ตรวจจับว่าเป็น Android หรือไม่
     function isAndroid() {
         return /android/i.test(navigator.userAgent.toLowerCase());
     }
 
-    // ตรวจจับว่าผู้ใช้กำลังรันแอปผ่าน PWA (ที่ติดตั้งไปแล้ว) หรือไม่
     function isStandalone() {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
     }
 
-    // ฟังก์ชันสำหรับปิด Banner
     function closeBanner() {
         pwaBanner.classList.add('hidden');
         pwaOverlay.classList.remove('show');
