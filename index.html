@@ -68,7 +68,8 @@
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">ค่าบริการ: <strong style="color:var(--danger); font-size:1.1rem;">99 บาท / เดือน</strong></p>
       <div style="background: #f1f5f9; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
         <img src="my-qr.jpg" alt="QR Code" style="width: 200px; border-radius: 10px; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">091-014-5332</p>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Promtpay</p>
+        <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">091-0700-910</p>
         <p style="color: var(--text-muted); font-size: 0.85rem;">ชื่อบัญชี: สุรชาติ มาเยอะ Surachat Mayer</p>
       </div>
       <div style="text-align: left; margin-bottom: 20px;">
@@ -105,11 +106,11 @@
         <h3 data-i18n="group_songs">กลุ่มเพลง</h3>
         <div class="grid-cats" id="grid-container"></div>
 
-        <h3>เพลย์ลิสต์</h3>
+        <h3 data-i18n="nav_music">เพลย์ลิสต์</h3>
         <div class="all-songs-card" style="background: linear-gradient(135deg, var(--accent) 0%, #0369a1 100%); margin-bottom: 0;" onclick="openMusicPlayer()">
           <div style="display:flex; align-items:center;">
             <div class="icon-box"><i class="fa-solid fa-headphones"></i></div>
-            <div><div style="font-size: 0.75rem; opacity:0.8;">เครื่องเล่น MP3</div><div>ฟังเพลงทั้งหมด</div></div>
+            <div><div style="font-size: 0.75rem; opacity:0.8;" data-i18n="music_mp3">เครื่องเล่น MP3</div><div data-i18n="music_play_all">ฟังเพลงทั้งหมด</div></div>
           </div>
           <div class="total-num" id="total-music-count">0</div>
         </div>
@@ -163,9 +164,9 @@
                 <i class="fa-solid fa-ellipsis-vertical"></i>
               </button>
               <div id="song-action-menu" class="song-dropdown hidden">
-                <button onclick="copySongLyrics()"><i class="fa-solid fa-copy"></i> คัดลอกเนื้อเพลง</button>
-                <button onclick="shareSong()"><i class="fa-solid fa-share-nodes"></i> แชร์เพลงนี้</button>
-                <button onclick="printSong()"><i class="fa-solid fa-print"></i> พิมพ์ / บันทึก PDF</button>
+                <button onclick="copySongLyrics()"><i class="fa-solid fa-copy"></i> <span data-i18n="menu_copy">คัดลอกเนื้อเพลง</span></button>
+                <button onclick="shareSong()"><i class="fa-solid fa-share-nodes"></i> <span data-i18n="menu_share">แชร์เพลงนี้</span></button>
+                <button onclick="printSong()"><i class="fa-solid fa-print"></i> <span data-i18n="menu_print">พิมพ์ / บันทึก PDF</span></button>
               </div>
             </div>
 
@@ -179,13 +180,13 @@
         </div>
 
         <div class="tags-wrapper">
-          <div id="detail-chords-container" class="reader-chords">คอร์ด: <span id="detail-chords"></span></div>
+          <div id="detail-chords-container" class="reader-chords"><span data-i18n="label_chord">คอร์ด:</span> <span id="detail-chords"></span></div>
           <div id="detail-notation-container" class="reader-notation hidden"></div>
         </div>
         
         <div class="lyrics-toggle no-print" id="lyrics-toggle-box">
-          <button class="lyrics-toggle-btn active" id="btn-lyric-new" onclick="switchReaderLyricView('new')">อาข่าแบบใหม่</button>
-          <button class="lyrics-toggle-btn" id="btn-lyric-old" onclick="switchReaderLyricView('old')">อาข่าแบบเก่า</button>
+          <button class="lyrics-toggle-btn active" id="btn-lyric-new" onclick="switchReaderLyricView('new')" data-i18n="lyric_new">อาข่าแบบใหม่</button>
+          <button class="lyrics-toggle-btn" id="btn-lyric-old" onclick="switchReaderLyricView('old')" data-i18n="lyric_old">อาข่าแบบเก่า</button>
         </div>
         
         <div id="detail-image-container" class="song-image-box hidden"></div>
@@ -202,9 +203,9 @@
         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
             <div class="lyrics-toggle" style="margin: 0; flex: 1; justify-content: center; display: flex;">
-                <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')">เพลย์ลิสต์</button>
-                <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')">กำลังเล่น</button>
-                <button id="tab-music-lyric" class="lyrics-toggle-btn" onclick="switchMusicTab('lyric')">เนื้อเพลง</button>
+                <button id="tab-music-list" class="lyrics-toggle-btn active" onclick="switchMusicTab('list')" data-i18n="music_tab_list">เพลย์ลิสต์</button>
+                <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')" data-i18n="music_tab_play">กำลังเล่น</button>
+                <button id="tab-music-lyric" class="lyrics-toggle-btn" onclick="switchMusicTab('lyric')" data-i18n="music_tab_lyric">เนื้อเพลง</button>
             </div>
             <button class="btn-icon" id="btn-music-indicator" style="cursor:default; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
                 <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
@@ -264,25 +265,25 @@
       <div class="hero-header"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--primary);">
-        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> บัญชีของคุณ</h3>
-        <p>เบอร์โทรศัพท์: <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
-        <p>วันหมดอายุ: <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
+        <h3 style="margin-bottom: 10px;"><i class="fa-solid fa-circle-user"></i> <span data-i18n="setting_account">บัญชีของคุณ</span></h3>
+        <p><span data-i18n="setting_phone">เบอร์โทรศัพท์:</span> <strong id="profile-phone" style="color:var(--primary)">-</strong></p>
+        <p><span data-i18n="setting_expire">วันหมดอายุ:</span> <strong id="profile-expiry" style="color:var(--danger)">-</strong></p>
         <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()">ต่ออายุการใช้งาน</button>
-          <button class="btn-outline" style="flex:1;" onclick="logoutUser()">ออกจากระบบ</button>
+          <button class="btn-primary" style="flex:1; box-shadow:none; font-size:0.9rem;" onclick="goToRenewFromProfile()" data-i18n="btn_renew">ต่ออายุการใช้งาน</button>
+          <button class="btn-outline" style="flex:1;" onclick="logoutUser()" data-i18n="btn_logout">ออกจากระบบ</button>
         </div>
       </div>
       
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid var(--accent);">
-        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> การแสดงผล</h3>
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">โหมดหน้าจอ</label>
+        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-palette"></i> <span data-i18n="setting_display">การแสดงผล</span></h3>
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_theme">โหมดหน้าจอ</label>
         
         <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> สว่าง</button>
-          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> มืด</button>
+          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('light')"><i class="fa-solid fa-sun"></i> <span data-i18n="theme_light">สว่าง</span></button>
+          <button class="btn-outline" style="flex:1; display: flex; justify-content: center; align-items: center; gap: 8px;" onclick="setTheme('dark')"><i class="fa-solid fa-moon"></i> <span data-i18n="theme_dark">มืด</span></button>
         </div>
         
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีหลักของแอป</label>
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_color">สีหลักของแอป</label>
         <div style="display:flex; gap:15px; justify-content: center; flex-wrap: wrap;">
           <button style="width:45px; height:45px; border-radius:50%; background:#10b981; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#10b981')"></button>
           <button style="width:45px; height:45px; border-radius:50%; background:#2563eb; border:3px solid var(--bg-surface); box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;" onclick="setColor('#2563eb')"></button>
@@ -294,9 +295,9 @@
 
       <!-- ส่วนตั้งค่าที่เพิ่มใหม่ -->
       <div class="reader-card" style="margin-bottom: 20px; border-left: 5px solid #8b5cf6;">
-        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-gear"></i> ตั้งค่าระบบเพิ่มเติม</h3>
+        <h3 style="margin-bottom: 15px;"><i class="fa-solid fa-gear"></i> <span data-i18n="setting_advanced">ตั้งค่าระบบเพิ่มเติม</span></h3>
         
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ภาษาระบบ (System Language)</label>
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_sys_lang">ภาษาระบบ (System Language)</label>
         <select id="setting-sys-lang" onchange="changeSystemLang(this.value)" style="margin-bottom: 15px;">
           <option value="th">ไทย (Thai)</option>
           <option value="en">English (อังกฤษ)</option>
@@ -304,33 +305,33 @@
           <option value="zh">中文 (Chinese)</option>
         </select>
 
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ขนาดหน้าจอ (Zoom): <span id="val-screen-scale" style="color:var(--primary);">50</span></label>
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);"><span data-i18n="setting_zoom">ขนาดหน้าจอ (Zoom):</span> <span id="val-screen-scale" style="color:var(--primary);">50</span></label>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
-          <span style="font-size:0.8rem; color:var(--text-muted);">25</span>
+          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('screen', -5)"><i class="fa-solid fa-minus"></i></button>
           <input type="range" id="setting-screen-scale" min="25" max="100" step="5" value="50" oninput="updateScreenScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
-          <span style="font-size:0.8rem; color:var(--text-muted);">100</span>
+          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('screen', 5)"><i class="fa-solid fa-plus"></i></button>
         </div>
 
-        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">ขนาดตัวอักษร (Font): <span id="val-font-scale" style="color:var(--primary);">50</span></label>
+        <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);"><span data-i18n="setting_font">ขนาดตัวอักษร (Font):</span> <span id="val-font-scale" style="color:var(--primary);">50</span></label>
         <div style="display:flex; align-items:center; gap:10px; margin-bottom: 15px;">
-          <span style="font-size:0.8rem; color:var(--text-muted);">25</span>
+          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('font', -5)"><i class="fa-solid fa-minus"></i></button>
           <input type="range" id="setting-font-scale" min="25" max="100" step="5" value="50" oninput="updateFontScale(this.value)" onchange="saveUiSettings()" style="flex:1;">
-          <span style="font-size:0.8rem; color:var(--text-muted);">100</span>
+          <button class="btn-icon" style="width:30px; height:30px; font-size:1rem; box-shadow:none; border-radius:8px;" onclick="adjustScale('font', 5)"><i class="fa-solid fa-plus"></i></button>
         </div>
 
         <div style="display:flex; gap:15px;">
           <div style="flex:1;">
-            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีพื้นหลัง</label>
+            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_bg_main">สีพื้นหลัง</label>
             <div style="display:flex; gap:10px; align-items:center;">
               <input type="color" id="setting-bg-main" onchange="updateBgColor('main', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
-              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('main')">คืนค่า</button>
+              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('main')" data-i18n="btn_reset">คืนค่า</button>
             </div>
           </div>
           <div style="flex:1;">
-            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);">สีการ์ด</label>
+            <label style="font-size: 0.9rem; font-weight: bold; margin-bottom: 5px; display: block; color: var(--text-muted);" data-i18n="setting_bg_card">สีการ์ด</label>
             <div style="display:flex; gap:10px; align-items:center;">
               <input type="color" id="setting-bg-surface" onchange="updateBgColor('surface', this.value)" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
-              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('surface')">คืนค่า</button>
+              <button class="btn-outline" style="padding: 5px 10px; font-size:0.8rem;" onclick="resetBgColor('surface')" data-i18n="btn_reset">คืนค่า</button>
             </div>
           </div>
         </div>
@@ -354,17 +355,17 @@
   <div id="pwa-install-banner" class="hidden pwa-pop no-print">
     <img src="icon-192.png" alt="App Icon">
     <div>
-      <h4 id="pwa-title">ติดตั้งแอปลงเครื่อง</h4>
-      <p id="pwa-desc">เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น</p>
+      <h4 id="pwa-title" data-i18n="pwa_title">ติดตั้งแอปลงเครื่อง</h4>
+      <p id="pwa-desc" data-i18n="pwa_desc">เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น</p>
     </div>
     <div class="pwa-btn-group">
-      <button class="pwa-btn-cancel" id="pwa-cancel-btn">ภายหลัง</button>
-      <button class="pwa-btn-install" id="pwa-install-btn">ติดตั้งเลย</button>
+      <button class="pwa-btn-cancel" id="pwa-cancel-btn" data-i18n="pwa_cancel">ภายหลัง</button>
+      <button class="pwa-btn-install" id="pwa-install-btn" data-i18n="pwa_install">ติดตั้งเลย</button>
     </div>
   </div>
 
   <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
-  <script src="app.js?v=128"></script>
+  <script src="app.js?v=129"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
