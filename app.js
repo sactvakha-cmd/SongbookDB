@@ -108,7 +108,6 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
 
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-      localStorage.setItem('offline_songs', JSON.stringify(allSongs));
       
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
@@ -129,15 +128,11 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
     document.getElementById('loader').classList.add('hidden');
     if(isSilentMode) {
-      showToast("ใช้งานแบบออฟไลน์ (ข้อมูลล่าสุดที่เคยซิงค์)", "warning");
-      const savedSongs = localStorage.getItem('offline_songs'); 
-      if(savedSongs) {
-        allSongs = JSON.parse(savedSongs);
-        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-      }
-      document.getElementById('view-auth').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
-      renderDashboard(); updateBottomNav('dashboard');
-    } else { alert("การเชื่อมต่อล้มเหลว: " + err.message); }
+      showToast("ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาลองใหม่", "error");
+      document.getElementById('view-auth').classList.remove('hidden'); 
+    } else { 
+      showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); 
+    }
   });
 }
 
@@ -199,11 +194,8 @@ function submitPayment() {
   }).catch(err => { btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false; alert("อัปโหลดไม่สำเร็จ: " + err.message); });
 }
 
-function logoutUser() { localStorage.removeItem('songbook_user'); localStorage.removeItem('offline_songs'); location.reload(); }
+function logoutUser() { localStorage.removeItem('songbook_user'); location.reload(); }
 
-// ===============================================
-// ไฮไลท์แก้ไข 1: ทำให้ปุ่มหมวดหมู่สีเปลี่ยนเมื่อเปิด Popup
-// ===============================================
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
   const overlay = document.getElementById('category-popup-overlay');
@@ -213,7 +205,6 @@ function toggleCategoryPopup() {
     overlay.classList.remove('hidden');
     document.body.classList.add('no-scroll');
 
-    // บังคับเปลี่ยนสีปุ่ม Bottom Nav ทันทีที่เปิด Popup
     updateBottomNav('category_popup'); 
 
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
@@ -231,18 +222,15 @@ function toggleCategoryPopup() {
     document.getElementById('popup-category-list').innerHTML = html;
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
-    // ปิด Popup
     popup.classList.remove('show');
     document.body.classList.remove('no-scroll');
     
-    // อัปเดตสีปุ่มกลับไปหน้าเดิม (หน้าก่อนที่จะกดเปิด Popup)
     updateBottomNav(currentActiveView);
     
     setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
 }
 
-// ไฮไลท์แก้ไข 2: สั่งให้ปิด Popup ตัวเองถ้าผู้ใช้กดสลับหน้าไปที่อื่น
 function closePopupIfOpen() {
   const popup = document.getElementById('category-popup');
   const overlay = document.getElementById('category-popup-overlay');
@@ -252,7 +240,6 @@ function closePopupIfOpen() {
       setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300);
   }
 }
-// ===============================================
 
 function selectCategoryFromPopup(catId) {
   toggleCategoryPopup();
@@ -266,7 +253,6 @@ function updateBottomNav(view) {
   
   nav.classList.remove('hidden'); nav.classList.add('justify-center'); 
   
-  // เพิ่มเงื่อนไข category_popup เข้าไป
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${i18n[appLang].nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
   const catBtn = `<div class="nav-item ${view==='category' || view==='category_popup' ?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${i18n[appLang].nav_categories}</span></div>`;
@@ -278,7 +264,13 @@ function updateBottomNav(view) {
 document.addEventListener("visibilitychange", () => {
   const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
   if (document.visibilityState === "visible" && savedUser && allSongs.length > 0) {
-    fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { if(res.status === 'success') { allSongs = res.songs || []; localStorage.setItem('offline_songs', JSON.stringify(allSongs)); renderDashboard(); if(currentCategory) searchCategory(); } }).catch(e => console.log('Auto sync failed'));
+    fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { 
+        if(res.status === 'success') { 
+            allSongs = res.songs || []; 
+            renderDashboard(); 
+            if(currentCategory) searchCategory(); 
+        } 
+    }).catch(e => console.log('Auto sync failed'));
   }
 });
 
@@ -289,13 +281,12 @@ function forceDataRefresh() {
       if(res.status === 'success') {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-        localStorage.setItem('offline_songs', JSON.stringify(allSongs)); 
         renderDashboard(); 
         if(currentCategory) searchCategory(true); 
         if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
         document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
       } else { logoutUser(); }
-    }).catch(error => { alert("เกิดข้อผิดพลาด: " + error.message); document.getElementById('loader-text').innerText = "โหลดข้อมูลล้มเหลว"; });
+    }).catch(error => { showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); });
 }
 
 function renderDashboard() {
@@ -388,7 +379,6 @@ function searchGlobal() {
 
 function switchView(view) {
   try {
-    // ปิด Popup ทุกครั้งที่สลับหน้า
     closePopupIfOpen();
 
     savedScrollPositions[currentActiveView] = window.scrollY;
