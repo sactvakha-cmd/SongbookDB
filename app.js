@@ -494,6 +494,67 @@ function openSong(id) {
   } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
 }
 
+/* === ฟังก์ชันใหม่: ดึงข้อความเนื้อเพลงแบบไม่มี HTML === */
+function getCleanSongText() {
+    if(!currentSong) return "";
+    let text = `[${currentSong.ID}] ${currentSong.Title}\n`;
+    if(currentSong.EnglishTitle) text += `${currentSong.EnglishTitle}\n`;
+    if(currentSong.Author) text += `ผู้แต่ง: ${currentSong.Author}\n`;
+    if(currentSong.Chords) text += `คอร์ด: ${currentSong.Chords}\n`;
+    text += `\n-----------------------\n\n`;
+    
+    const lyricsBox = document.createElement("div");
+    
+    const isNewActive = document.getElementById('btn-lyric-new').classList.contains('active');
+    lyricsBox.innerHTML = isNewActive ? (currentSong.LyricsNew || currentSong.Lyrics) : (currentSong.Lyrics || currentSong.LyricsNew);
+    
+    lyricsBox.querySelectorAll('br, p, div').forEach(el => {
+       if (el.tagName === 'BR') el.replaceWith('\n');
+       else el.append('\n');
+    });
+    
+    let plainText = lyricsBox.innerText.replace(/\n\s*\n/g, '\n\n').trim();
+    text += plainText;
+    
+    return text;
+}
+
+/* === ฟังก์ชันใหม่: คัดลอกเนื้อเพลง === */
+function copySongLyrics() {
+    const textToCopy = getCleanSongText();
+    if(!textToCopy) return showToast("ไม่มีข้อมูลเนื้อเพลง", "warning");
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
+        showToast("คัดลอกเนื้อเพลงเรียบร้อยแล้ว", "success");
+    }).catch(err => {
+        showToast("ไม่สามารถคัดลอกได้", "error");
+        console.error('Copy Error:', err);
+    });
+}
+
+/* === ฟังก์ชันใหม่: แชร์เนื้อเพลง === */
+function shareSong() {
+    const textToShare = getCleanSongText();
+    if(!textToShare) return showToast("ไม่มีข้อมูลเพลงที่จะแชร์", "warning");
+
+    if (navigator.share) {
+        navigator.share({
+            title: currentSong.Title,
+            text: textToShare,
+        }).catch(err => console.log('Share canceled:', err));
+    } else {
+        copySongLyrics();
+        showToast("คัดลอกแทน (อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง)", "success");
+    }
+}
+
+/* === ฟังก์ชันใหม่: พิมพ์ / เซฟ PDF === */
+function printSong() {
+    if(!currentSong) return;
+    window.print();
+}
+/* ================================================= */
+
 function showToast(msg, type="success") {
   const toast = document.getElementById('toast');
   const icon = type === "error" ? "fa-circle-xmark" : type === "warning" ? "fa-triangle-exclamation" : "fa-circle-check";
@@ -765,37 +826,3 @@ if(songAudioEl) {
     if(isMusicPlayerActive && musicPlaylist.length > 0) { playMusicNext(true); }
   });
 }
-
-let deferredPrompt;
-const pwaBanner = document.getElementById('pwa-install-banner');
-const pwaBtn = document.getElementById('pwa-install-btn');
-const pwaDesc = document.getElementById('pwa-desc');
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault(); 
-  deferredPrompt = e;
-  if(pwaBanner) pwaBanner.classList.remove('hidden');
-});
-
-if(pwaBtn) {
-  pwaBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') pwaBanner.classList.add('hidden');
-      deferredPrompt = null;
-    } else {
-      const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-      if (isIos) {
-        alert("📲 สำหรับ iPhone/iPad:\n1. แตะไอคอน 'แชร์' (สี่เหลี่ยมลูกศรชี้ขึ้น) ที่แถบด้านล่าง\n2. เลื่อนลงแล้วเลือก 'เพิ่มไปยังหน้าจอโฮม' (Add to Home Screen)");
-        pwaBanner.classList.add('hidden');
-      }
-    }
-  });
-}
-
-window.addEventListener('load', () => {
-  const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-  if (isIos && !isStandalone && pwaBanner) { pwaDesc.innerText = "แตะ 📤 แชร์ -> ➕ เพิ่มไปยังหน้าจอโฮม"; pwaBanner.classList.remove('hidden'); }
-});
