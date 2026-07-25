@@ -8,13 +8,14 @@ async function fetchAPI(action, params = {}) {
   } catch (error) { throw error; }
 }
 
+// คลังคำแปลภาษาระบบ (System Language Dictionary)
 const i18n = {
-  th: { app_title: "คลังเพลงคริสเตียนอาข่า", search_placeholder: "ค้นหาด้วย เลข หรือ ชื่อเพลง...", manage_text: "ดูและจัดการ", total_songs: "เพลงทั้งหมดในคลัง", group_songs: "กลุ่มเพลง", song_count_label: "จำนวนเพลง:", song_unit: "เพลง", nav_home: "หน้าแรก", nav_profile: "โปรไฟล์", nav_categories: "หมวดหมู่", cat_life: "เพลงชีวิตคริสเตียนอาข่า", cat_gen: "เพลงคริสเตียนทั่วไป", cat_xmas: "เพลงคริสต์มาส", cat_sad: "เพลงไว้อาลัย", cat_wed: "เพลงงานมงคลสมรส", cat_praise: "เพลงสรรเสริญ", cat_worship: "เพลงนมัสการ", cat_other: "เพลงอื่นๆ", nav_cat_life: "อาข่า", nav_cat_gen: "ทั่วไป", nav_cat_xmas: "คริสต์มาส", nav_cat_sad: "ไว้อาลัย", nav_cat_wed: "มงคลสมรส", nav_cat_praise: "สรรเสริญ", nav_cat_worship: "นมัสการ", nav_cat_other: "อื่นๆ" },
-  an: { app_title: "Aqkaq kalizaq DawrCar deuq.", search_placeholder: "Bof-awr pov-eu...", manage_text: "Haw-awr lavsav-eu", total_songs: "Dawqcar dawqtawvluf", group_songs: "Dawqcawr armaf", song_count_label: "Dawqcar:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Armaf", cat_life: "Aqkaq kalizaq Car-eu Sanqbof", cat_gen: "Aqkaq kalizaq cardawq nuideuq.", cat_xmas: "Kirsarmax DawqCar", cat_sad: "Shirbui-anr car-eu Dawqcar", cat_wed: "Oermr barngae Car-eu Dawqcar", cat_praise: "Jaceuq-euu dawqcar", cat_worship: "Uqduq tanq-eu DawqCar", cat_other: "Dawqcar Nuideuq.", nav_cat_life: "Sanqbof", nav_cat_gen: "Nuideuq.", nav_cat_xmas: "Kirsarmax", nav_cat_sad: "Shirbui", nav_cat_wed: "Oermr", nav_cat_praise: "Jaceuq", nav_cat_worship: "Uqduq", nav_cat_other: "Nuideuq." },
-  ao: { app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awˇ poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Aˇmaꞈ", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ" },
-  en: { app_title: "Akha Songbook", search_placeholder: "Search by number or title...", manage_text: "View & Manage", total_songs: "Total Songs", group_songs: "Categories", song_count_label: "Total:", song_unit: "songs", nav_home: "Home", nav_profile: "Profile", nav_categories: "Categories", cat_life: "Akha Christian Life", cat_gen: "General Christian", cat_xmas: "Christmas", cat_sad: "Funeral", cat_wed: "Wedding", cat_praise: "Praise", cat_worship: "Worship", cat_other: "Others", nav_cat_life: "Akha", nav_cat_gen: "General", nav_cat_xmas: "Xmas", nav_cat_sad: "Funeral", nav_cat_wed: "Wedding", nav_cat_praise: "Praise", nav_cat_worship: "Worship", nav_cat_other: "Others" },
-  my: { app_title: "အာခါ သီချင်းစာအုပ်", search_placeholder: "နံပါတ် သို့မဟုတ် ခေါင်းစဉ်ဖြင့် ရှာဖွေပါ...", manage_text: "ကြည့်ရှုရန်", total_songs: "သီချင်းစုစုပေါင်း", group_songs: "အမျိုးအစားများ", song_count_label: "စုစုပေါင်း:", song_unit: "ပုဒ်", nav_home: "ပင်မ", nav_profile: "ပရိုဖိုင်", nav_categories: "အမျိုးအစား", cat_life: "အာခါ ခရစ်ယာန် အသက်တာ", cat_gen: "အထွေထွေ ခရစ်ယာန်", cat_xmas: "ခရစ္စမတ်", cat_sad: "ဈာပန", cat_wed: "မင်္ဂလာဆောင်", cat_praise: "ချီးမွမ်းခြင်း", cat_worship: "ကိုးကွယ်ခြင်း", cat_other: "အခြား", nav_cat_life: "အာခါ", nav_cat_gen: "အထွေထွေ", nav_cat_xmas: "ခရစ္စမတ်", nav_cat_sad: "ဈာပန", nav_cat_wed: "မင်္ဂလာဆောင်", nav_cat_praise: "ချီးမွမ်းခြင်း", nav_cat_worship: "ကိုးကွယ်ခြင်း", nav_cat_other: "အခြား" },
-  zh: { app_title: "阿卡诗歌本", search_placeholder: "按编号或标题搜索...", manage_text: "查看与管理", total_songs: "歌曲总数", group_songs: "分类", song_count_label: "总计:", song_unit: "首", nav_home: "首页", nav_profile: "个人资料", nav_categories: "分类", cat_life: "阿卡基督徒生活", cat_gen: "普通基督教", cat_xmas: "圣诞", cat_sad: "葬礼", cat_wed: "婚礼", cat_praise: "赞美", cat_worship: "敬拜", cat_other: "其他", nav_cat_life: "阿卡", nav_cat_gen: "普通", nav_cat_xmas: "圣诞", nav_cat_sad: "葬礼", nav_cat_wed: "婚礼", nav_cat_praise: "赞美", nav_cat_worship: "敬拜", nav_cat_other: "其他" }
+  th: { app_title: "คลังเพลงคริสเตียนอาข่า", search_placeholder: "ค้นหาด้วย เลข หรือ ชื่อเพลง...", manage_text: "ดูและจัดการ", total_songs: "เพลงทั้งหมดในคลัง", group_songs: "กลุ่มเพลง", song_count_label: "จำนวนเพลง:", song_unit: "เพลง", nav_home: "หน้าแรก", nav_profile: "โปรไฟล์", nav_categories: "หมวดหมู่", cat_life: "เพลงชีวิตคริสเตียนอาข่า", cat_gen: "เพลงคริสเตียนทั่วไป", cat_xmas: "เพลงคริสต์มาส", cat_sad: "เพลงไว้อาลัย", cat_wed: "เพลงงานมงคลสมรส", cat_praise: "เพลงสรรเสริญ", cat_worship: "เพลงนมัสการ", cat_other: "เพลงอื่นๆ", nav_cat_life: "อาข่า", nav_cat_gen: "ทั่วไป", nav_cat_xmas: "คริสต์มาส", nav_cat_sad: "ไว้อาลัย", nav_cat_wed: "มงคลสมรส", nav_cat_praise: "สรรเสริญ", nav_cat_worship: "นมัสการ", nav_cat_other: "อื่นๆ", nav_music: "เพลย์ลิสต์", music_mp3: "เครื่องเล่น MP3", music_play_all: "ฟังเพลงทั้งหมด", menu_copy: "คัดลอกเนื้อเพลง", menu_share: "แชร์เพลงนี้", menu_print: "พิมพ์ / บันทึก PDF", label_chord: "คอร์ด:", lyric_new: "อาข่าแบบใหม่", lyric_old: "อาข่าแบบเก่า", music_tab_list: "เพลย์ลิสต์", music_tab_play: "กำลังเล่น", music_tab_lyric: "เนื้อเพลง", setting_account: "บัญชีของคุณ", setting_phone: "เบอร์โทรศัพท์:", setting_expire: "วันหมดอายุ:", btn_renew: "ต่ออายุการใช้งาน", btn_logout: "ออกจากระบบ", setting_display: "การแสดงผล", setting_theme: "โหมดหน้าจอ", theme_light: "สว่าง", theme_dark: "มืด", setting_color: "สีหลักของแอป", setting_advanced: "ตั้งค่าระบบเพิ่มเติม", setting_sys_lang: "ภาษาระบบ (System Language)", setting_zoom: "ขนาดหน้าจอ (Zoom):", setting_font: "ขนาดตัวอักษร (Font):", setting_bg_main: "สีพื้นหลัง", setting_bg_card: "สีการ์ด", btn_reset: "คืนค่า", pwa_title: "ติดตั้งแอปลงเครื่อง", pwa_desc: "เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น", pwa_cancel: "ภายหลัง", pwa_install: "ติดตั้งเลย" },
+  en: { app_title: "Akha Songbook", search_placeholder: "Search number or title...", manage_text: "View & Manage", total_songs: "Total Songs", group_songs: "Categories", song_count_label: "Total:", song_unit: "songs", nav_home: "Home", nav_profile: "Profile", nav_categories: "Categories", cat_life: "Akha Christian Life", cat_gen: "General Christian", cat_xmas: "Christmas", cat_sad: "Funeral", cat_wed: "Wedding", cat_praise: "Praise", cat_worship: "Worship", cat_other: "Others", nav_cat_life: "Akha", nav_cat_gen: "General", nav_cat_xmas: "Xmas", nav_cat_sad: "Funeral", nav_cat_wed: "Wedding", nav_cat_praise: "Praise", nav_cat_worship: "Worship", nav_cat_other: "Others", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "New Akha", lyric_old: "Old Akha", music_tab_list: "Playlist", music_tab_play: "Now Playing", music_tab_lyric: "Lyrics", setting_account: "Your Account", setting_phone: "Phone Number:", setting_expire: "Expiry Date:", btn_renew: "Renew Subscription", btn_logout: "Logout", setting_display: "Display", setting_theme: "Theme Mode", theme_light: "Light", theme_dark: "Dark", setting_color: "App Color", setting_advanced: "Advanced Settings", setting_sys_lang: "System Language", setting_zoom: "Screen Zoom:", setting_font: "Font Size:", setting_bg_main: "Background Color", setting_bg_card: "Card Color", btn_reset: "Reset", pwa_title: "Install App", pwa_desc: "For faster and easier access.", pwa_cancel: "Later", pwa_install: "Install Now" },
+  my: { app_title: "အာခါ သီချင်းစာအုပ်", search_placeholder: "နံပါတ် သို့မဟုတ် ခေါင်းစဉ်ဖြင့် ရှာဖွေပါ...", manage_text: "စီမံရန်", total_songs: "သီချင်းစုစုပေါင်း", group_songs: "အမျိုးအစားများ", song_count_label: "စုစုပေါင်း-", song_unit: "ပုဒ်", nav_home: "ပင်မ", nav_profile: "ပရိုဖိုင်", nav_categories: "အမျိုးအစား", cat_life: "အာခါ ခရစ်ယာန် အသက်တာ", cat_gen: "အထွေထွေ ခရစ်ယာန်", cat_xmas: "ခရစ္စမတ်", cat_sad: "ဈာပန", cat_wed: "မင်္ဂလာဆောင်", cat_praise: "ချီးမွမ်းခြင်း", cat_worship: "ကိုးကွယ်ခြင်း", cat_other: "အခြား", nav_cat_life: "အာခါ", nav_cat_gen: "အထွေထွေ", nav_cat_xmas: "ခရစ္စမတ်", nav_cat_sad: "ဈာပန", nav_cat_wed: "မင်္ဂလာဆောင်", nav_cat_praise: "ချီးမွမ်းခြင်း", nav_cat_worship: "ကိုးကွယ်ခြင်း", nav_cat_other: "အခြား", nav_music: "ဖွင့်စာရင်း", music_mp3: "MP3 ပလေယာ", music_play_all: "အားလုံးဖွင့်ပါ", menu_copy: "စာသားကူးယူရန်", menu_share: "မျှဝေရန်", menu_print: "ပရင့် / PDF သိမ်းရန်", label_chord: "ကော့ဒ်-", lyric_new: "အာခါ (သစ်)", lyric_old: "အာခါ (ဟောင်း)", music_tab_list: "ဖွင့်စာရင်း", music_tab_play: "ဖွင့်နေသည်", music_tab_lyric: "စာသား", setting_account: "သင့်အကောင့်", setting_phone: "ဖုန်းနံပါတ်-", setting_expire: "သက်တမ်းကုန်ဆုံးရက်-", btn_renew: "သက်တမ်းတိုးရန်", btn_logout: "ထွက်မည်", setting_display: "ပြသမှု", setting_theme: "အခင်းအကျင်း", theme_light: "အလင်း", theme_dark: "အမှောင်", setting_color: "အက်ပ် အရောင်", setting_advanced: "အဆင့်မြင့် ဆက်တင်များ", setting_sys_lang: "စနစ် ဘာသာစကား (System Language)", setting_zoom: "ချဲ့ရန်-", setting_font: "ဖောင့်အရွယ်အစား-", setting_bg_main: "နောက်ခံအရောင်", setting_bg_card: "ကတ်အရောင်", btn_reset: "ပြန်လည်သတ်မှတ်ရန်", pwa_title: "အက်ပ်ကို ထည့်သွင်းပါ", pwa_desc: "ပိုမိုမြန်ဆန်လွယ်ကူစွာ အသုံးပြုရန်။", pwa_cancel: "နောက်မှ", pwa_install: "ယခုထည့်သွင်းပါ" },
+  zh: { app_title: "阿卡诗歌本", search_placeholder: "按编号或标题搜索...", manage_text: "查看与管理", total_songs: "歌曲总数", group_songs: "分类", song_count_label: "总计:", song_unit: "首", nav_home: "首页", nav_profile: "个人资料", nav_categories: "分类", cat_life: "阿卡基督徒生活", cat_gen: "普通基督教", cat_xmas: "圣诞", cat_sad: "葬礼", cat_wed: "婚礼", cat_praise: "赞美", cat_worship: "敬拜", cat_other: "其他", nav_cat_life: "阿卡", nav_cat_gen: "普通", nav_cat_xmas: "圣诞", nav_cat_sad: "葬礼", nav_cat_wed: "婚礼", nav_cat_praise: "赞美", nav_cat_worship: "敬拜", nav_cat_other: "其他", nav_music: "播放列表", music_mp3: "MP3 播放器", music_play_all: "播放全部", menu_copy: "复制歌词", menu_share: "分享歌曲", menu_print: "打印 / 保存 PDF", label_chord: "和弦:", lyric_new: "新阿卡语", lyric_old: "旧阿卡语", music_tab_list: "列表", music_tab_play: "正在播放", music_tab_lyric: "歌词", setting_account: "您的账户", setting_phone: "电话号码:", setting_expire: "到期日期:", btn_renew: "续费", btn_logout: "退出登录", setting_display: "显示", setting_theme: "主题模式", theme_light: "浅色", theme_dark: "深色", setting_color: "应用颜色", setting_advanced: "高级设置", setting_sys_lang: "系统语言 (System Language)", setting_zoom: "屏幕缩放:", setting_font: "字体大小:", setting_bg_main: "背景颜色", setting_bg_card: "卡片颜色", btn_reset: "重置", pwa_title: "安装应用", pwa_desc: "以便更快捷地访问。", pwa_cancel: "稍后", pwa_install: "立即安装" },
+  an: { app_title: "Aqkaq kalizaq DawrCar deuq.", search_placeholder: "Bof-awr pov-eu...", manage_text: "Haw-awr lavsav-eu", total_songs: "Dawqcar dawqtawvluf", group_songs: "Dawqcawr armaf", song_count_label: "Dawqcar:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Armaf", cat_life: "Aqkaq kalizaq Car-eu Sanqbof", cat_gen: "Aqkaq kalizaq cardawq nuideuq.", cat_xmas: "Kirsarmax DawqCar", cat_sad: "Shirbui-anr car-eu Dawqcar", cat_wed: "Oermr barngae Car-eu Dawqcar", cat_praise: "Jaceuq-euu dawqcar", cat_worship: "Uqduq tanq-eu DawqCar", cat_other: "Dawqcar Nuideuq.", nav_cat_life: "Sanqbof", nav_cat_gen: "Nuideuq.", nav_cat_xmas: "Kirsarmax", nav_cat_sad: "Shirbui", nav_cat_wed: "Oermr", nav_cat_praise: "Jaceuq", nav_cat_worship: "Uqduq", nav_cat_other: "Nuideuq.", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aqkaq New", lyric_old: "Aqkaq Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" },
+  ao: { app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awˇ poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Aˇmaꞈ", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aˬkaˬ New", lyric_old: "Aˬkaˬ Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" }
 };
 
 let appLang = 'th'; 
@@ -53,7 +54,6 @@ function setAppLanguage(lang, reRender = true) {
   appLang = lang; 
   localStorage.setItem('app_lang', lang);
   
-  // อัปเดตปุ่มเลือกภาษาหน้าแรกอย่างปลอดภัย
   ['th', 'an', 'ao'].forEach(l => {
       const btn = document.getElementById('btn-lang-'+l);
       if(btn) btn.classList.remove('active');
@@ -61,20 +61,23 @@ function setAppLanguage(lang, reRender = true) {
   const activeBtn = document.getElementById('btn-lang-'+lang);
   if (activeBtn) activeBtn.classList.add('active');
 
-  // อัปเดต Dropdown ภาษาในการตั้งค่า (ถ้าเปิดอยู่)
   const sysLangInput = document.getElementById('setting-sys-lang');
   if (sysLangInput && ['th','en','my','zh'].includes(lang)) {
       sysLangInput.value = lang;
   }
 
-  // แปลงข้อความ UI ทั้งระบบ
   document.querySelectorAll('[data-i18n]').forEach(el => { 
       const key = el.getAttribute('data-i18n'); 
-      if(i18n[lang] && i18n[lang][key]) { 
+      
+      let text = i18n[lang] && i18n[lang][key] ? i18n[lang][key] : null;
+      if (!text) text = i18n['en'][key]; 
+      if (!text) text = i18n['th'][key]; 
+
+      if(text) { 
           if(el.tagName === 'INPUT' && el.hasAttribute('placeholder')) { 
-              el.placeholder = i18n[lang][key]; 
+              el.placeholder = text; 
           } else { 
-              el.innerHTML = i18n[lang][key]; 
+              el.innerHTML = text; 
           } 
       } 
   });
@@ -83,8 +86,9 @@ function setAppLanguage(lang, reRender = true) {
     renderDashboard(); updateBottomNav(currentCategory ? 'category' : 'dashboard');
     if(currentCategory) { 
         const catConf = baseCategories.find(c => c.id === currentCategory); 
-        if(catConf && i18n[appLang]) document.getElementById('cat-title').innerText = i18n[appLang][catConf.i18n_cat]; 
-        else if(i18n[appLang]) document.getElementById('cat-title').innerText = i18n[appLang].total_songs; 
+        const ln = i18n[appLang] || i18n['en'];
+        if(catConf && ln) document.getElementById('cat-title').innerText = ln[catConf.i18n_cat] || i18n['en'][catConf.i18n_cat]; 
+        else if(ln) document.getElementById('cat-title').innerText = ln.total_songs || i18n['en'].total_songs; 
     }
   }
 }
@@ -243,6 +247,7 @@ function logoutUser() { localStorage.removeItem('songbook_user'); location.reloa
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
   const overlay = document.getElementById('category-popup-overlay');
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
 
   if (popup.classList.contains('hidden')) {
     popup.classList.remove('hidden');
@@ -253,13 +258,13 @@ function toggleCategoryPopup() {
 
     let html = `<div class="cat-grid-item full-width" onclick="selectCategoryFromPopup('ALL')">
                   <div class="icon" style="background:var(--primary);"><i class="fa-solid fa-list-ul"></i></div>
-                  <div class="name">${i18n[appLang] ? i18n[appLang].total_songs : i18n['th'].total_songs}</div>
+                  <div class="name">${ln.total_songs || 'Total Songs'}</div>
                 </div>`;
                 
     baseCategories.forEach(cat => {
       html += `<div class="cat-grid-item" onclick="selectCategoryFromPopup('${cat.id}')">
                  <div class="icon ${cat.bg}"><i class="fa-solid ${cat.icon}"></i></div>
-                 <div class="name">${i18n[appLang] ? i18n[appLang][cat.i18n_nav] : i18n['th'][cat.i18n_nav]}</div>
+                 <div class="name">${ln[cat.i18n_nav] || 'Category'}</div>
                </div>`;
     });
     
@@ -297,9 +302,9 @@ function updateBottomNav(view) {
   
   nav.classList.remove('hidden'); nav.classList.add('justify-center'); 
   
-  const ln = i18n[appLang] || i18n['th'];
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${ln.nav_home}</span></div>`;
-  const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span>ฟังเพลง</span></div>`;
+  const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span data-i18n="nav_music">${ln.nav_music || 'Playlist'}</span></div>`;
   const catBtn = `<div class="nav-item ${view==='category' || view==='category_popup' ?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${ln.nav_categories}</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${ln.nav_profile}</span></div>`;
   
@@ -342,17 +347,18 @@ function renderDashboard() {
     if (mp3CountEl) mp3CountEl.innerText = mp3Count;
 
     const grid = document.getElementById('grid-container');
-    const ln = i18n[appLang] || i18n['th'];
+    const ln = i18n[appLang] || i18n['en'] || i18n['th'];
     grid.innerHTML = baseCategories.map(cat => {
-      const count = allSongs.filter(s => s.Category === cat.id).length; const catName = ln[cat.i18n_cat];
-      return `<div class="cat-card ${cat.bg}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><h3 style="font-size: 1rem;">${catName}</h3><div class="count">${count} ${ln.song_unit}</div></div>`;
+      const count = allSongs.filter(s => s.Category === cat.id).length; const catName = ln[cat.i18n_cat] || cat.id;
+      return `<div class="cat-card ${cat.bg}" onclick="openCategory('${cat.id}', '${cat.id}')"><i class="fa-solid ${cat.icon}"></i><h3 style="font-size: 1rem;">${catName}</h3><div class="count">${count} ${ln.song_unit || 'Songs'}</div></div>`;
     }).join('');
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
 function openAllSongs() { 
   currentCategory = "ALL"; 
-  document.getElementById('cat-title').innerText = i18n[appLang] ? i18n[appLang].total_songs : i18n['th'].total_songs; 
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
+  document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
   switchView('category'); 
   searchCategory(true); 
@@ -361,8 +367,8 @@ function openAllSongs() {
 function openCategory(catId, catRealId) { 
   currentCategory = catId; 
   const catConf = baseCategories.find(c => c.id === catId); 
-  const ln = i18n[appLang] || i18n['th'];
-  document.getElementById('cat-title').innerText = catConf ? ln[catConf.i18n_cat] : catId; 
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
+  document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
   switchView('category'); 
   searchCategory(true); 
@@ -689,6 +695,28 @@ function changeSystemLang(lang) {
     saveUiSettings();
 }
 
+function adjustScale(type, amount) {
+    const inputId = type === 'screen' ? 'setting-screen-scale' : 'setting-font-scale';
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    let currentVal = parseInt(input.value);
+    let newVal = currentVal + amount;
+    
+    if (newVal < 25) newVal = 25;
+    if (newVal > 100) newVal = 100;
+    
+    input.value = newVal;
+    
+    if (type === 'screen') {
+        updateScreenScale(newVal);
+    } else {
+        updateFontScale(newVal);
+    }
+    
+    saveUiSettings();
+}
+
 function updateScreenScale(val) {
     if (document.getElementById('val-screen-scale')) document.getElementById('val-screen-scale').innerText = val;
     document.documentElement.style.zoom = (val / 50);
@@ -826,8 +854,8 @@ function switchMusicTab(tab) {
 
 function renderMusicCategories() {
   const container = document.getElementById('music-category-scroll');
-  const ln = i18n[appLang] || i18n['th'];
-  let html = `<button class="music-cat-btn ${currentMusicCategory==='ALL'?'active':''}" onclick="filterMusicByCategory('ALL')">${ln.total_songs}</button>`;
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
+  let html = `<button class="music-cat-btn ${currentMusicCategory==='ALL'?'active':''}" onclick="filterMusicByCategory('ALL')">${ln.total_songs || 'Total Songs'}</button>`;
   baseCategories.forEach(cat => {
       const countInCat = masterMusicList.filter(s => s.Category === cat.id).length;
       if(countInCat > 0) { html += `<button class="music-cat-btn ${currentMusicCategory===cat.id?'active':''}" onclick="filterMusicByCategory('${cat.id}')">${ln[cat.i18n_nav]}</button>`; }
