@@ -434,7 +434,18 @@ function openSong(id) {
     const engTitleEl = document.getElementById('detail-eng-title'); 
     if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
     
-    document.getElementById('detail-id').innerText = currentSong.ID; document.getElementById('detail-author').innerText = currentSong.Author || '-'; 
+    document.getElementById('detail-id').innerText = currentSong.ID; 
+    
+    // แก้ไข: เช็คว่ามีข้อมูลผู้แต่งไหม ถ้าไม่มีให้ซ่อนไอคอนปากกาทิ้งไปเลย
+    const authorEl = document.getElementById('detail-author'); 
+    if(currentSong.Author && currentSong.Author.trim() !== "") {
+        authorEl.innerText = currentSong.Author;
+        authorEl.parentElement.style.display = ""; // กลับมาแสดง (ถ้าเคยถูกซ่อน)
+    } else {
+        authorEl.innerText = "";
+        authorEl.parentElement.style.display = "none"; // ซ่อนทั้ง span ที่มีปากกาและข้อความ
+    }
+
     const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
     
     const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
