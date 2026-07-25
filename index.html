@@ -282,12 +282,12 @@
       <p id="pwa-desc">เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น</p>
     </div>
     <div class="pwa-btn-group">
-      <button class="pwa-btn-cancel" onclick="closePwaBanner()">ภายหลัง</button>
+      <button class="pwa-btn-cancel" id="pwa-cancel-btn">ภายหลัง</button>
       <button class="pwa-btn-install" id="pwa-install-btn">ติดตั้งเลย</button>
     </div>
   </div>
 
-  <script src="app.js?v=119"></script>
+  <script src="app.js?v=120"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -298,33 +298,50 @@
     let deferredPrompt;
     const pwaBanner = document.getElementById('pwa-install-banner');
     const pwaOverlay = document.getElementById('pwa-overlay-bg');
-    const pwaBtn = document.getElementById('pwa-install-btn');
+    const pwaInstallBtn = document.getElementById('pwa-install-btn');
+    const pwaCancelBtn = document.getElementById('pwa-cancel-btn');
 
+    // ตรวจจับว่าเป็น Android หรือไม่
     function isAndroid() {
         return /android/i.test(navigator.userAgent.toLowerCase());
     }
 
-    function closePwaBanner() {
+    // ตรวจจับว่าผู้ใช้กำลังรันแอปผ่าน PWA (ที่ติดตั้งไปแล้ว) หรือไม่
+    function isStandalone() {
+        return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    }
+
+    // ฟังก์ชันสำหรับปิด Banner (ซ่อนเฉยๆ ไม่บันทึก Cookie)
+    function closeBanner() {
         pwaBanner.classList.add('hidden');
         pwaOverlay.classList.remove('show');
     }
 
+    // ใส่ Event ให้ปุ่ม Cancel แทน onclick ใน HTML แก้ปัญหากดไม่ติด
+    if (pwaCancelBtn) {
+        pwaCancelBtn.addEventListener('click', closeBanner);
+    }
+
+    // ฟังก์ชันนี้จะถูกเรียกทุกครั้งที่เปิดเบราว์เซอร์และยังไม่ได้ติดตั้ง
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault(); 
       deferredPrompt = e;
       
-      if (isAndroid()) {
+      // แสดง Banner เฉพาะเครื่อง Android และเมื่อเปิดในเบราว์เซอร์ปกติเท่านั้น
+      if (isAndroid() && !isStandalone()) {
           pwaBanner.classList.remove('hidden');
           pwaOverlay.classList.add('show');
       }
     });
 
-    if(pwaBtn) {
-      pwaBtn.addEventListener('click', async () => {
+    if (pwaInstallBtn) {
+      pwaInstallBtn.addEventListener('click', async () => {
         if (deferredPrompt) {
           deferredPrompt.prompt();
           const { outcome } = await deferredPrompt.userChoice;
-          if (outcome === 'accepted') closePwaBanner();
+          if (outcome === 'accepted') {
+              closeBanner(); // ปิดหน้าต่างลงเมื่อกดยอมรับการติดตั้ง
+          }
           deferredPrompt = null;
         }
       });
