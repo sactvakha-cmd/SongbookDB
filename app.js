@@ -380,6 +380,7 @@ function searchGlobal() {
 function switchView(view) {
   try {
     closePopupIfOpen();
+    closeSongMenu(); // ปิดเมนูเพลงด้วยเมื่อสลับหน้า
 
     savedScrollPositions[currentActiveView] = window.scrollY;
     
@@ -490,9 +491,33 @@ function openSong(id) {
     
     if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
     
+    closeSongMenu(); // ปิดเมนูก่อนเสมอเวลาเปิดเพลงใหม่
     switchView('song');
   } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
 }
+
+/* === ระบบ Dropdown เมนูเพลง === */
+function toggleSongMenu(event) {
+    event.stopPropagation();
+    const menu = document.getElementById('song-action-menu');
+    menu.classList.toggle('hidden');
+}
+
+function closeSongMenu() {
+    const menu = document.getElementById('song-action-menu');
+    if (menu && !menu.classList.contains('hidden')) {
+        menu.classList.add('hidden');
+    }
+}
+
+// คลิกที่ว่างเพื่อปิด Dropdown เมนู
+document.addEventListener('click', (event) => {
+    const menuContainer = document.querySelector('.song-menu-container');
+    if (menuContainer && !menuContainer.contains(event.target)) {
+        closeSongMenu();
+    }
+});
+/* ================================= */
 
 /* === ฟังก์ชันใหม่: ดึงข้อความเนื้อเพลงแบบไม่มี HTML === */
 function getCleanSongText() {
@@ -521,6 +546,7 @@ function getCleanSongText() {
 
 /* === ฟังก์ชันใหม่: คัดลอกเนื้อเพลง === */
 function copySongLyrics() {
+    closeSongMenu(); // ปิดเมนูหลังจากกดเลือก
     const textToCopy = getCleanSongText();
     if(!textToCopy) return showToast("ไม่มีข้อมูลเนื้อเพลง", "warning");
 
@@ -534,6 +560,7 @@ function copySongLyrics() {
 
 /* === ฟังก์ชันใหม่: แชร์เนื้อเพลง === */
 function shareSong() {
+    closeSongMenu(); // ปิดเมนูหลังจากกดเลือก
     const textToShare = getCleanSongText();
     if(!textToShare) return showToast("ไม่มีข้อมูลเพลงที่จะแชร์", "warning");
 
@@ -543,13 +570,14 @@ function shareSong() {
             text: textToShare,
         }).catch(err => console.log('Share canceled:', err));
     } else {
-        copySongLyrics();
-        showToast("คัดลอกแทน (อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง)", "success");
+        copySongLyrics(); // ถ้าเครื่องไม่รองรับ Web Share ให้ก๊อปปี้แทน
+        showToast("คัดลอกเนื้อเพลงแล้ว (อุปกรณ์นี้ไม่รองรับการแชร์โดยตรง)", "success");
     }
 }
 
 /* === ฟังก์ชันใหม่: พิมพ์ / เซฟ PDF === */
 function printSong() {
+    closeSongMenu(); // ปิดเมนูหลังจากกดเลือก
     if(!currentSong) return;
     window.print();
 }
