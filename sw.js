@@ -1,27 +1,44 @@
 const CACHE_NAME = 'akha-songbook-pro-v40';
 
+// รายชื่อไฟล์ที่ 'ต้อง' แคชเพื่อให้แอนดรอยด์ยอมรับการติดตั้ง
+const ASSETS_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/app.js',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png'
+];
+
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
+  self.skipWaiting(); // บังคับให้ SW ตัวใหม่ทำงานทันที
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      // ดึงไฟล์สำคัญมาเก็บไว้ทันทีตอนติดตั้ง
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
       keys.map(key => {
+        // ล้าง Cache ตัวเก่าทิ้ง เพื่อกันบั๊ก
         if (key !== CACHE_NAME) return caches.delete(key);
       })
-    ))
+    )).then(() => self.clients.claim()) // บังคับคุมทุกหน้าต่างที่เปิดอยู่
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  // บล็อคไม่ให้ Cache API และการ POST ข้อมูล เพื่อให้ระบบเพลงทำงานถูกต้อง 100%
+  // ไม่ยุ่งกับ API Request
   if (event.request.method !== 'GET' || event.request.url.includes('workers.dev')) {
     return;
   }
 
-  // Network First Strategy: ให้แอปดึงข้อมูลใหม่ล่าสุดเสมอ (UI ไม่มีทางพัง/ค้าง) 
-  // แต่ถ้าออฟไลน์ (ไม่มีเน็ต) ค่อยสลับไปดึงจาก Cache
+  // Network First Strategy: ให้แอปดึงข้อมูลใหม่ล่าสุดเสมอ 
   event.respondWith(
     fetch(event.request)
       .then(response => {
