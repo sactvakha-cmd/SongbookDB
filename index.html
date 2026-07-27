@@ -46,7 +46,6 @@
         margin-bottom: 12px !important;
     }
 
-    /* สไตล์สำหรับกล่องข้อความรออนุมัติ */
     .waiting-approval-box {
         background: rgba(245, 158, 11, 0.1);
         border: 2px dashed #f59e0b;
@@ -101,7 +100,6 @@
       <div class="auth-icon"><i class="fa-solid fa-music"></i></div>
       <h2 class="auth-title">Akha Songbook Pro</h2>
       
-      <!-- กล่องแสดงสถานะกำลังรออนุมัติ -->
       <div id="waiting-approval-msg" class="waiting-approval-box">
         <i class="fa-solid fa-clock-rotate-left fa-spin"></i>
         <strong style="text-align: center;">กรุณารอสักครู่...<br>แอดมินกำลังตรวจสอบและอนุมัติ</strong>
@@ -195,7 +193,6 @@
           </div>
           <div class="total-num" id="total-music-count">0</div>
         </div>
-
       </div>
     </div>
 
@@ -222,8 +219,9 @@
 
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar no-print">
-        <!-- เปลี่ยนจาก switchView('category') เป็น goBackFromSong() -->
+        <!-- นี่คือจุดสำคัญที่ทำให้ปุ่ม Back ฉลาดขึ้น -->
         <button class="btn-icon" onclick="goBackFromSong()"><i class="fa-solid fa-arrow-left"></i></button>
+        
         <div id="top-audio-player" class="top-audio-ui hidden">
          <audio id="song-audio-element" preload="auto" crossorigin="anonymous"></audio>
           <button class="btn-play-pause" id="btn-play-pause" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
@@ -237,11 +235,8 @@
       </div>
       
       <div class="reader-card" id="printable-song-area">
-        
         <div class="reader-header" style="text-align: center; margin-bottom: 10px; position: relative;">
-          
           <div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center;">
-            
             <div style="position: absolute; left: 0; top: 2px;">
               <span id="detail-id" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: var(--bg-main); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></span>
             </div>
@@ -258,7 +253,6 @@
                 <button onclick="printSong()"><i class="fa-solid fa-print"></i> <span data-i18n="menu_print">พิมพ์ / บันทึก PDF</span></button>
               </div>
             </div>
-
           </div>
 
           <h4 id="detail-eng-title" class="reader-eng-title hidden" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 400; font-style: italic; margin-bottom: 10px; margin-top: 5px;">English Title</h4>
@@ -280,9 +274,7 @@
         </div>
         
         <div id="detail-image-container" class="song-image-box hidden"></div>
-        
         <div id="detail-lyrics" class="reader-lyrics"></div>
-        
         <div id="detail-inspiration" class="reader-inspiration hidden"></div>
         <div id="detail-media-container" class="media-box hidden no-print"></div>
       </div>
@@ -347,7 +339,6 @@
              </div>
          </div>
       </div>
-      
     </div>
 
     <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
@@ -427,7 +418,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -455,7 +445,8 @@
     </div>
   </div>
 
-  <script src="app.js?v=136"></script>
+  <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
+  <script src="app.js?v=137"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
