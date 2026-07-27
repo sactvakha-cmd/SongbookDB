@@ -41,11 +41,26 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; cursor: pointer;
     }
 
-    /* ปรับระยะห่างด้านล่างของหน้า Dashboard Header ให้ชิดขึ้น */
     #view-dashboard .hero-header {
         padding-bottom: 8px !important;
         margin-bottom: 12px !important;
     }
+
+    /* สไตล์สำหรับกล่องข้อความรออนุมัติ */
+    .waiting-approval-box {
+        background: rgba(245, 158, 11, 0.1);
+        border: 2px dashed #f59e0b;
+        color: #d97706;
+        padding: 15px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .waiting-approval-box i { font-size: 2rem; }
   </style>
 
   <script>
@@ -85,7 +100,15 @@
     <div class="auth-card">
       <div class="auth-icon"><i class="fa-solid fa-music"></i></div>
       <h2 class="auth-title">Akha Songbook Pro</h2>
-      <div class="auth-tabs">
+      
+      <!-- กล่องแสดงสถานะกำลังรออนุมัติ -->
+      <div id="waiting-approval-msg" class="waiting-approval-box">
+        <i class="fa-solid fa-clock-rotate-left fa-spin"></i>
+        <strong style="text-align: center;">กรุณารอสักครู่...<br>แอดมินกำลังตรวจสอบและอนุมัติ</strong>
+        <span style="font-size:0.8rem; color: var(--text-muted);">ระบบจะพาเข้าใช้งานอัตโนมัติเมื่ออนุมัติสำเร็จ</span>
+      </div>
+
+      <div class="auth-tabs" id="auth-tabs-container">
         <button class="auth-tab-btn active" id="tab-login" onclick="switchAuthTab('login')">เข้าสู่ระบบ</button>
         <button class="auth-tab-btn" id="tab-register" onclick="switchAuthTab('register')">สมัครใหม่</button>
       </div>
@@ -96,7 +119,16 @@
   <div id="view-payment" class="auth-wrapper hidden">
     <div class="auth-card" style="max-width: 500px; padding: 30px;">
       <h2 style="color: var(--primary); margin-bottom: 10px;" id="pay-title">ชำระเงินเพื่อเข้าใช้งาน</h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">ค่าบริการ: <strong style="color:var(--danger); font-size:1.1rem;">99 บาท / เดือน</strong></p>
+      
+      <div style="text-align: left; margin-bottom: 15px;">
+        <label style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); display: block; margin-bottom: 5px;">เลือกแพ็กเกจการใช้งาน <span style="color:red">*</span></label>
+        <select id="payment-package" style="font-weight: bold; color: var(--primary); background: rgba(37, 99, 235, 0.05); border: 2px solid var(--primary); padding: 12px; width: 100%; border-radius: 8px;">
+          <option value="39 บาท / 1 เดือน">39 บาท / 1 เดือน</option>
+          <option value="230 บาท / 6 เดือน">230 บาท / 6 เดือน</option>
+          <option value="450 บาท / 1 ปี">450 บาท / 1 ปี</option>
+        </select>
+      </div>
+
       <div style="background: #f1f5f9; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
         <img src="my-qr.jpg" alt="QR Code" style="width: 200px; border-radius: 10px; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
         <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">091-014-5332</p>
@@ -131,7 +163,6 @@
         </select>
       </div>
 
-      <!-- ระบบค้นหา แบบดึงชื่อศิลปินอัตโนมัติ -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -139,7 +170,6 @@
         </div>
         <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
           <option value="">-- ศิลปิน/Artist --</option>
-          <!-- Option จะถูกเพิ่มจาก app.js -->
         </select>
       </div>
 
@@ -177,7 +207,6 @@
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
       
-      <!-- ค้นหาศิลปินในหน้าหมวดหมู่ แบบอัตโนมัติ -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-filter"></i>
@@ -185,7 +214,6 @@
         </div>
         <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
           <option value="">-- ศิลปิน/Artist --</option>
-          <!-- Option จะถูกเพิ่มจาก app.js -->
         </select>
       </div>
 
@@ -321,7 +349,7 @@
       
     </div>
 
-    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ที่บีบอัดให้กระชับขึ้น ===== -->
+    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header" style="padding-bottom:10px;"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
@@ -426,7 +454,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=135"></script>
+  <script src="app.js?v=136"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
