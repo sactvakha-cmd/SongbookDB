@@ -121,7 +121,6 @@
           <h1 data-i18n="app_title" style="font-size:1.35rem; margin-bottom:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">คลังเพลงคริสเตียนอาข่า</h1>
         </div>
         
-        <!-- เมนู Dropdown เปลี่ยนภาษา -->
         <select id="main-lang-selector" class="top-lang-dropdown" onchange="setAppLanguage(this.value)">
           <option value="th">ไทย</option>
           <option value="an">อาข่าใหม่</option>
@@ -131,10 +130,8 @@
           <option value="zh">中文</option>
         </select>
       </div>
-      
-      <!-- เอา <br> ออกจากตรงนี้ และใช้ CSS จัดการแทนเพื่อให้ช่องไฟสวยงาม -->
 
-      <!-- ระบบค้นหา แบ่งสัดส่วน 70% และ 30% -->
+      <!-- ระบบค้นหา แบบดึงชื่อศิลปินอัตโนมัติ -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -142,9 +139,7 @@
         </div>
         <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
           <option value="">-- ศิลปิน/Artist --</option>
-          <option value="Sl. Aqyo Ghoeqmaer">Aqyo</option>
-          <option value="Sll. Aqlmq Mazeuv">Aqlmq</option>
-          <option value="Sl. Lawqtsaq">Lawqtsaq</option>
+          <!-- Option จะถูกเพิ่มจาก app.js -->
         </select>
       </div>
 
@@ -182,7 +177,7 @@
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
       
-      <!-- เพิ่มช่องค้นหาตามศิลปินในหน้าหมวดหมู่ด้วย -->
+      <!-- ค้นหาศิลปินในหน้าหมวดหมู่ แบบอัตโนมัติ -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-filter"></i>
@@ -190,10 +185,7 @@
         </div>
         <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
           <option value="">-- ศิลปิน/Artist --</option>
-          <option value="Sl. Aˬyo G'oeˬmehˇ">Aˬyo</option>
-          <option value="Sll. Aˬlmˬ Mazeuˆ">Aˬlmˬ</option>
-          <option value="Sl. Lawˬtsaˬ">Lawˬtsaˬ</option>
-          <option value="Sl. Laˇcawꞈ Mazeuˆ">Laˇcawꞈ</option>
+          <!-- Option จะถูกเพิ่มจาก app.js -->
         </select>
       </div>
 
@@ -221,15 +213,12 @@
           
           <div style="position: relative; width: 100%; min-height: 40px; margin-bottom: 5px; display: flex; align-items: flex-start; justify-content: center;">
             
-            <!-- ป้ายรหัสเพลง -->
             <div style="position: absolute; left: 0; top: 2px;">
               <span id="detail-id" style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); background: var(--bg-main); padding: 3px 8px; border-radius: 8px; border: 1px solid var(--border-color); font-family: monospace; box-shadow: 0 2px 5px rgba(0,0,0,0.05);"></span>
             </div>
             
-            <!-- ชื่อเพลง -->
             <h2 id="detail-title" class="reader-title" style="margin: 0; padding: 0 70px; line-height: 1.4; font-size: 1.35rem; color: var(--primary); text-align: center; width: 100%; word-break: break-word;">ชื่อเพลง</h2>
 
-            <!-- ปุ่มเมนู Action แบบ Dropdown -->
             <div style="position: absolute; right: 0; top: 0;" class="no-print song-menu-container">
               <button class="btn-song-menu" onclick="toggleSongMenu(event)" title="จัดการเพลง">
                 <i class="fa-solid fa-ellipsis-vertical"></i>
@@ -246,7 +235,8 @@
           <h4 id="detail-eng-title" class="reader-eng-title hidden" style="font-size: 0.95rem; color: var(--text-muted); font-weight: 400; font-style: italic; margin-bottom: 10px; margin-top: 5px;">English Title</h4>
           
           <div class="reader-meta" style="font-size: 0.8rem; color: var(--text-muted); opacity: 0.9; margin-bottom: 5px; display: flex; justify-content: center; gap: 15px;">
-            <span><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span>
+            <span id="detail-artist-container" class="hidden"><i class="fa-solid fa-microphone-lines"></i> <span id="detail-artist"></span></span>
+            <span id="detail-author-container" class="hidden"><i class="fa-solid fa-pen-nib"></i> <span id="detail-author"></span></span>
           </div>
         </div>
 
@@ -436,7 +426,7 @@
     </div>
   </div>
 
-  <script src="app.js?v=134"></script>
+  <script src="app.js?v=135"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
