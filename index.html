@@ -17,6 +17,32 @@
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* สไตล์เพิ่มเติมสำหรับ Dropdown เปลี่ยนภาษาและค้นหาศิลปิน */
+    .top-lang-dropdown {
+      position: absolute; right: 20px; top: 15px; 
+      background: var(--bg-surface); color: var(--text-main);
+      border: 1px solid var(--border-color); border-radius: 8px;
+      padding: 5px 10px; font-family: var(--font-main); font-size: 0.85rem; font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); outline: none; cursor: pointer;
+    }
+    
+    .search-flex-container {
+      display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+    }
+    
+    .search-flex-container .search-container {
+      flex: 7; margin-bottom: 0; 
+    }
+    
+    .search-flex-container .artist-select {
+      flex: 3; background: var(--bg-surface); color: var(--text-main);
+      border: 1px solid var(--border-color); border-radius: var(--radius-ui);
+      padding: 12px 10px; font-family: var(--font-main); font-size: 0.85rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; cursor: pointer;
+    }
+  </style>
+
   <script>
     try {
       const savedUi = JSON.parse(localStorage.getItem('songbook_settings'));
@@ -83,16 +109,39 @@
 
   <div id="app" class="container hidden">
     <div id="view-dashboard" class="fade-in">
-      <div class="hero-header">
+      
+      <div class="hero-header" style="position: relative;">
         <div><p style="color:var(--text-muted);">AKHA SONGBOOK 🎵</p><h1 data-i18n="app_title">คลังเพลงคริสเตียนอาข่า</h1></div>
+        
+        <!-- เมนู Dropdown เปลี่ยนภาษา มุมขวาบน -->
+        <select id="main-lang-selector" class="top-lang-dropdown" onchange="setAppLanguage(this.value)">
+          <option value="th">ไทย</option>
+          <option value="an">อาข่าใหม่</option>
+          <option value="ao">อาข่าเก่า</option>
+          <option value="en">English</option>
+          <option value="my">မြန်မာ</option>
+          <option value="zh">中文</option>
+        </select>
       </div>
-      <div class="lang-switcher">
-        <button class="lang-btn active" id="btn-lang-th" onclick="setAppLanguage('th')">ไทย</button>
-        <button class="lang-btn" id="btn-lang-an" onclick="setAppLanguage('an')">อาข่าใหม่</button>
-        <button class="lang-btn" id="btn-lang-ao" onclick="setAppLanguage('ao')">อาข่าเก่า</button>
+      
+      <br>
+
+      <!-- ระบบค้นหา แบ่งสัดส่วน 70% และ 30% -->
+      <div class="search-flex-container">
+        <div class="search-container">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()">
+        </div>
+        <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
+          <option value="">-- ศิลปิน --</option>
+          <option value="Sl. Aqyo Ghoeqmaer">Aqyo</option>
+          <option value="Sll. Aqlmq Mazeuv">Aqlmq</option>
+          <option value="Sl. Lawqtsaq">Lawqtsaq</option>
+        </select>
       </div>
-      <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()"></div>
+
       <div id="search-results"></div>
+
       <div id="dashboard-content">
         <div class="all-songs-card" onclick="openAllSongs()">
           <div style="display:flex; align-items:center;">
@@ -124,7 +173,21 @@
         <button class="btn-icon" onclick="forceDataRefresh()" title="อัปเดตข้อมูล"><i class="fa-solid fa-rotate-right"></i></button>
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
-      <div class="search-container"><i class="fa-solid fa-filter"></i><input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()"></div>
+      
+      <!-- เพิ่มช่องค้นหาตามศิลปินในหน้าหมวดหมู่ด้วย -->
+      <div class="search-flex-container">
+        <div class="search-container">
+          <i class="fa-solid fa-filter"></i>
+          <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
+        </div>
+        <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
+          <option value="">-- ศิลปิน --</option>
+          <option value="Sl. Aqyo Ghoeqmaer">Aqyo</option>
+          <option value="Sll. Aqlmq Mazeuv">Aqlmq</option>
+          <option value="Sl. Lawqtsaq">Lawqtsaq</option>
+        </select>
+      </div>
+
       <div id="song-list"></div>
     </div>
 
@@ -298,6 +361,8 @@
         <label style="font-size: 0.85rem; font-weight: bold; margin-bottom: 3px; display: block; color: var(--text-muted);" data-i18n="setting_sys_lang">ภาษาระบบ (System Language)</label>
         <select id="setting-sys-lang" onchange="changeSystemLang(this.value)" style="margin-bottom: 12px; padding: 8px 16px 8px 16px;">
           <option value="th">ไทย (Thai)</option>
+          <option value="an">อาข่าใหม่</option>
+          <option value="ao">อาข่าเก่า</option>
           <option value="en">English (อังกฤษ)</option>
           <option value="my">မြန်မာ (Burmese)</option>
           <option value="zh">中文 (Chinese)</option>
@@ -363,7 +428,7 @@
   </div>
 
   <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
-  <script src="app.js?v=131"></script>
+  <script src="app.js?v=132"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
