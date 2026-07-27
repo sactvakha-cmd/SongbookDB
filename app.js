@@ -35,14 +35,6 @@ const baseCategories = [
   { id: 'เพลงไว้อาลัย', i18n_cat: 'cat_sad', i18n_nav: 'nav_cat_sad', icon: 'fa-dove', bg: 'bg-g8' }
 ];
 
-// เก็บตัวย่อศิลปินเพื่อใช้สร้างรหัสเพลงใหม่
-const artistPrefixes = {
-  "Sl. Aˬyo G'oeˬmehˇ": "AY",
-  "Sll. Aˬlmˬ Mazeuˆ": "AL",
-  "Sl. Lawˬtsaˬ": "LTS"
-  "Sl. Laˇcawꞈ Mazeuˆ": "LC" 
-};
-
 window.onload = () => {
   switchAuthTab('login');
   const savedLang = localStorage.getItem('app_lang'); if(savedLang) appLang = savedLang; setAppLanguage(appLang, false); 
@@ -126,6 +118,25 @@ function doLogin() {
   authenticateUser(phone, pin, btn, false);
 }
 
+// ฟังก์ชันสำหรับกวาดรายชื่อศิลปินอัตโนมัติ
+function populateArtistFilter() {
+  const artistSet = new Set();
+  allSongs.forEach(song => {
+    if (song.Artist && song.Artist.trim() !== "") {
+      artistSet.add(song.Artist.trim());
+    }
+  });
+
+  const optionsHTML = `<option value="">-- ศิลปิน/Artist --</option>` + 
+    Array.from(artistSet).sort().map(artist => `<option value="${artist}">${artist}</option>`).join('');
+  
+  const globalFilter = document.getElementById('artist-filter');
+  const catFilter = document.getElementById('cat-artist-filter');
+  
+  if (globalFilter) globalFilter.innerHTML = optionsHTML;
+  if (catFilter) catFilter.innerHTML = optionsHTML;
+}
+
 function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
   if(!isSilentMode) { document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังตรวจสอบสิทธิ์..."; }
   fetchAPI('authAndGetSongs', { phone: phone, pin: pin })
@@ -159,6 +170,8 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
 
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+      
+      populateArtistFilter(); // อัปเดตรายชื่อศิลปินใน Dropdown
       
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
@@ -320,6 +333,7 @@ document.addEventListener("visibilitychange", () => {
     fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { 
         if(res.status === 'success') { 
             allSongs = res.songs || []; 
+            populateArtistFilter();
             renderDashboard(); 
             if(currentCategory) searchCategory(); 
         } 
@@ -334,6 +348,9 @@ function forceDataRefresh() {
       if(res.status === 'success') {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+        
+        populateArtistFilter(); // อัปเดต Filter ทันที
+        
         renderDashboard(); 
         if(currentCategory) searchCategory(true); 
         if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
@@ -390,7 +407,7 @@ function searchCategory(isImmediate = false) {
       
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
-        const matchArtist = selectedArtist === "" || s.Author === selectedArtist;
+        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; // ค้นหาจาก Artist
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
@@ -398,7 +415,7 @@ function searchCategory(isImmediate = false) {
       });
 
       document.getElementById('cat-total').innerText = results.length; 
-      renderList(results, document.getElementById('song-list'), selectedArtist);
+      renderList(results, document.getElementById('song-list'));
     } catch(e) { console.error("Search Error", e); }
   };
 
@@ -427,39 +444,25 @@ function searchGlobal() {
       contentDiv.classList.add('hidden'); 
       
       const results = allSongs.filter(s => { 
-        const matchArtist = selectedArtist === "" || s.Author === selectedArtist;
+        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; // ค้นหาจาก Artist
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
         return matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
-      renderList(results, resDiv, selectedArtist);
+      renderList(results, resDiv);
     } catch(e) { console.error("Search Global Error", e); }
   }, 300);
 }
 
-// ฟังก์ชัน renderList อัปเดตให้รองรับการเปลี่ยน ID แบบชั่วคราว
-function renderList(songs, container, filterArtist = "") {
+function renderList(songs, container) {
   try {
     if(songs.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลเพลง 😢</div>`; return; }
-    
-    // ถ้ามีการเลือกศิลปิน ให้เรียงใหม่และเปลี่ยนรหัสชั่วคราว แต่เวลาเรียกเปิดเพลงยังใช้ ID จริง
-    let displaySongs = songs;
-    if (filterArtist !== "" && artistPrefixes[filterArtist]) {
-        let prefix = artistPrefixes[filterArtist];
-        displaySongs = songs.map((s, index) => {
-            let fakeId = prefix + String(index + 1).padStart(2, '0');
-            return { ...s, displayId: fakeId };
-        });
-    } else {
-        displaySongs = songs.map(s => ({ ...s, displayId: s.ID }));
-    }
 
-    container.innerHTML = displaySongs.map(s => {
+    container.innerHTML = songs.map(s => {
       let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; 
-      // สังเกตว่า s.displayId ใช้แค่แสดงผล แต่ onclick ส่ง s.ID ของจริงไป
-      return `<div class="song-item" onclick="openSong('${s.ID}', '${s.displayId}')"><div class="s-id">${s.displayId}</div><div class="s-info"><div class="s-title">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
+      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info"><div class="s-title">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Artist || s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
     }).join('');
   } catch(e) { console.error("Render List Error", e); }
 }
@@ -523,23 +526,35 @@ function switchReaderLyricView(type) {
   }
 }
 
-function openSong(id, displayId = null) {
+function openSong(id) {
   try {
     currentSong = allSongs.find(s => s.ID === id); 
     document.getElementById('detail-title').innerText = currentSong.Title; 
     const engTitleEl = document.getElementById('detail-eng-title'); 
     if(currentSong.EnglishTitle) { engTitleEl.innerText = currentSong.EnglishTitle; engTitleEl.classList.remove('hidden'); } else { engTitleEl.classList.add('hidden'); }
     
-    // แสดงรหัสปลอม (ถ้ามี) หรือแสดงรหัสจริง
-    document.getElementById('detail-id').innerText = displayId ? displayId : currentSong.ID; 
+    document.getElementById('detail-id').innerText = currentSong.ID; 
     
+    // จัดการแสดงผล ศิลปิน/นักร้อง (Artist)
+    const artistEl = document.getElementById('detail-artist'); 
+    const artistContainer = document.getElementById('detail-artist-container');
+    if(currentSong.Artist && currentSong.Artist.trim() !== "") {
+        artistEl.innerText = currentSong.Artist;
+        artistContainer.classList.remove('hidden');
+    } else {
+        artistEl.innerText = "";
+        artistContainer.classList.add('hidden');
+    }
+
+    // จัดการแสดงผล ผู้แต่ง/เรียบเรียง (Author)
     const authorEl = document.getElementById('detail-author'); 
+    const authorContainer = document.getElementById('detail-author-container');
     if(currentSong.Author && currentSong.Author.trim() !== "") {
         authorEl.innerText = currentSong.Author;
-        authorEl.parentElement.style.display = ""; 
+        authorContainer.classList.remove('hidden');
     } else {
         authorEl.innerText = "";
-        authorEl.parentElement.style.display = "none"; 
+        authorContainer.classList.add('hidden');
     }
 
     const chordDiv = document.getElementById('detail-chords-container'); if(currentSong.Chords) { document.getElementById('detail-chords').innerText = currentSong.Chords; chordDiv.classList.remove('hidden'); } else { chordDiv.classList.add('hidden'); }
@@ -627,7 +642,8 @@ function getCleanSongText() {
     if(!currentSong) return "";
     let text = `[${currentSong.ID}] ${currentSong.Title}\n`;
     if(currentSong.EnglishTitle) text += `${currentSong.EnglishTitle}\n`;
-    if(currentSong.Author) text += `ผู้แต่ง: ${currentSong.Author}\n`;
+    if(currentSong.Artist) text += `ศิลปิน: ${currentSong.Artist}\n`;
+    if(currentSong.Author) text += `ผู้แต่ง/เรียบเรียง: ${currentSong.Author}\n`;
     if(currentSong.Chords) text += `คอร์ด: ${currentSong.Chords}\n`;
     text += `\n-----------------------\n\n`;
     
@@ -854,7 +870,7 @@ function openMusicPlayer() {
       
       const song = masterMusicList[0];
       document.getElementById('music-title-display').innerText = song.Title;
-      document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
+      document.getElementById('music-artist-display').innerText = song.Artist || song.Author || 'Akha Songbook';
       
       const coverImg = document.getElementById('music-cover-img');
       const lyricBg = document.getElementById('lyric-bg-img');
@@ -917,7 +933,7 @@ function renderMusicList() {
       </div>
       <div class="s-info">
          <div class="s-title" style="${isPlaying ? 'color:var(--primary);' : ''}">${s.Title}</div>
-         <div class="s-meta">${s.Author || 'Akha Songbook'}</div>
+         <div class="s-meta">${s.Artist || s.Author || 'Akha Songbook'}</div>
       </div>
       <i class="fa-solid ${isPlaying && !songAudioEl.paused ? 'fa-pause' : 'fa-play'}" style="color:${isPlaying ? 'var(--primary)' : 'var(--border-color)'}; font-size:1rem;"></i>
     </div>`;
@@ -934,7 +950,7 @@ function playMusicIndex(index) {
   }
   
   document.getElementById('music-title-display').innerText = song.Title;
-  document.getElementById('music-artist-display').innerText = song.Author || 'Akha Songbook';
+  document.getElementById('music-artist-display').innerText = song.Artist || song.Author || 'Akha Songbook';
   
   const coverImg = document.getElementById('music-cover-img');
   const lyricBg = document.getElementById('lyric-bg-img');
