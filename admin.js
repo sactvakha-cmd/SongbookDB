@@ -5,6 +5,11 @@ let allUsers = [];
 let currentAdminView = 'dashboard';
 let adminScrollPositions = {};
 
+// สร้างระบบเก็บค่า Scroll Position ก่อนการ Reload หน้าเว็บ (เพื่อให้เลื่อนกลับมาที่เดิมหลังเซฟเพลง)
+window.addEventListener('beforeunload', () => {
+  sessionStorage.setItem('adminScrollTemp', window.scrollY);
+});
+
 window.onload = () => {
   const savedCat = sessionStorage.getItem('adminCatTemp');
   if(savedCat) { currentAdminCategory = savedCat; }
@@ -65,6 +70,13 @@ function fetchAllData() {
       document.getElementById('loader').classList.add('hidden');
       
       filterAdminCat(currentAdminCategory);
+
+      // เลื่อนหน้าจอกลับมาที่ตำแหน่งเดิมหากมีการ Refresh (หลังกดบันทึก)
+      const savedScroll = sessionStorage.getItem('adminScrollTemp');
+      if (savedScroll) {
+         setTimeout(() => { window.scrollTo(0, parseInt(savedScroll)); sessionStorage.removeItem('adminScrollTemp'); }, 100);
+      }
+
   }).catch(err => {
       showToast("โหลดข้อมูลล้มเหลว: " + err.message, "error");
       document.getElementById('loader').classList.add('hidden');
@@ -122,11 +134,13 @@ function renderSongs() {
     const matchCat = (currentAdminCategory === 'ALL') || (s.Category === currentAdminCategory);
     return matchSearch && matchCat;
   });
+  
+  // ปรับให้สามารถกดที่ไหนก็ได้ใน card ของ song-item
   document.getElementById('song-list').innerHTML = results.map(s => `
-    <div class="song-item">
+    <div class="song-item" onclick="openAdminForm('${s.ID}')">
       <div class="s-id">${s.ID}</div>
       <div class="s-info"><div class="s-title">${s.Title||'-'}</div><div class="s-meta">${s.Category} | 🎧 ฟัง ${s.PlayCount || 0} ครั้ง</div></div>
-      <div class="quick-actions">
+      <div class="quick-actions" onclick="event.stopPropagation();">
         <button class="btn-quick edit" onclick="openAdminForm('${s.ID}')"><i class="fa-solid fa-pen"></i></button>
         <button class="btn-quick del" onclick="deleteSong('${s.ID}')"><i class="fa-solid fa-trash"></i></button>
       </div>
@@ -139,25 +153,79 @@ function openAdminForm(id = null) {
   const editorOld = document.getElementById('form-lyrics-old'); const editorNew = document.getElementById('form-lyrics-new');
   if(id) {
     const s = allSongs.find(x => x.ID === id);
-    document.getElementById('form-id').value = s.ID; document.getElementById('form-cat').value = s.Category; document.getElementById('form-title').value = s.Title; document.getElementById('form-eng-title').value = s.EnglishTitle || ""; document.getElementById('form-author').value = s.Author || ""; document.getElementById('form-chords').value = s.Chords || ""; document.getElementById('form-notation').value = s.Notation || ""; document.getElementById('form-audio').value = s.AudioUrl || ""; document.getElementById('form-link').value = s.ExternalLink || ""; document.getElementById('form-image').value = s.ImageUrl || ""; document.getElementById('form-inspiration').value = s.Inspiration || ""; 
-    editorOld.innerHTML = s.Lyrics || ""; editorNew.innerHTML = s.LyricsNew || ""; document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + s.ID;
+    document.getElementById('form-id').value = s.ID; 
+    document.getElementById('form-cat').value = s.Category; 
+    document.getElementById('form-title').value = s.Title; 
+    document.getElementById('form-eng-title').value = s.EnglishTitle || ""; 
+    
+    // ตั้งค่าศิลปิน: ถ้ามีในระบบให้เลือก ถ้าไม่มีให้เลือกช่องว่าง
+    const artistSelect = document.getElementById('form-artist');
+    if (s.Author && [...artistSelect.options].some(opt => opt.value === s.Author)) {
+        artistSelect.value = s.Author;
+        document.getElementById('form-author').value = ""; // เคลียร์ช่องเก่า
+    } else {
+        artistSelect.value = "";
+        document.getElementById('form-author').value = s.Author || ""; 
+    }
+
+    document.getElementById('form-chords').value = s.Chords || ""; 
+    document.getElementById('form-notation').value = s.Notation || ""; 
+    document.getElementById('form-audio').value = s.AudioUrl || ""; 
+    document.getElementById('form-link').value = s.ExternalLink || ""; 
+    document.getElementById('form-image').value = s.ImageUrl || ""; 
+    document.getElementById('form-inspiration').value = s.Inspiration || ""; 
+    editorOld.innerHTML = s.Lyrics || ""; 
+    editorNew.innerHTML = s.LyricsNew || ""; 
+    document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + s.ID;
   } else {
-    document.getElementById('form-id').value = ""; document.getElementById('form-title').value = ""; editorOld.innerHTML = ""; editorNew.innerHTML = ""; document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
-    document.getElementById('form-audio').value = ""; document.getElementById('form-image').value = "";
+    document.getElementById('form-id').value = ""; 
+    document.getElementById('form-title').value = ""; 
+    document.getElementById('form-artist').value = "";
+    document.getElementById('form-author').value = "";
+    editorOld.innerHTML = ""; 
+    editorNew.innerHTML = ""; 
+    document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
+    document.getElementById('form-audio').value = ""; 
+    document.getElementById('form-image').value = "";
     if(currentAdminCategory !== 'ALL') document.getElementById('form-cat').value = currentAdminCategory;
   }
   switchView('admin-form');
 }
 
 function saveSong() {
-  const data = { ID: document.getElementById('form-id').value, Title: document.getElementById('form-title').value, Category: document.getElementById('form-cat').value, Language: "Akha", Author: document.getElementById('form-author').value, Chords: document.getElementById('form-chords').value, Lyrics: document.getElementById('form-lyrics-old').innerHTML, LyricsNew: document.getElementById('form-lyrics-new').innerHTML, Inspiration: document.getElementById('form-inspiration').value, Notation: document.getElementById('form-notation').value, AudioUrl: document.getElementById('form-audio').value, ExternalLink: document.getElementById('form-link').value, EnglishTitle: document.getElementById('form-eng-title').value, ImageUrl: document.getElementById('form-image').value };
+  // ดึงข้อมูลศิลปิน (ถ้าเลือก Dropdown ให้ใช้ Dropdown, ถ้าไม่เลือกให้ใช้ Text Input เก่า)
+  const selectedArtist = document.getElementById('form-artist').value;
+  const oldAuthor = document.getElementById('form-author').value;
+  const finalAuthor = selectedArtist !== "" ? selectedArtist : oldAuthor;
+
+  const data = { 
+      ID: document.getElementById('form-id').value, 
+      Title: document.getElementById('form-title').value, 
+      Category: document.getElementById('form-cat').value, 
+      Language: "Akha", 
+      Author: finalAuthor, 
+      Chords: document.getElementById('form-chords').value, 
+      Lyrics: document.getElementById('form-lyrics-old').innerHTML, 
+      LyricsNew: document.getElementById('form-lyrics-new').innerHTML, 
+      Inspiration: document.getElementById('form-inspiration').value, 
+      Notation: document.getElementById('form-notation').value, 
+      AudioUrl: document.getElementById('form-audio').value, 
+      ExternalLink: document.getElementById('form-link').value, 
+      EnglishTitle: document.getElementById('form-eng-title').value, 
+      ImageUrl: document.getElementById('form-image').value 
+  };
+  
   if(!data.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
   document.getElementById('btn-save-top').disabled = true;
+  
   fetchAPI('saveSong', { data: data }).then(res => {
     document.getElementById('btn-save-top').disabled = false;
-    showToast(res.msg); setTimeout(() => location.reload(), 1000);
+    showToast(res.msg); 
+    // โหลดหน้าใหม่เพื่อให้ข้อมูลอัปเดต โดยโค้ด window.onbeforeunload จะจำตำแหน่ง scroll ไว้ให้เอง
+    setTimeout(() => location.reload(), 1000);
   }).catch(e => { showToast(e.message, "error"); document.getElementById('btn-save-top').disabled = false; });
 }
+
 function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('deleteSong', { id: id }).then(res => { showToast(res.msg); location.reload(); }); } }
 
 function switchAdminLyricView(type) {
@@ -197,7 +265,6 @@ function formatTextAdmin(command, value = null) {
   });
 }
 
-// === ไฮไลท์การแก้ไข: อัปเกรดระบบจัดรูปแบบให้ทะลวงลบโค้ดแฝงได้หมดจด ===
 function applyCustomStyle(property, value) {
   if (!value) return;
 
@@ -225,7 +292,6 @@ function applyCustomStyle(property, value) {
         let blockParent = el.closest('div, p');
         if (blockParent && activeEditor.contains(blockParent) && blockParent !== activeEditor) {
             blockParent.style.lineHeight = finalValue;
-            // บังคับล้างบรรทัดเก่าทั้งหมดที่ซ่อนอยู่ข้างใน
             blockParent.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
         } else {
             const div = document.createElement('div');
@@ -247,18 +313,13 @@ function applyCustomStyle(property, value) {
     span.style[property] = finalValue;
     span.innerHTML = el.innerHTML;
 
-    // บังคับค้นหาและทำลาย (Bulldozer) สไตล์เก่าที่ซ่อนอยู่ลึกๆ
     span.querySelectorAll('*').forEach(child => {
-        // ล้างสไตล์เก่าที่เป็นตัวขัดแย้ง
         if (child.style) {
             child.style[property] = ''; 
         }
-        
-        // พิเศษสำหรับการปรับขนาดอักษร: ต้องฆ่า Tag โบราณที่ซ่อนอยู่ด้วย
         if (property === 'fontSize') {
-            if (child.style) child.style.fontSize = ''; // ลบ inline CSS ที่ซ่อนอยู่ (เช่น style="font-size: 10pt")
-            if (child.tagName.toLowerCase() === 'font') child.removeAttribute('size'); // ลบ HTML Attribute (เช่น size="2")
-            // ถ้าเจอ Tag แบบดื้อๆ เช่น <small> หรือ <big> ให้บังคับมันกลายร่าง
+            if (child.style) child.style.fontSize = ''; 
+            if (child.tagName.toLowerCase() === 'font') child.removeAttribute('size'); 
             if (child.tagName.toLowerCase() === 'small' || child.tagName.toLowerCase() === 'big') {
                 child.style.fontSize = 'inherit'; 
             }
@@ -268,10 +329,8 @@ function applyCustomStyle(property, value) {
     el.replaceWith(span);
   });
   
-  // จัดระเบียบโค้ด HTML ให้เป็นระเบียบหลังทำงานเสร็จ
   activeEditor.normalize();
 }
-// =========================================================
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
