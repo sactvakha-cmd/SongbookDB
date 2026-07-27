@@ -25,6 +25,7 @@ let pendingSlipBase64 = "";
 let isRegisteringNew = true;
 let currentActiveView = 'dashboard';
 let savedScrollPositions = {};
+let approvalCheckInterval = null; // ตัวแปรสำหรับเช็คสถานะรออนุมัติแบบอัตโนมัติ
 
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
@@ -118,7 +119,6 @@ function doLogin() {
   authenticateUser(phone, pin, btn, false);
 }
 
-// ฟังก์ชันสำหรับกวาดรายชื่อศิลปินอัตโนมัติ
 function populateArtistFilter() {
   const artistSet = new Set();
   allSongs.forEach(song => {
@@ -145,6 +145,18 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     document.getElementById('loader').classList.add('hidden');
     
     if(res.status === 'success') {
+      
+      // ถ้ารออนุมัติอยู่ แล้วแอดมินกดอนุมัติ ให้หยุดการเช็คอัตโนมัติแล้วเด้งเข้าแอปเลย
+      if(approvalCheckInterval) {
+          clearInterval(approvalCheckInterval);
+          approvalCheckInterval = null;
+          showToast("ได้รับการอนุมัติเรียบร้อยแล้ว!", "success");
+      }
+      // รีเซ็ตหน้าล็อกอินให้กลับมาปกติ เผื่อมีการล็อกเอ้าท์ทีหลัง
+      document.getElementById('waiting-approval-msg').style.display = 'none';
+      document.getElementById('auth-tabs-container').style.display = 'flex';
+      document.getElementById('auth-content-box').style.display = 'block';
+
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
       
@@ -171,7 +183,7 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
       
-      populateArtistFilter(); // อัปเดตรายชื่อศิลปินใน Dropdown
+      populateArtistFilter();
       
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
@@ -182,18 +194,42 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       showToast(res.msg, "error"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
       localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin); goToPayment(false); localStorage.removeItem('songbook_user');
     } else if(res.status === 'pending') {
-      showToast(res.msg, "warning"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
-      showLoginView(); localStorage.removeItem('songbook_user');
+      
+      // กรณีสถานะคือรออนุมัติ (Pending)
+      if(!isSilentMode) showToast("กำลังรอแอดมินอนุมัติสลิป...", "warning");
+      
+      document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
+      
+      document.getElementById('view-payment').classList.add('hidden');
+      document.getElementById('view-auth').classList.remove('hidden');
+      
+      // ซ่อนฟอร์มล็อกอิน และโชว์ข้อความรออนุมัติแทน
+      document.getElementById('auth-tabs-container').style.display = 'none';
+      document.getElementById('auth-content-box').style.display = 'none';
+      document.getElementById('waiting-approval-msg').style.display = 'flex';
+      
+      // เริ่มการดึงข้อมูลตรวจสอบสถานะใหม่ทุกๆ 10 วินาที
+      if(!approvalCheckInterval) {
+          approvalCheckInterval = setInterval(() => {
+              authenticateUser(phone, pin, null, true);
+          }, 10000); 
+      }
+      
+      // เซฟข้อมูลไว้เพื่อให้ Refresh หน้าจอแล้วยังดึงเช็คต่อได้
+      localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin})); 
+
     } else {
-      showToast(res.msg, "error"); document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
-      showLoginView(); localStorage.removeItem('songbook_user');
+      if(approvalCheckInterval) { clearInterval(approvalCheckInterval); approvalCheckInterval = null; }
+      showToast(res.msg, "error"); 
+      document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
+      showLoginView(); 
+      localStorage.removeItem('songbook_user');
     }
   }).catch(err => {
     if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
     document.getElementById('loader').classList.add('hidden');
     if(isSilentMode) {
-      showToast("ไม่มีการเชื่อมต่ออินเทอร์เน็ต กรุณาลองใหม่", "error");
-      document.getElementById('view-auth').classList.remove('hidden'); 
+      // ไม่ต้องโชว์แจ้งเตือนตอนเช็คเงียบๆ จะได้ไม่น่ารำคาญถ้าเน็ตกระตุก
     } else { 
       showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); 
     }
@@ -201,7 +237,19 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
 }
 
 function showPaymentView() { document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden'); }
-function showLoginView() { document.getElementById('view-payment').classList.add('hidden'); document.getElementById('view-auth').classList.remove('hidden'); switchAuthTab('login');}
+function showLoginView() { 
+    document.getElementById('view-payment').classList.add('hidden'); 
+    document.getElementById('view-auth').classList.remove('hidden'); 
+    
+    // คืนค่าหน้าล็อกอินให้เป็นปกติ
+    document.getElementById('waiting-approval-msg').style.display = 'none';
+    document.getElementById('auth-tabs-container').style.display = 'flex';
+    document.getElementById('auth-content-box').style.display = 'block';
+    
+    if(approvalCheckInterval) { clearInterval(approvalCheckInterval); approvalCheckInterval = null; }
+    
+    switchAuthTab('login');
+}
 
 function goToRenewFromProfile() {
   const savedUser = JSON.parse(localStorage.getItem('songbook_user')); if(!savedUser) return;
@@ -227,7 +275,7 @@ function cancelPayment() {
   document.getElementById('view-payment').classList.add('hidden'); const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
   if(savedUser && document.getElementById('app').classList.contains('hidden') === true && isRegisteringNew === false) {
       document.getElementById('app').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
-  } else { document.getElementById('view-auth').classList.remove('hidden'); switchAuthTab('login'); }
+  } else { showLoginView(); }
 }
 
 function previewSlip(event) {
@@ -248,17 +296,41 @@ function previewSlip(event) {
 
 function submitPayment() {
   if(!pendingSlipBase64) { showToast("กรุณาแนบรูปภาพสลิปโอนเงิน", "warning"); return; }
-  const phone = localStorage.getItem('temp_renew_phone'); const pin = localStorage.getItem('temp_renew_pin'); const name = localStorage.getItem('temp_renew_name');
+  const phone = localStorage.getItem('temp_renew_phone'); 
+  const pin = localStorage.getItem('temp_renew_pin'); 
+  const name = localStorage.getItem('temp_renew_name');
+  
+  // ดึงค่าแพ็กเกจที่เลือกส่งไปด้วย
+  const packageSelected = document.getElementById('payment-package').value;
+
   if(!phone || !pin) { showToast("ข้อมูลสูญหาย กรุณาทำรายการใหม่", "error"); showLoginView(); return; }
-  const btn = document.getElementById('btn-submit-payment'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดสลิป...'; btn.disabled = true;
-  fetchAPI('submitPayment', { phone: phone, pin: pin, name: name, type: isRegisteringNew ? 'register' : 'renew', base64Image: pendingSlipBase64 })
+  const btn = document.getElementById('btn-submit-payment'); 
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังอัปโหลดสลิป...'; btn.disabled = true;
+  
+  fetchAPI('submitPayment', { phone: phone, pin: pin, name: name, type: isRegisteringNew ? 'register' : 'renew', base64Image: pendingSlipBase64, package: packageSelected })
   .then(res => {
     btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false;
-    if(res.status === 'success') { showToast(res.msg, "success"); setTimeout(() => { logoutUser(); }, 2000); } else { showToast(res.msg, "error"); }
+    if(res.status === 'success') { 
+        showToast("ส่งหลักฐานสำเร็จ! กรุณารอตรวจสอบ...", "success"); 
+        
+        // เมื่ออัปโหลดเสร็จ ให้เก็บข้อมูลและไปหน้าโหลดรออนุมัติเลย
+        localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
+        document.getElementById('view-payment').classList.add('hidden');
+        document.getElementById('view-auth').classList.remove('hidden');
+        
+        // เรียกฟังก์ชันนี้เพื่อเข้าสู่โหมด Auto-Polling เช็คสถานะอนุมัติ
+        authenticateUser(phone, pin);
+    } else { 
+        showToast(res.msg, "error"); 
+    }
   }).catch(err => { btn.innerHTML = 'ส่งหลักฐานและรอตรวจสอบ'; btn.disabled = false; alert("อัปโหลดไม่สำเร็จ: " + err.message); });
 }
 
-function logoutUser() { localStorage.removeItem('songbook_user'); location.reload(); }
+function logoutUser() { 
+    if(approvalCheckInterval) { clearInterval(approvalCheckInterval); approvalCheckInterval = null; }
+    localStorage.removeItem('songbook_user'); 
+    location.reload(); 
+}
 
 function toggleCategoryPopup() {
   const popup = document.getElementById('category-popup');
@@ -349,7 +421,7 @@ function forceDataRefresh() {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         
-        populateArtistFilter(); // อัปเดต Filter ทันที
+        populateArtistFilter(); 
         
         renderDashboard(); 
         if(currentCategory) searchCategory(true); 
@@ -407,7 +479,7 @@ function searchCategory(isImmediate = false) {
       
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
-        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; // ค้นหาจาก Artist
+        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
@@ -444,7 +516,7 @@ function searchGlobal() {
       contentDiv.classList.add('hidden'); 
       
       const results = allSongs.filter(s => { 
-        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; // ค้นหาจาก Artist
+        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
@@ -535,7 +607,6 @@ function openSong(id) {
     
     document.getElementById('detail-id').innerText = currentSong.ID; 
     
-    // จัดการแสดงผล ศิลปิน/นักร้อง (Artist)
     const artistEl = document.getElementById('detail-artist'); 
     const artistContainer = document.getElementById('detail-artist-container');
     if(currentSong.Artist && currentSong.Artist.trim() !== "") {
@@ -546,7 +617,6 @@ function openSong(id) {
         artistContainer.classList.add('hidden');
     }
 
-    // จัดการแสดงผล ผู้แต่ง/เรียบเรียง (Author)
     const authorEl = document.getElementById('detail-author'); 
     const authorContainer = document.getElementById('detail-author-container');
     if(currentSong.Author && currentSong.Author.trim() !== "") {
