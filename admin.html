@@ -119,17 +119,14 @@
               <input type="text" id="form-eng-title" placeholder="English title...">
             </div>
 
-            <!-- เพิ่มช่องตัวเลือกศิลปิน -->
-            <label style="color:var(--primary); font-weight:bold;">ศิลปิน (Artist) <span style="color:var(--text-muted); font-size:0.8rem; font-weight:normal;">(สำหรับแยกหมวดศิลปิน)</span></label>
-            <select id="form-artist" style="border-color: var(--primary);">
-              <option value="">-- ไม่ระบุ (รวมกับทั่วไป) --</option>
-              <option value="Sl. Aˬyo G'oeˬmehˇ">Sl. Aˬyo</option>
-              <option value="Sll. Aˬlmˬ Mazeuˆ">Sll. Aˬlmˬ</option>
-              <option value="Sl. Lawˬtsaˬ">Sl. Lawˬtsaˬ</option>
-              <option value="Sl. Laˇcawꞈ Mazeuˆ">Sl. Laˇcawꞈ</option>
-            </select>
+            <!-- ช่องพิมพ์/เลือกศิลปินแบบผสม (Datalist) -->
+            <label style="color:var(--primary); font-weight:bold;">ศิลปิน / นักร้อง (Artist) <span style="color:var(--text-muted); font-size:0.8rem; font-weight:normal;">(พิมพ์ใหม่ หรือเลือกจากที่เคยมี)</span></label>
+            <input type="text" id="form-artist" list="artist-list" placeholder="ชื่อศิลปิน / นักร้อง (เว้นว่างได้)" style="border-color: var(--primary);">
+            <datalist id="artist-list">
+              <!-- ข้อมูลตัวเลือกศิลปินจะถูกดึงมาใส่ที่นี่อัตโนมัติจากไฟล์ admin.js -->
+            </datalist>
             
-            <label>ผู้แต่ง / เรียบเรียง (ข้อมูลเก่า)</label>
+            <label>ผู้แต่ง / เรียบเรียง (Author)</label>
             <input type="text" id="form-author" placeholder="เว้นว่างได้...">
             
             <div style="display:flex; gap:10px;">
@@ -328,7 +325,6 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <!-- เปลี่ยนเวอร์ชันให้ดึงไฟล์ JS ล่าสุด -->
-  <script src="admin.js?v=111"></script>
+  <script src="admin.js?v=112"></script>
 </body>
 </html>
