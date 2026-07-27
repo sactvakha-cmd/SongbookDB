@@ -18,13 +18,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* สไตล์เพิ่มเติมสำหรับ Dropdown เปลี่ยนภาษาและค้นหาศิลปิน */
+    /* ปรับแต่ง Dropdown ใหม่ให้ปลอดภัยกับทุกหน้าจอ */
     .top-lang-dropdown {
-      position: absolute; right: 20px; top: 15px; 
-      background: var(--bg-surface); color: var(--text-main);
+      background: var(--bg-surface); color: var(--primary);
       border: 1px solid var(--border-color); border-radius: 8px;
-      padding: 5px 10px; font-family: var(--font-main); font-size: 0.85rem; font-weight: 600;
+      padding: 6px 10px; font-family: var(--font-main); font-size: 0.85rem; font-weight: 600;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); outline: none; cursor: pointer;
+      max-width: 110px; /* ป้องกันไม่ให้ยาวเกินไปจนดันเลย์เอาต์พัง */
     }
     
     .search-flex-container {
@@ -110,10 +110,14 @@
   <div id="app" class="container hidden">
     <div id="view-dashboard" class="fade-in">
       
-      <div class="hero-header" style="position: relative;">
-        <div><p style="color:var(--text-muted);">AKHA SONGBOOK 🎵</p><h1 data-i18n="app_title">คลังเพลงคริสเตียนอาข่า</h1></div>
+      <!-- แก้ไขการจัดวางให้เป็นแบบ Flex แนวนอน ป้องกันการซ้อนทับ 100% -->
+      <div class="hero-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding-top: 15px; padding-bottom: 15px;">
+        <div style="flex: 1; overflow: hidden; margin-right: 10px;">
+          <p style="color:var(--text-muted); margin-bottom:0; font-size:0.75rem; font-weight:600;">AKHA SONGBOOK 🎵</p>
+          <h1 data-i18n="app_title" style="font-size:1.35rem; margin-bottom:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">คลังเพลงคริสเตียนอาข่า</h1>
+        </div>
         
-        <!-- เมนู Dropdown เปลี่ยนภาษา มุมขวาบน -->
+        <!-- เมนู Dropdown เปลี่ยนภาษา -->
         <select id="main-lang-selector" class="top-lang-dropdown" onchange="setAppLanguage(this.value)">
           <option value="th">ไทย</option>
           <option value="an">อาข่าใหม่</option>
@@ -133,7 +137,7 @@
           <input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()">
         </div>
         <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
-          <option value="">-- ศิลปิน --</option>
+          <option value="">-- ศิลปิน/Artist --</option>
           <option value="Sl. Aqyo Ghoeqmaer">Aqyo</option>
           <option value="Sll. Aqlmq Mazeuv">Aqlmq</option>
           <option value="Sl. Lawqtsaq">Lawqtsaq</option>
@@ -181,7 +185,7 @@
           <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
         </div>
         <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
-          <option value="">-- ศิลปิน --</option>
+          <option value="">-- ศิลปิน/Artist --</option>
           <option value="Sl. Aqyo Ghoeqmaer">Aqyo</option>
           <option value="Sll. Aqlmq Mazeuv">Aqlmq</option>
           <option value="Sl. Lawqtsaq">Lawqtsaq</option>
@@ -322,7 +326,7 @@
       
     </div>
 
-    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ที่บีบอัดให้กระชับขึ้น ===== -->
+    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header" style="padding-bottom:10px;"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
@@ -428,7 +432,7 @@
   </div>
 
   <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
-  <script src="app.js?v=132"></script>
+  <script src="app.js?v=133"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
