@@ -1,4 +1,4 @@
-const CACHE_NAME = 'akha-songbook-pro-v56';
+const CACHE_NAME = 'akha-songbook-pro-v57';
 
 // รายชื่อไฟล์ที่ 'ต้อง' แคชเพื่อให้แอนดรอยด์ยอมรับการติดตั้ง
 const ASSETS_TO_CACHE = [
