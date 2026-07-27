@@ -24,11 +24,10 @@ let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
 let currentActiveView = 'dashboard';
-let previousView = 'dashboard'; // ตัวแปรสำหรับจำหน้าก่อนเข้าเนื้อเพลง
+let previousView = 'dashboard'; 
 let savedScrollPositions = {};
 let approvalCheckInterval = null; 
 
-// เพิ่มหมวดหมู่ "เพลงนมัสการ" และ "เพลงอื่นๆ" เข้าไป
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
   { id: 'เพลงคริสเตียนทั่วไป', i18n_cat: 'cat_gen', i18n_nav: 'nav_cat_gen', icon: 'fa-music', bg: 'bg-g2' },
@@ -375,6 +374,21 @@ function selectCategoryFromPopup(catId) {
   if (catId === 'ALL') { openAllSongs(); } else { openCategory(catId, catId); }
 }
 
+// ==== ฟังก์ชันใหม่: เพื่อล้างค่าการค้นหาแล้วพากลับหน้าแรกแบบ 100% ====
+function goHome() {
+  const searchInput = document.getElementById('global-search');
+  const artistFilter = document.getElementById('artist-filter');
+  if(searchInput) searchInput.value = "";
+  if(artistFilter) artistFilter.value = "";
+  
+  const resDiv = document.getElementById('search-results');
+  const contentDiv = document.getElementById('dashboard-content');
+  if(resDiv) resDiv.innerHTML = "";
+  if(contentDiv) contentDiv.classList.remove('hidden');
+  
+  switchView('dashboard');
+}
+
 function updateBottomNav(view) {
   const nav = document.getElementById('main-bottom-nav'); 
   if (!nav) return;
@@ -383,7 +397,9 @@ function updateBottomNav(view) {
   nav.classList.remove('hidden'); nav.classList.add('justify-center'); 
   
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
-  const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${ln.nav_home}</span></div>`;
+  
+  // เปลี่ยนปุ่มหน้าแรก ให้เรียก goHome() แทน switchView('dashboard')
+  const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="goHome()"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${ln.nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span data-i18n="nav_music">${ln.nav_music || 'Playlist'}</span></div>`;
   const catBtn = `<div class="nav-item ${view==='category' || view==='category_popup' ?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${ln.nav_categories}</span></div>`;
   const profileBtn = `<div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-user"></i><span data-i18n="nav_profile">${ln.nav_profile}</span></div>`;
@@ -574,7 +590,6 @@ function switchView(view) {
   } catch (e) { console.error("Switch View Error", e); }
 }
 
-// ฟังก์ชันใหม่! สำหรับกดปุ่ม Back จากหน้าเนื้อเพลง เพื่อกลับไปที่หน้าเดิม
 function goBackFromSong() {
   switchView(previousView || 'dashboard');
 }
@@ -682,7 +697,6 @@ function openSong(id) {
     
     closeSongMenu();
     
-    // บันทึกหน้าปัจจุบันเอาไว้ เพื่อให้ปุ่ม Back กลับมาถูกทาง
     previousView = currentActiveView;
     switchView('song');
     
