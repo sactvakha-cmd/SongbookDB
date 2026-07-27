@@ -222,7 +222,8 @@
 
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar no-print">
-        <button class="btn-icon" onclick="switchView('category')"><i class="fa-solid fa-arrow-left"></i></button>
+        <!-- เปลี่ยนจาก switchView('category') เป็น goBackFromSong() -->
+        <button class="btn-icon" onclick="goBackFromSong()"><i class="fa-solid fa-arrow-left"></i></button>
         <div id="top-audio-player" class="top-audio-ui hidden">
          <audio id="song-audio-element" preload="auto" crossorigin="anonymous"></audio>
           <button class="btn-play-pause" id="btn-play-pause" onclick="toggleAudio()"><i class="fa-solid fa-play"></i></button>
