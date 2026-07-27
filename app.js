@@ -37,9 +37,10 @@ const baseCategories = [
 
 // เก็บตัวย่อศิลปินเพื่อใช้สร้างรหัสเพลงใหม่
 const artistPrefixes = {
-  "Sl. Aqyo Ghoeqmaer": "AY",
-  "Sll. Aqlmq Mazeuv": "AL",
-  "Sl. Lawqtsaq": "LT"
+  "Sl. Aˬyo G'oeˬmehˇ": "AY",
+  "Sll. Aˬlmˬ Mazeuˆ": "AL",
+  "Sl. Lawˬtsaˬ": "LTS"
+  "Sl. Laˇcawꞈ Mazeuˆ": "LC" 
 };
 
 window.onload = () => {
