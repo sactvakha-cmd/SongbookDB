@@ -18,13 +18,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="style.css">
   <style>
-    /* ปรับแต่ง Dropdown ใหม่ให้ปลอดภัยกับทุกหน้าจอ */
     .top-lang-dropdown {
       background: var(--bg-surface); color: var(--primary);
       border: 1px solid var(--border-color); border-radius: 8px;
       padding: 6px 10px; font-family: var(--font-main); font-size: 0.85rem; font-weight: 600;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); outline: none; cursor: pointer;
-      max-width: 110px; /* ป้องกันไม่ให้ยาวเกินไปจนดันเลย์เอาต์พัง */
+      max-width: 110px; 
     }
     
     .search-flex-container {
@@ -40,6 +39,12 @@
       border: 1px solid var(--border-color); border-radius: var(--radius-ui);
       padding: 12px 10px; font-family: var(--font-main); font-size: 0.85rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; cursor: pointer;
+    }
+
+    /* ปรับระยะห่างด้านล่างของหน้า Dashboard Header ให้ชิดขึ้น */
+    #view-dashboard .hero-header {
+        padding-bottom: 8px !important;
+        margin-bottom: 12px !important;
     }
   </style>
 
@@ -110,8 +115,7 @@
   <div id="app" class="container hidden">
     <div id="view-dashboard" class="fade-in">
       
-      <!-- แก้ไขการจัดวางให้เป็นแบบ Flex แนวนอน ป้องกันการซ้อนทับ 100% -->
-      <div class="hero-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding-top: 15px; padding-bottom: 15px;">
+      <div class="hero-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding-top: 15px;">
         <div style="flex: 1; overflow: hidden; margin-right: 10px;">
           <p style="color:var(--text-muted); margin-bottom:0; font-size:0.75rem; font-weight:600;">AKHA SONGBOOK 🎵</p>
           <h1 data-i18n="app_title" style="font-size:1.35rem; margin-bottom:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">คลังเพลงคริสเตียนอาข่า</h1>
@@ -128,7 +132,7 @@
         </select>
       </div>
       
-      <br>
+      <!-- เอา <br> ออกจากตรงนี้ และใช้ CSS จัดการแทนเพื่อให้ช่องไฟสวยงาม -->
 
       <!-- ระบบค้นหา แบ่งสัดส่วน 70% และ 30% -->
       <div class="search-flex-container">
@@ -326,7 +330,7 @@
       
     </div>
 
-    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ===== -->
+    <!-- ===== หน้าต่างโปรไฟล์และการตั้งค่า ที่บีบอัดให้กระชับขึ้น ===== -->
     <div id="view-settings" class="hidden fade-in">
       <div class="hero-header" style="padding-bottom:10px;"><h1 data-i18n="nav_profile">โปรไฟล์ & การตั้งค่า</h1></div>
       
@@ -431,8 +435,7 @@
     </div>
   </div>
 
-  <!-- เปลี่ยนเวอร์ชันให้ดึงสคริปต์ตัวใหม่ -->
-  <script src="app.js?v=133"></script>
+  <script src="app.js?v=134"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
