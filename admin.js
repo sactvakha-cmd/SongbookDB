@@ -61,6 +61,7 @@ function fetchAllData() {
       if(resSongs.status === 'success') {
         allSongs = resSongs.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+        populateArtistDatalist(); // เรียกฟังก์ชันอัปเดต DataList ของศิลปิน
       }
       
       showToast("เข้าสู่ระบบแอดมินสำเร็จ");
@@ -81,6 +82,23 @@ function fetchAllData() {
       showToast("โหลดข้อมูลล้มเหลว: " + err.message, "error");
       document.getElementById('loader').classList.add('hidden');
   });
+}
+
+// ฟังก์ชันใหม่! สร้างรายการชื่อศิลปินใส่ Datalist อัตโนมัติ
+function populateArtistDatalist() {
+  const datalist = document.getElementById('artist-list');
+  if (!datalist) return;
+  
+  // กวาดชื่อ Artist ออกมา (ตัดค่าว่าง) และกรองเอาเฉพาะที่ไม่ซ้ำ
+  const artistSet = new Set();
+  allSongs.forEach(song => {
+    if (song.Artist && song.Artist.trim() !== "") {
+      artistSet.add(song.Artist.trim());
+    }
+  });
+
+  // สร้าง tag <option> ยัดเข้าไปใน datalist
+  datalist.innerHTML = Array.from(artistSet).sort().map(artist => `<option value="${artist}"></option>`).join('');
 }
 
 function updateBottomNav(view) {
@@ -135,7 +153,6 @@ function renderSongs() {
     return matchSearch && matchCat;
   });
   
-  // ปรับให้สามารถกดที่ไหนก็ได้ใน card ของ song-item
   document.getElementById('song-list').innerHTML = results.map(s => `
     <div class="song-item" onclick="openAdminForm('${s.ID}')">
       <div class="s-id">${s.ID}</div>
@@ -157,17 +174,8 @@ function openAdminForm(id = null) {
     document.getElementById('form-cat').value = s.Category; 
     document.getElementById('form-title').value = s.Title; 
     document.getElementById('form-eng-title').value = s.EnglishTitle || ""; 
-    
-    // ตั้งค่าศิลปิน: ถ้ามีในระบบให้เลือก ถ้าไม่มีให้เลือกช่องว่าง
-    const artistSelect = document.getElementById('form-artist');
-    if (s.Author && [...artistSelect.options].some(opt => opt.value === s.Author)) {
-        artistSelect.value = s.Author;
-        document.getElementById('form-author').value = ""; // เคลียร์ช่องเก่า
-    } else {
-        artistSelect.value = "";
-        document.getElementById('form-author').value = s.Author || ""; 
-    }
-
+    document.getElementById('form-artist').value = s.Artist || ""; 
+    document.getElementById('form-author').value = s.Author || ""; 
     document.getElementById('form-chords').value = s.Chords || ""; 
     document.getElementById('form-notation').value = s.Notation || ""; 
     document.getElementById('form-audio').value = s.AudioUrl || ""; 
@@ -193,17 +201,13 @@ function openAdminForm(id = null) {
 }
 
 function saveSong() {
-  // ดึงข้อมูลศิลปิน (ถ้าเลือก Dropdown ให้ใช้ Dropdown, ถ้าไม่เลือกให้ใช้ Text Input เก่า)
-  const selectedArtist = document.getElementById('form-artist').value;
-  const oldAuthor = document.getElementById('form-author').value;
-  const finalAuthor = selectedArtist !== "" ? selectedArtist : oldAuthor;
-
   const data = { 
       ID: document.getElementById('form-id').value, 
       Title: document.getElementById('form-title').value, 
       Category: document.getElementById('form-cat').value, 
       Language: "Akha", 
-      Author: finalAuthor, 
+      Artist: document.getElementById('form-artist').value, // เพิ่มฟิลด์ Artist แยกต่างหาก
+      Author: document.getElementById('form-author').value, // ให้ Author กลับมาทำงานตามเดิม
       Chords: document.getElementById('form-chords').value, 
       Lyrics: document.getElementById('form-lyrics-old').innerHTML, 
       LyricsNew: document.getElementById('form-lyrics-new').innerHTML, 
