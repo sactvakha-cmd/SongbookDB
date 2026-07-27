@@ -24,16 +24,20 @@ let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
 let currentActiveView = 'dashboard';
+let previousView = 'dashboard'; // ตัวแปรสำหรับจำหน้าก่อนเข้าเนื้อเพลง
 let savedScrollPositions = {};
-let approvalCheckInterval = null; // ตัวแปรสำหรับเช็คสถานะรออนุมัติแบบอัตโนมัติ
+let approvalCheckInterval = null; 
 
+// เพิ่มหมวดหมู่ "เพลงนมัสการ" และ "เพลงอื่นๆ" เข้าไป
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
   { id: 'เพลงคริสเตียนทั่วไป', i18n_cat: 'cat_gen', i18n_nav: 'nav_cat_gen', icon: 'fa-music', bg: 'bg-g2' },
   { id: 'เพลงคริสต์มาส', i18n_cat: 'cat_xmas', i18n_nav: 'nav_cat_xmas', icon: 'fa-tree', bg: 'bg-g5' },
   { id: 'เพลงสรรเสริญ', i18n_cat: 'cat_praise', i18n_nav: 'nav_cat_praise', icon: 'fa-hands-praying', bg: 'bg-g3' },
+  { id: 'เพลงนมัสการ', i18n_cat: 'cat_worship', i18n_nav: 'nav_cat_worship', icon: 'fa-hands', bg: 'bg-g6' },
   { id: 'เพลงงานมงคลสมรส', i18n_cat: 'cat_wed', i18n_nav: 'nav_cat_wed', icon: 'fa-ring', bg: 'bg-g4' },
-  { id: 'เพลงไว้อาลัย', i18n_cat: 'cat_sad', i18n_nav: 'nav_cat_sad', icon: 'fa-dove', bg: 'bg-g8' }
+  { id: 'เพลงไว้อาลัย', i18n_cat: 'cat_sad', i18n_nav: 'nav_cat_sad', icon: 'fa-dove', bg: 'bg-g8' },
+  { id: 'เพลงอื่นๆ', i18n_cat: 'cat_other', i18n_nav: 'nav_cat_other', icon: 'fa-icons', bg: 'bg-g7' }
 ];
 
 window.onload = () => {
@@ -146,13 +150,11 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
     
     if(res.status === 'success') {
       
-      // ถ้ารออนุมัติอยู่ แล้วแอดมินกดอนุมัติ ให้หยุดการเช็คอัตโนมัติแล้วเด้งเข้าแอปเลย
       if(approvalCheckInterval) {
           clearInterval(approvalCheckInterval);
           approvalCheckInterval = null;
           showToast("ได้รับการอนุมัติเรียบร้อยแล้ว!", "success");
       }
-      // รีเซ็ตหน้าล็อกอินให้กลับมาปกติ เผื่อมีการล็อกเอ้าท์ทีหลัง
       document.getElementById('waiting-approval-msg').style.display = 'none';
       document.getElementById('auth-tabs-container').style.display = 'flex';
       document.getElementById('auth-content-box').style.display = 'block';
@@ -195,7 +197,6 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin); goToPayment(false); localStorage.removeItem('songbook_user');
     } else if(res.status === 'pending') {
       
-      // กรณีสถานะคือรออนุมัติ (Pending)
       if(!isSilentMode) showToast("กำลังรอแอดมินอนุมัติสลิป...", "warning");
       
       document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
@@ -203,19 +204,16 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       document.getElementById('view-payment').classList.add('hidden');
       document.getElementById('view-auth').classList.remove('hidden');
       
-      // ซ่อนฟอร์มล็อกอิน และโชว์ข้อความรออนุมัติแทน
       document.getElementById('auth-tabs-container').style.display = 'none';
       document.getElementById('auth-content-box').style.display = 'none';
       document.getElementById('waiting-approval-msg').style.display = 'flex';
       
-      // เริ่มการดึงข้อมูลตรวจสอบสถานะใหม่ทุกๆ 10 วินาที
       if(!approvalCheckInterval) {
           approvalCheckInterval = setInterval(() => {
               authenticateUser(phone, pin, null, true);
           }, 10000); 
       }
       
-      // เซฟข้อมูลไว้เพื่อให้ Refresh หน้าจอแล้วยังดึงเช็คต่อได้
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin})); 
 
     } else {
@@ -228,9 +226,7 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
   }).catch(err => {
     if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
     document.getElementById('loader').classList.add('hidden');
-    if(isSilentMode) {
-      // ไม่ต้องโชว์แจ้งเตือนตอนเช็คเงียบๆ จะได้ไม่น่ารำคาญถ้าเน็ตกระตุก
-    } else { 
+    if(!isSilentMode) { 
       showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); 
     }
   });
@@ -241,7 +237,6 @@ function showLoginView() {
     document.getElementById('view-payment').classList.add('hidden'); 
     document.getElementById('view-auth').classList.remove('hidden'); 
     
-    // คืนค่าหน้าล็อกอินให้เป็นปกติ
     document.getElementById('waiting-approval-msg').style.display = 'none';
     document.getElementById('auth-tabs-container').style.display = 'flex';
     document.getElementById('auth-content-box').style.display = 'block';
@@ -300,7 +295,6 @@ function submitPayment() {
   const pin = localStorage.getItem('temp_renew_pin'); 
   const name = localStorage.getItem('temp_renew_name');
   
-  // ดึงค่าแพ็กเกจที่เลือกส่งไปด้วย
   const packageSelected = document.getElementById('payment-package').value;
 
   if(!phone || !pin) { showToast("ข้อมูลสูญหาย กรุณาทำรายการใหม่", "error"); showLoginView(); return; }
@@ -313,12 +307,10 @@ function submitPayment() {
     if(res.status === 'success') { 
         showToast("ส่งหลักฐานสำเร็จ! กรุณารอตรวจสอบ...", "success"); 
         
-        // เมื่ออัปโหลดเสร็จ ให้เก็บข้อมูลและไปหน้าโหลดรออนุมัติเลย
         localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
         document.getElementById('view-payment').classList.add('hidden');
         document.getElementById('view-auth').classList.remove('hidden');
         
-        // เรียกฟังก์ชันนี้เพื่อเข้าสู่โหมด Auto-Polling เช็คสถานะอนุมัติ
         authenticateUser(phone, pin);
     } else { 
         showToast(res.msg, "error"); 
@@ -582,6 +574,11 @@ function switchView(view) {
   } catch (e) { console.error("Switch View Error", e); }
 }
 
+// ฟังก์ชันใหม่! สำหรับกดปุ่ม Back จากหน้าเนื้อเพลง เพื่อกลับไปที่หน้าเดิม
+function goBackFromSong() {
+  switchView(previousView || 'dashboard');
+}
+
 function switchReaderLyricView(type) {
   document.getElementById('btn-lyric-new').classList.remove('active'); 
   document.getElementById('btn-lyric-old').classList.remove('active'); 
@@ -684,7 +681,11 @@ function openSong(id) {
     if(mediaHtml !== "") { mediaBox.innerHTML = mediaHtml; mediaBox.classList.remove('hidden'); } else { mediaBox.innerHTML = ""; mediaBox.classList.add('hidden'); }
     
     closeSongMenu();
+    
+    // บันทึกหน้าปัจจุบันเอาไว้ เพื่อให้ปุ่ม Back กลับมาถูกทาง
+    previousView = currentActiveView;
     switchView('song');
+    
   } catch (e) { console.error("Open Song Error", e); alert('เกิดข้อผิดพลาดในการแสดงเพลง'); }
 }
 
