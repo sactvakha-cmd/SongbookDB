@@ -31,6 +31,23 @@
     .admin-hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     .admin-cat-btn { padding: 6px 16px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.3s ease; }
     .admin-cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-glow); }
+
+    /* ทำให้แถบค้นหาและหมวดหมู่ติดหนึบด้านบน */
+    .sticky-filters {
+      position: sticky;
+      top: 60px; /* อยู่ใต้ top-bar */
+      background: var(--bg-main);
+      z-index: 40;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      margin-top: -10px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 15px;
+    }
+    
+    /* ให้รายการเพลงกดได้ */
+    .song-item { cursor: pointer; }
+    .song-item:hover { transform: translateX(5px); border-left: 4px solid var(--primary); }
   </style>
 </head>
 <body>
@@ -54,16 +71,19 @@
         <h2><i class="fa-solid fa-music"></i> จัดการเพลง</h2>
         <button class="btn-icon" style="background:#f59e0b; color:white; border:none;" onclick="openAdminForm()"><i class="fa-solid fa-plus"></i></button>
       </div>
-      <div class="search-container"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()"></div>
       
-      <div class="admin-hide-scroll" style="display: flex; overflow-x: auto; gap: 8px; margin-bottom: 15px; padding-bottom: 5px;">
-        <button class="admin-cat-btn active" data-cat="ALL" onclick="filterAdminCat('ALL')">ทั้งหมด</button>
-        <button class="admin-cat-btn" data-cat="เพลงชีวิตคริสเตียนอาข่า" onclick="filterAdminCat('เพลงชีวิตคริสเตียนอาข่า')">ชีวิตคริสเตียนอาข่า</button>
-        <button class="admin-cat-btn" data-cat="เพลงคริสเตียนทั่วไป" onclick="filterAdminCat('เพลงคริสเตียนทั่วไป')">คริสเตียนทั่วไป</button>
-        <button class="admin-cat-btn" data-cat="เพลงคริสต์มาส" onclick="filterAdminCat('เพลงคริสต์มาส')">คริสต์มาส</button>
-        <button class="admin-cat-btn" data-cat="เพลงสรรเสริญ" onclick="filterAdminCat('เพลงสรรเสริญ')">สรรเสริญ</button>
-        <button class="admin-cat-btn" data-cat="เพลงงานมงคลสมรส" onclick="filterAdminCat('เพลงงานมงคลสมรส')">มงคลสมรส</button>
-        <button class="admin-cat-btn" data-cat="เพลงไว้อาลัย" onclick="filterAdminCat('เพลงไว้อาลัย')">ไว้อาลัย</button>
+      <!-- ส่วนนี้จะติดหนึบด้านบน -->
+      <div class="sticky-filters">
+        <div class="search-container" style="margin-bottom: 10px;"><i class="fa-solid fa-magnifying-glass"></i><input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()"></div>
+        <div class="admin-hide-scroll" style="display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px;">
+          <button class="admin-cat-btn active" data-cat="ALL" onclick="filterAdminCat('ALL')">ทั้งหมด</button>
+          <button class="admin-cat-btn" data-cat="เพลงชีวิตคริสเตียนอาข่า" onclick="filterAdminCat('เพลงชีวิตคริสเตียนอาข่า')">ชีวิตคริสเตียนอาข่า</button>
+          <button class="admin-cat-btn" data-cat="เพลงคริสเตียนทั่วไป" onclick="filterAdminCat('เพลงคริสเตียนทั่วไป')">คริสเตียนทั่วไป</button>
+          <button class="admin-cat-btn" data-cat="เพลงคริสต์มาส" onclick="filterAdminCat('เพลงคริสต์มาส')">คริสต์มาส</button>
+          <button class="admin-cat-btn" data-cat="เพลงสรรเสริญ" onclick="filterAdminCat('เพลงสรรเสริญ')">สรรเสริญ</button>
+          <button class="admin-cat-btn" data-cat="เพลงงานมงคลสมรส" onclick="filterAdminCat('เพลงงานมงคลสมรส')">มงคลสมรส</button>
+          <button class="admin-cat-btn" data-cat="เพลงไว้อาลัย" onclick="filterAdminCat('เพลงไว้อาลัย')">ไว้อาลัย</button>
+        </div>
       </div>
 
       <div id="song-list"></div>
@@ -98,8 +118,17 @@
               <label>ชื่อเพลงภาษาอังกฤษ <span style="color:var(--text-muted); font-size:0.8rem;">(ถ้ามี)</span></label>
               <input type="text" id="form-eng-title" placeholder="English title...">
             </div>
+
+            <!-- เพิ่มช่องตัวเลือกศิลปิน -->
+            <label style="color:var(--primary); font-weight:bold;">ศิลปิน (Artist) <span style="color:var(--text-muted); font-size:0.8rem; font-weight:normal;">(สำหรับแยกหมวดศิลปิน)</span></label>
+            <select id="form-artist" style="border-color: var(--primary);">
+              <option value="">-- ไม่ระบุ (รวมกับทั่วไป) --</option>
+              <option value="Sl. Aqyo Ghoeqmaer">Sl. Aqyo Ghoeqmaer</option>
+              <option value="Sll. Aqlmq Mazeuv">Sll. Aqlmq Mazeuv</option>
+              <option value="Sl. Lawqtsaq">Sl. Lawqtsaq</option>
+            </select>
             
-            <label>ผู้แต่ง / เรียบเรียง</label>
+            <label>ผู้แต่ง / เรียบเรียง (ข้อมูลเก่า)</label>
             <input type="text" id="form-author" placeholder="เว้นว่างได้...">
             
             <div style="display:flex; gap:10px;">
@@ -192,57 +221,13 @@
                 <option value="'Taviraj', serif">Taviraj (ทวิราช)</option>
                 <option value="'Thasadith', sans-serif">Thasadith (ทัสดิธ)</option>
                 <option value="'Trirong', serif">Trirong (ไตรรงค์)</option>
-                <option value="'Roboto', sans-serif">Roboto</option>
-                <option value="'Open Sans', sans-serif">Open Sans</option>
-                <option value="'Lato', sans-serif">Lato</option>
-                <option value="'Montserrat', sans-serif">Montserrat</option>
-                <option value="'Oswald', sans-serif">Oswald</option>
-                <option value="'Source Sans Pro', sans-serif">Source Sans Pro</option>
-                <option value="'Slabo 27px', serif">Slabo 27px</option>
-                <option value="'Raleway', sans-serif">Raleway</option>
-                <option value="'PT Sans', sans-serif">PT Sans</option>
-                <option value="'Merriweather', serif">Merriweather</option>
-                <option value="'Roboto Condensed', sans-serif">Roboto Condensed</option>
-                <option value="'Noto Sans', sans-serif">Noto Sans</option>
-                <option value="'Ubuntu', sans-serif">Ubuntu</option>
-                <option value="'Roboto Slab', serif">Roboto Slab</option>
-                <option value="'Lora', serif">Lora</option>
-                <option value="'Playfair Display', serif">Playfair Display</option>
-                <option value="'Nunito', sans-serif">Nunito</option>
-                <option value="'Poppins', sans-serif">Poppins</option>
-                <option value="'Arimo', sans-serif">Arimo</option>
-                <option value="'Titillium Web', sans-serif">Titillium Web</option>
-                <option value="'Muli', sans-serif">Muli</option>
-                <option value="'PT Serif', serif">PT Serif</option>
-                <option value="'Mukta', sans-serif">Mukta</option>
-                <option value="'Rubik', sans-serif">Rubik</option>
-                <option value="'Bitter', serif">Bitter</option>
-                <option value="'Anton', sans-serif">Anton</option>
-                <option value="'Fira Sans', sans-serif">Fira Sans</option>
-                <option value="'Dosis', sans-serif">Dosis</option>
-                <option value="'Inconsolata', monospace">Inconsolata</option>
-                <option value="'Oxygen', sans-serif">Oxygen</option>
-                <option value="'Fjalla One', sans-serif">Fjalla One</option>
-                <option value="'Hind', sans-serif">Hind</option>
-                <option value="'Josefin Sans', sans-serif">Josefin Sans</option>
-                <option value="'Cabin', sans-serif">Cabin</option>
-                <option value="'Arvo', serif">Arvo</option>
-                <option value="'Crimson Text', serif">Crimson Text</option>
-                <option value="'Signika', sans-serif">Signika</option>
-                <option value="'Pacifico', cursive">Pacifico</option>
-                <option value="'Inter', sans-serif">Inter</option>
-                <option value="'Caveat', cursive">Caveat</option>
               </select>
               
-              <!-- เมนูขนาดอักษรแบบใหม่ (ระบุตัวเลข pt) -->
               <select class="editor-select" onchange="applyCustomStyle('fontSize', this.value)" style="width:auto; min-width:85px;" title="ขนาดอักษร">
                 <option value="">-- ขนาด --</option>
                 <option value="8">8</option>
-                <option value="8.5">8.5</option>
                 <option value="9">9</option>
-                <option value="9.5">9.5</option>
                 <option value="10">10</option>
-                <option value="10.5">10.5</option>
                 <option value="11">11</option>
                 <option value="12">12</option>
                 <option value="14">14</option>
@@ -253,20 +238,12 @@
                 <option value="28">28</option>
                 <option value="32">32</option>
                 <option value="36">36</option>
-                <option value="48">48</option>
               </select>
 
-              <!-- เมนูระยะบรรทัด (เพิ่มค่าน้อยกว่า 1.0) -->
               <select class="editor-select" onchange="applyCustomStyle('lineHeight', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างบรรทัด">
                 <option value="">-- บรรทัด --</option>
-                <option value="0.2">0.2</option>
-                <option value="0.3">0.3</option>
-                <option value="0.4">0.4</option>
                 <option value="0.5">0.5</option>
-                <option value="0.6">0.6</option>
-                <option value="0.7">0.7</option>
                 <option value="0.8">0.8</option>
-                <option value="0.9">0.9</option>
                 <option value="1.0">1.0</option>
                 <option value="1.2">1.2</option>
                 <option value="1.5">1.5</option>
@@ -275,16 +252,13 @@
                 <option value="2.5">2.5</option>
               </select>
 
-              <!-- เมนูช่องไฟ (เพิ่มค่าติดลบเพื่อให้ชิดกันมากขึ้น) -->
               <select class="editor-select" onchange="applyCustomStyle('letterSpacing', this.value)" style="width:auto; min-width:85px;" title="ระยะห่างตัวอักษร">
                 <option value="">-- ช่องไฟ --</option>
-                <option value="-3px">แคบสุด 3</option>
                 <option value="-2px">แคบ 2</option>
                 <option value="-1px">แคบ 1</option>
                 <option value="normal">ปกติ</option>
                 <option value="1px">กว้าง 1</option>
                 <option value="2px">กว้าง 2</option>
-                <option value="3px">กว้าง 3</option>
               </select>
 
               <div class="editor-divider"></div>
@@ -353,7 +327,7 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <!-- เปลี่ยนเวอร์ชันเพื่อให้ระบบบังคับดึงไฟล์ JS ตัวใหม่มาใช้งาน -->
-  <script src="admin.js?v=110"></script>
+  <!-- เปลี่ยนเวอร์ชันให้ดึงไฟล์ JS ล่าสุด -->
+  <script src="admin.js?v=111"></script>
 </body>
 </html>
