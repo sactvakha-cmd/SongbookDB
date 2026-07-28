@@ -206,8 +206,8 @@ function saveSong() {
       Title: document.getElementById('form-title').value, 
       Category: document.getElementById('form-cat').value, 
       Language: "Akha", 
-      Artist: document.getElementById('form-artist').value, // เพิ่มฟิลด์ Artist แยกต่างหาก
-      Author: document.getElementById('form-author').value, // ให้ Author กลับมาทำงานตามเดิม
+      Artist: document.getElementById('form-artist').value, 
+      Author: document.getElementById('form-author').value, 
       Chords: document.getElementById('form-chords').value, 
       Lyrics: document.getElementById('form-lyrics-old').innerHTML, 
       LyricsNew: document.getElementById('form-lyrics-new').innerHTML, 
@@ -220,14 +220,22 @@ function saveSong() {
   };
   
   if(!data.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
-  document.getElementById('btn-save-top').disabled = true;
+
+  // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด เพื่อให้ไม่รู้สึกว่าระบบค้าง
+  const btnSave = document.getElementById('btn-save-top');
+  const originalBtnContent = btnSave.innerHTML;
+  btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังประมวลผล...';
+  btnSave.disabled = true;
   
   fetchAPI('saveSong', { data: data }).then(res => {
-    document.getElementById('btn-save-top').disabled = false;
     showToast(res.msg); 
-    // โหลดหน้าใหม่เพื่อให้ข้อมูลอัปเดต โดยโค้ด window.onbeforeunload จะจำตำแหน่ง scroll ไว้ให้เอง
-    setTimeout(() => location.reload(), 1000);
-  }).catch(e => { showToast(e.message, "error"); document.getElementById('btn-save-top').disabled = false; });
+    // ลดเวลาหน่วงก่อนรีเฟรชหน้าจอจาก 1 วินาที (1000) เหลือ 0.5 วินาที (500) ให้ดูไวขึ้น
+    setTimeout(() => location.reload(), 500);
+  }).catch(e => { 
+    showToast(e.message, "error"); 
+    btnSave.innerHTML = originalBtnContent;
+    btnSave.disabled = false; 
+  });
 }
 
 function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('deleteSong', { id: id }).then(res => { showToast(res.msg); location.reload(); }); } }
