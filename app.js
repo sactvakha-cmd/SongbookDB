@@ -245,7 +245,6 @@ function showLoginView() {
     switchAuthTab('login');
 }
 
-// --- ฟังก์ชันใหม่: ดึงข้อมูลการตั้งค่าบัญชีจากระบบหลังบ้าน ---
 function loadPaymentSettings() {
   fetchAPI('getPaymentSettings', {}).then(res => {
     if(res.status === 'success' && res.settings) {
@@ -621,6 +620,21 @@ function switchReaderLyricView(type) {
   }
 }
 
+// ---- Media Session API Update Function ----
+function updateMediaSessionMetadata(song) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: song.Title || 'Unknown Title',
+      artist: song.Artist || song.Author || 'Akha Songbook',
+      album: 'Akha Songbook Pro',
+      artwork: [
+        { src: song.ImageUrl ? song.ImageUrl : 'icon-192.png', sizes: '192x192', type: 'image/png' },
+        { src: song.ImageUrl ? song.ImageUrl : 'icon-512.png', sizes: '512x512', type: 'image/png' }
+      ]
+    });
+  }
+}
+
 function openSong(id) {
   try {
     currentSong = allSongs.find(s => s.ID === id); 
@@ -689,6 +703,8 @@ function openSong(id) {
       document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
       document.getElementById('audio-fill').style.width = '0%';
       document.getElementById('audio-time').innerText = '0:00';
+      
+      updateMediaSessionMetadata(currentSong);
     } else {
       topAudio.classList.add('hidden');
       topEmpty.classList.remove('hidden');
@@ -976,6 +992,7 @@ function openMusicPlayer() {
       updateMusicLyrics(song);
       
       songAudioEl.src = song.AudioUrl;
+      updateMediaSessionMetadata(song);
       songAudioEl.load(); 
   }
 }
@@ -1056,6 +1073,8 @@ function playMusicIndex(index) {
   updateMusicLyrics(song);
   
   songAudioEl.src = song.AudioUrl;
+  updateMediaSessionMetadata(song);
+  
   songAudioEl.play().then(() => {
      document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-pause"></i>';
      coverImg.classList.add('spin-slow');
@@ -1078,24 +1097,16 @@ function updateMusicLyrics(song) {
 function toggleAudio() {
   const playBtn = document.getElementById('btn-play-pause');
   if(!songAudioEl.src) return;
-  if(songAudioEl.paused) { songAudioEl.play().then(() => { playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; }); } 
-  else { songAudioEl.pause(); playBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; }
+  if(songAudioEl.paused) { songAudioEl.play(); } 
+  else { songAudioEl.pause(); }
 }
 
 function toggleMusicAudio() {
   if(!currentPlayingSongId && musicPlaylist.length > 0) { playMusicIndex(0); return; }
-  const playBtn = document.getElementById('btn-music-play-pause'); const coverImg = document.getElementById('music-cover-img'); const cdIcon = document.getElementById('music-indicator-icon');
   if(!songAudioEl.src) return;
   
-  if(songAudioEl.paused) {
-    songAudioEl.play().then(() => { 
-        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>'; coverImg.classList.add('spin-slow');
-        if(cdIcon) cdIcon.classList.add('fa-spin'); renderMusicList();
-    });
-  } else {
-    songAudioEl.pause(); playBtn.innerHTML = '<i class="fa-solid fa-play"></i>'; coverImg.classList.remove('spin-slow');
-    if(cdIcon) cdIcon.classList.remove('fa-spin'); renderMusicList();
-  }
+  if(songAudioEl.paused) { songAudioEl.play(); } 
+  else { songAudioEl.pause(); }
 }
 
 function playMusicNext(isAuto = false) {
@@ -1147,7 +1158,64 @@ function seekMusicAudio(e) {
   songAudioEl.currentTime = (clickX / track.getBoundingClientRect().width) * songAudioEl.duration;
 }
 
+// ---- ผูก Event และตั้งค่า Media Session ----
 if(songAudioEl) {
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.setActionHandler('play', () => {
+      if (songAudioEl.paused) songAudioEl.play();
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+      if (!songAudioEl.paused) songAudioEl.pause();
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+      if(isMusicPlayerActive) playMusicPrev();
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+      if(isMusicPlayerActive) playMusicNext(false);
+    });
+    navigator.mediaSession.setActionHandler('seekto', (details) => {
+      if (songAudioEl && details.seekTime !== undefined) {
+        songAudioEl.currentTime = details.seekTime;
+      }
+    });
+  }
+
+  songAudioEl.addEventListener('play', () => {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
+    
+    const playBtn = document.getElementById('btn-play-pause');
+    if(playBtn) playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    
+    const mPlayBtn = document.getElementById('btn-music-play-pause');
+    if(mPlayBtn) mPlayBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    
+    const coverImg = document.getElementById('music-cover-img');
+    if(coverImg && isMusicPlayerActive) coverImg.classList.add('spin-slow');
+    
+    const cdIcon = document.getElementById('music-indicator-icon');
+    if(cdIcon && isMusicPlayerActive) cdIcon.classList.add('fa-spin');
+    
+    if(isMusicPlayerActive) renderMusicList();
+  });
+
+  songAudioEl.addEventListener('pause', () => {
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+    
+    const playBtn = document.getElementById('btn-play-pause');
+    if(playBtn) playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    
+    const mPlayBtn = document.getElementById('btn-music-play-pause');
+    if(mPlayBtn) mPlayBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+    
+    const coverImg = document.getElementById('music-cover-img');
+    if(coverImg) coverImg.classList.remove('spin-slow');
+    
+    const cdIcon = document.getElementById('music-indicator-icon');
+    if(cdIcon) cdIcon.classList.remove('fa-spin');
+    
+    if(isMusicPlayerActive) renderMusicList();
+  });
+
   songAudioEl.addEventListener('loadedmetadata', () => {
     if(!isNaN(songAudioEl.duration) && songAudioEl.duration !== Infinity) {
       let mins = Math.floor(songAudioEl.duration / 60); let secs = Math.floor(songAudioEl.duration % 60);
@@ -1172,17 +1240,19 @@ if(songAudioEl) {
 
     const mFillEl = document.getElementById('music-time-fill'); if(mFillEl) mFillEl.style.width = percent + '%';
     const mCurEl = document.getElementById('music-time-current'); if(mCurEl) mCurEl.innerText = curMins + ':' + curSecs;
+    
+    if ('mediaSession' in navigator && !isNaN(songAudioEl.duration) && songAudioEl.duration !== Infinity) {
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: songAudioEl.duration,
+          playbackRate: songAudioEl.playbackRate,
+          position: songAudioEl.currentTime
+        });
+      } catch(e) {}
+    }
   });
 
   songAudioEl.addEventListener('ended', () => {
-    document.getElementById('btn-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
-    document.getElementById('audio-fill').style.width = '0%';
-    document.getElementById('audio-time').innerText = '0:00';
-    
-    document.getElementById('btn-music-play-pause').innerHTML = '<i class="fa-solid fa-play"></i>';
-    const coverImg = document.getElementById('music-cover-img'); if(coverImg) coverImg.classList.remove('spin-slow');
-    const cdIcon = document.getElementById('music-indicator-icon'); if(cdIcon) cdIcon.classList.remove('fa-spin');
-    
     if(isMusicPlayerActive && musicPlaylist.length > 0) { playMusicNext(true); }
   });
 }
