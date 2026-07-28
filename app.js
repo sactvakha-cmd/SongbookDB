@@ -28,6 +28,10 @@ let previousView = 'dashboard';
 let savedScrollPositions = {};
 let approvalCheckInterval = null; 
 
+// ตัวแปรสำหรับแบ่งหน้า (Pagination)
+let currentListPage = 1;
+const ITEMS_PER_PAGE = 60;
+
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
   { id: 'เพลงคริสเตียนทั่วไป', i18n_cat: 'cat_gen', i18n_nav: 'nav_cat_gen', icon: 'fa-music', bg: 'bg-g2' },
@@ -397,6 +401,7 @@ function goHome() {
   if(resDiv) resDiv.innerHTML = "";
   if(contentDiv) contentDiv.classList.remove('hidden');
   
+  currentListPage = 1;
   switchView('dashboard');
 }
 
@@ -471,6 +476,7 @@ function openAllSongs() {
   document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
+  currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
 }
@@ -482,13 +488,15 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
+  currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
 }
 
 let searchCatTimeout = null;
-function searchCategory(isImmediate = false) {
+function searchCategory(isImmediate = false, isPageChange = false) {
   clearTimeout(searchCatTimeout);
+  if (!isPageChange) currentListPage = 1;
   
   const executeSearch = () => {
     try {
@@ -505,11 +513,11 @@ function searchCategory(isImmediate = false) {
       });
 
       document.getElementById('cat-total').innerText = results.length; 
-      renderList(results, document.getElementById('song-list'));
+      renderList(results, document.getElementById('song-list'), 'category');
     } catch(e) { console.error("Search Error", e); }
   };
 
-  if(isImmediate) {
+  if(isImmediate || isPageChange) {
     document.getElementById('song-list').innerHTML = ""; 
     executeSearch();
   } else {
@@ -518,9 +526,11 @@ function searchCategory(isImmediate = false) {
 }
 
 let searchGlobalTimeout = null;
-function searchGlobal() {
+function searchGlobal(isPageChange = false) {
   clearTimeout(searchGlobalTimeout);
-  searchGlobalTimeout = setTimeout(() => {
+  if (!isPageChange) currentListPage = 1;
+  
+  const executeSearch = () => {
     try {
       const q = document.getElementById('global-search').value.toLowerCase(); 
       const selectedArtist = document.getElementById('artist-filter').value;
@@ -541,20 +551,67 @@ function searchGlobal() {
         return matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
-      renderList(results, resDiv);
+      renderList(results, resDiv, 'global');
     } catch(e) { console.error("Search Global Error", e); }
-  }, 300);
+  };
+  
+  if (isPageChange) {
+      executeSearch();
+  } else {
+      searchGlobalTimeout = setTimeout(executeSearch, 300);
+  }
 }
 
-function renderList(songs, container) {
+function renderList(songs, container, context = 'category') {
   try {
     if(songs.length === 0) { container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">ไม่พบข้อมูลเพลง 😢</div>`; return; }
 
-    container.innerHTML = songs.map(s => {
+    const totalItems = songs.length;
+    const totalPages = Math.ceil(totalItems / ITEMS_PER_PAGE);
+    
+    if (currentListPage < 1) currentListPage = 1;
+    if (currentListPage > totalPages) currentListPage = totalPages;
+    
+    const startIndex = (currentListPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    const paginatedSongs = songs.slice(startIndex, endIndex);
+
+    let html = paginatedSongs.map(s => {
       let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; 
       return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info"><div class="s-title">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Artist || s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
     }).join('');
+    
+    if (totalPages > 1) {
+       const startNum = startIndex + 1;
+       const endNum = Math.min(endIndex, totalItems);
+       const prevDisabled = currentListPage === 1 ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : '';
+       const nextDisabled = currentListPage === totalPages ? 'disabled style="opacity:0.3; cursor:not-allowed;"' : '';
+       
+       const pageFn = context === 'global' ? 'changePageGlobal' : 'changePageCategory';
+       
+       html += `
+         <div class="pagination-wrapper" style="display:flex; justify-content:center; align-items:center; gap:15px; margin-top:20px; margin-bottom:20px;">
+           <button class="btn-icon" style="width:40px; height:40px;" ${prevDisabled} onclick="${pageFn}(${currentListPage - 1})"><i class="fa-solid fa-chevron-left"></i></button>
+           <span style="font-size:0.95rem; font-weight:600; color:var(--primary); background:var(--bg-surface); padding:8px 15px; border-radius:20px; border:1px solid var(--border-color); box-shadow:0 2px 5px rgba(0,0,0,0.02);">${startNum} - ${endNum} / ${totalItems}</span>
+           <button class="btn-icon" style="width:40px; height:40px;" ${nextDisabled} onclick="${pageFn}(${currentListPage + 1})"><i class="fa-solid fa-chevron-right"></i></button>
+         </div>
+       `;
+    }
+
+    container.innerHTML = html;
   } catch(e) { console.error("Render List Error", e); }
+}
+
+function changePageCategory(newPage) {
+    currentListPage = newPage;
+    searchCategory(true, true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function changePageGlobal(newPage) {
+    currentListPage = newPage;
+    searchGlobal(true); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function switchView(view) {
@@ -1158,7 +1215,6 @@ function seekMusicAudio(e) {
   songAudioEl.currentTime = (clickX / track.getBoundingClientRect().width) * songAudioEl.duration;
 }
 
-// ---- ผูก Event และตั้งค่า Media Session ----
 if(songAudioEl) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.setActionHandler('play', () => {
