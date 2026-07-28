@@ -134,7 +134,7 @@ function populateArtistFilter() {
     }
   });
 
-  const optionsHTML = `<option value="">-- ศิลปิน/Artist --</option>` + 
+  const optionsHTML = `<option value="">Artist</option>` + 
     Array.from(artistSet).sort().map(artist => `<option value="${artist}">${artist}</option>`).join('');
   
   const globalFilter = document.getElementById('artist-filter');
