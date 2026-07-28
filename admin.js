@@ -51,16 +51,26 @@ function fetchAllData() {
   
   Promise.all([
     fetchAPI('getAllUsers'), 
-    fetchAPI('getAllSongsAdmin') 
+    fetchAPI('getAllSongsAdmin'),
+    fetchAPI('getPaymentSettings')
   ]).then(results => {
       const resUsers = results[0];
       const resSongs = results[1];
+      const resSettings = results[2];
       
       if(resUsers.status === 'success') allUsers = resUsers.users || [];
       if(resSongs.status === 'success') {
         allSongs = resSongs.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         populateArtistDatalist(); 
+      }
+      
+      if(resSettings && resSettings.status === 'success') {
+        const s = resSettings.settings;
+        document.getElementById('setting-bank-name').value = s.bank_name || '';
+        document.getElementById('setting-bank-number').value = s.bank_number || '';
+        document.getElementById('setting-qr-image').value = s.qr_image || '';
+        document.getElementById('setting-qr-preview').src = s.qr_image || 'my-qr.jpg';
       }
       
       showToast("เข้าสู่ระบบแอดมินสำเร็จ");
@@ -82,14 +92,14 @@ function fetchAllData() {
   });
 }
 
-// ==== ฟังก์ชันใหม่! สำหรับดึงข้อมูลแบบไม่รีเฟรชหน้าเว็บ (Soft Reload) ====
 function refreshAdminData(targetView = null) {
   document.getElementById('loader').classList.remove('hidden');
   document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
 
   Promise.all([
     fetchAPI('getAllUsers'),
-    fetchAPI('getAllSongsAdmin')
+    fetchAPI('getAllSongsAdmin'),
+    fetchAPI('getPaymentSettings')
   ]).then(results => {
       if(results[0].status === 'success') allUsers = results[0].users || [];
       if(results[1].status === 'success') {
@@ -97,6 +107,14 @@ function refreshAdminData(targetView = null) {
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         populateArtistDatalist();
       }
+      if(results[2] && results[2].status === 'success') {
+        const s = results[2].settings;
+        document.getElementById('setting-bank-name').value = s.bank_name || '';
+        document.getElementById('setting-bank-number').value = s.bank_number || '';
+        document.getElementById('setting-qr-image').value = s.qr_image || '';
+        document.getElementById('setting-qr-preview').src = s.qr_image || 'my-qr.jpg';
+      }
+      
       document.getElementById('loader').classList.add('hidden');
 
       if(targetView) {
@@ -131,6 +149,7 @@ function updateBottomNav(view) {
   nav.innerHTML = `
     <div class="nav-item ${view==='dashboard'||view==='admin-form'?'active':''}" onclick="switchView('dashboard')"><i class="fa-solid fa-music"></i><span>จัดการเพลง</span></div>
     <div class="nav-item ${view==='users'||view==='user-form'?'active':''}" onclick="switchView('users')"><i class="fa-solid fa-users"></i><span>จัดการผู้ใช้</span></div>
+    <div class="nav-item ${view==='settings'?'active':''}" onclick="switchView('settings')"><i class="fa-solid fa-gear"></i><span>ตั้งค่า</span></div>
     <div class="nav-item" onclick="logout()" style="color:var(--danger)"><i class="fa-solid fa-right-from-bracket"></i><span>ออกระบบ</span></div>
   `;
 }
@@ -138,14 +157,14 @@ function updateBottomNav(view) {
 function switchView(view) {
   adminScrollPositions[currentAdminView] = window.scrollY;
 
-  ['view-dashboard', 'view-admin-form', 'view-users', 'view-user-form'].forEach(v => document.getElementById(v).classList.add('hidden'));
+  ['view-dashboard', 'view-admin-form', 'view-users', 'view-user-form', 'view-settings'].forEach(v => document.getElementById(v).classList.add('hidden'));
   document.getElementById('view-' + view).classList.remove('hidden');
   
   updateBottomNav(view);
   if(view === 'dashboard') filterAdminCat(currentAdminCategory);
   if(view === 'users') renderUsers();
 
-  if (view === 'admin-form' || view === 'user-form') {
+  if (view === 'admin-form' || view === 'user-form' || view === 'settings') {
     window.scrollTo(0, 0);
   } else {
     setTimeout(() => {
@@ -254,7 +273,6 @@ function saveSong() {
     showToast(res.msg); 
     btnSave.innerHTML = originalText;
     btnSave.disabled = false;
-    // โหลดข้อมูลแบบ Soft Reload และกลับไปหน้าแรกทันที
     refreshAdminData('dashboard');
   }).catch(e => { 
     showToast(e.message, "error"); 
@@ -312,13 +330,8 @@ function formatTextAdmin(command, value = null) {
 
 function applyCustomStyle(property, value) {
   if (!value) return;
-
   const selection = window.getSelection();
-  if (!selection.rangeCount || selection.isCollapsed) {
-    showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning");
-    return;
-  }
-
+  if (!selection.rangeCount || selection.isCollapsed) { return showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning"); }
   let finalValue = value;
   if (property === 'fontSize') finalValue = value + 'pt';
 
@@ -326,10 +339,7 @@ function applyCustomStyle(property, value) {
   document.execCommand('styleWithCSS', false, true);
   document.execCommand('fontName', false, marker);
 
-  const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') ?
-                       document.getElementById('form-lyrics-new') :
-                       document.getElementById('form-lyrics-old');
-
+  const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') ? document.getElementById('form-lyrics-new') : document.getElementById('form-lyrics-old');
   const elements = activeEditor.querySelectorAll(`font[face="${marker}"], span[style*="${marker}"]`);
 
   elements.forEach(el => {
@@ -340,71 +350,48 @@ function applyCustomStyle(property, value) {
             blockParent.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
         } else {
             const div = document.createElement('div');
-            div.style.lineHeight = finalValue;
-            div.innerHTML = el.innerHTML;
+            div.style.lineHeight = finalValue; div.innerHTML = el.innerHTML;
             div.querySelectorAll('*').forEach(child => { if(child.style) child.style.lineHeight = ''; });
-            el.replaceWith(div);
-            return; 
+            el.replaceWith(div); return; 
         }
     }
-
     const span = document.createElement('span');
     if (el.tagName.toLowerCase() === 'span') {
         let css = el.style.cssText;
         css = css.replace(new RegExp(`font-family:\\s*["']?${marker}["']?;?`, 'gi'), '');
         span.style.cssText = css;
     }
-
-    span.style[property] = finalValue;
-    span.innerHTML = el.innerHTML;
-
+    span.style[property] = finalValue; span.innerHTML = el.innerHTML;
     span.querySelectorAll('*').forEach(child => {
-        if (child.style) {
-            child.style[property] = ''; 
-        }
+        if (child.style) { child.style[property] = ''; }
         if (property === 'fontSize') {
             if (child.style) child.style.fontSize = ''; 
             if (child.tagName.toLowerCase() === 'font') child.removeAttribute('size'); 
-            if (child.tagName.toLowerCase() === 'small' || child.tagName.toLowerCase() === 'big') {
-                child.style.fontSize = 'inherit'; 
-            }
+            if (child.tagName.toLowerCase() === 'small' || child.tagName.toLowerCase() === 'big') { child.style.fontSize = 'inherit'; }
         }
     });
-
     el.replaceWith(span);
   });
-  
   activeEditor.normalize();
 }
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
-  
   const results = allUsers.filter(u => {
-    const phone = (u.Phone || "").toLowerCase();
-    const name = (u.Name || "").toLowerCase();
-    const exp = (u.ExpiryDate || "").toLowerCase();
-    const status = (u.Status || "").toLowerCase();
-    
+    const phone = (u.Phone || "").toLowerCase(); const name = (u.Name || "").toLowerCase(); const exp = (u.ExpiryDate || "").toLowerCase(); const status = (u.Status || "").toLowerCase();
     let statusThai = "";
     if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
     else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
-    
     return phone.includes(q) || name.includes(q) || exp.includes(q) || status.includes(q) || statusThai.includes(q);
   });
 
   document.getElementById('user-list').innerHTML = results.map(u => {
     let isPending = u.Status === "pending_new" || u.Status === "pending_renew" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
-    
     let statusText = `หมดอายุ: ${u.ExpiryDate}`;
     if (isPending) {
-        if (u.Status === "pending_renew") {
-            statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
-        } else {
-            statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
-        }
+        if (u.Status === "pending_renew") statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
+        else statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
     }
-    
     let statusColor = isPending ? "#f59e0b" : "var(--primary)";
     let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; margin-left:5px;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
     return `<div class="song-item">
@@ -442,28 +429,16 @@ function addDaysToExpiry(days) {
 
 function saveUser() {
   const d = { 
-    Phone: document.getElementById('form-user-phone').value, 
-    PIN: document.getElementById('form-user-pin').value, 
-    Name: document.getElementById('form-user-name').value, 
-    ExpiryDate: document.getElementById('form-user-expiry').value,
-    RenewCount: parseInt(document.getElementById('form-user-count').value) || 1,
-    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
+    Phone: document.getElementById('form-user-phone').value, PIN: document.getElementById('form-user-pin').value, Name: document.getElementById('form-user-name').value, 
+    ExpiryDate: document.getElementById('form-user-expiry').value, RenewCount: parseInt(document.getElementById('form-user-count').value) || 1, Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
   };
-  
   document.getElementById('loader').classList.remove('hidden');
-  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { 
-      showToast(res.msg); 
-      refreshAdminData('users');
-  });
+  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); refreshAdminData('users'); });
 }
 
 function deleteUser(phone) { 
     if(confirm(`ลบเบอร์ ${phone}?`)) { 
-        document.getElementById('loader').classList.remove('hidden');
-        fetchAPI('deleteUser', { phone: phone }).then(res => { 
-            showToast(res.msg); 
-            refreshAdminData(); 
-        }); 
+        document.getElementById('loader').classList.remove('hidden'); fetchAPI('deleteUser', { phone: phone }).then(res => { showToast(res.msg); refreshAdminData(); }); 
     } 
 }
 
@@ -475,131 +450,93 @@ function showToast(msg, type="success") {
 }
 
 async function uploadMedia(event, targetId, fileType) {
-  const file = event.target.files[0];
-  if(!file) return;
-  showToast("กำลังอัปโหลดไฟล์...", "warning");
-  
+  const file = event.target.files[0]; if(!file) return; showToast("กำลังอัปโหลดไฟล์...", "warning");
   const formData = new FormData();
-  formData.append("action", "uploadAdminFile");
-  formData.append("password", adminPassword);
-  formData.append("fileType", fileType);
-  formData.append("extension", file.name.split('.').pop());
-  formData.append("file", file); 
-
+  formData.append("action", "uploadAdminFile"); formData.append("password", adminPassword); formData.append("fileType", fileType); formData.append("extension", file.name.split('.').pop()); formData.append("file", file); 
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: formData 
-    });
+    const response = await fetch(API_URL, { method: 'POST', body: formData });
     const res = await response.json();
-    
-    if(res.status === 'success') {
-      document.getElementById(targetId).value = res.url;
-      showToast("อัปโหลดสำเร็จ!", "success");
-    } else { showToast(res.msg, "error"); }
-  } catch (err) { 
-    showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); 
-  }
+    if(res.status === 'success') { document.getElementById(targetId).value = res.url; showToast("อัปโหลดสำเร็จ!", "success"); } else { showToast(res.msg, "error"); }
+  } catch (err) { showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); }
 }
 
-let mediaRecorder;
-let audioChunks = [];
-let isRecording = false;
-let recordedBlob = null; 
-
+let mediaRecorder; let audioChunks = []; let isRecording = false; let recordedBlob = null; 
 async function toggleRecording() {
   try {
-    const btn = document.getElementById('btn-record-audio');
-    const icon = btn.querySelector('i');
-    const previewBox = document.getElementById('audio-preview-box');
-    
-    previewBox.classList.add('hidden');
-    document.getElementById('audio-preview-element').src = "";
-    recordedBlob = null;
-    
+    const btn = document.getElementById('btn-record-audio'); const icon = btn.querySelector('i'); const previewBox = document.getElementById('audio-preview-box');
+    previewBox.classList.add('hidden'); document.getElementById('audio-preview-element').src = ""; recordedBlob = null;
     if (!isRecording) {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("เบราว์เซอร์ของคุณไม่รองรับการใช้งานไมค์ หรือไม่ได้เข้าใช้งานผ่าน HTTPS"); return;
-      }
-      
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { alert("เบราว์เซอร์ของคุณไม่รองรับ"); return; }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      if (typeof MediaRecorder === 'undefined') { alert("อุปกรณ์นี้ไม่รองรับระบบบันทึกเสียงครับ"); return; }
-
-      let options = {};
-      if (MediaRecorder.isTypeSupported('audio/webm')) { options = { mimeType: 'audio/webm' }; }
-      else if (MediaRecorder.isTypeSupported('audio/mp4')) { options = { mimeType: 'audio/mp4' }; }
-
-      mediaRecorder = new MediaRecorder(stream, options);
-      audioChunks = [];
-      mediaRecorder.start();
-      isRecording = true;
-      
-      btn.style.background = "var(--danger)"; btn.classList.add('recording-pulse');
-      icon.classList.remove('fa-microphone'); icon.classList.add('fa-stop');
+      let options = {}; if (MediaRecorder.isTypeSupported('audio/webm')) options = { mimeType: 'audio/webm' }; else if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
+      mediaRecorder = new MediaRecorder(stream, options); audioChunks = []; mediaRecorder.start(); isRecording = true;
+      btn.style.background = "var(--danger)"; btn.classList.add('recording-pulse'); icon.classList.remove('fa-microphone'); icon.classList.add('fa-stop');
       showToast("🔴 กำลังบันทึกเสียง... กดอีกครั้งเพื่อหยุด", "warning");
-
-      mediaRecorder.addEventListener("dataavailable", event => { 
-        if (event.data.size > 0) audioChunks.push(event.data); 
-      });
-
+      mediaRecorder.addEventListener("dataavailable", event => { if (event.data.size > 0) audioChunks.push(event.data); });
       mediaRecorder.addEventListener("stop", () => {
-        const mimeType = mediaRecorder.mimeType || 'audio/mp4'; 
-        recordedBlob = new Blob(audioChunks, { type: mimeType });
-        
-        const audioUrl = URL.createObjectURL(recordedBlob);
-        document.getElementById('audio-preview-element').src = audioUrl;
-        
-        previewBox.classList.remove('hidden');
-        previewBox.style.display = "flex";
-        
-        showToast("หยุดบันทึกแล้ว กรุณาลองฟังและกดยืนยันอัปโหลด", "success");
-        stream.getTracks().forEach(track => track.stop()); 
+        const mimeType = mediaRecorder.mimeType || 'audio/mp4'; recordedBlob = new Blob(audioChunks, { type: mimeType });
+        document.getElementById('audio-preview-element').src = URL.createObjectURL(recordedBlob);
+        previewBox.classList.remove('hidden'); previewBox.style.display = "flex"; showToast("หยุดบันทึกแล้ว", "success"); stream.getTracks().forEach(track => track.stop()); 
       });
     } else {
       if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
-      isRecording = false;
-      btn.style.background = "#ef4444"; btn.classList.remove('recording-pulse');
-      icon.classList.remove('fa-stop'); icon.classList.add('fa-microphone');
+      isRecording = false; btn.style.background = "#ef4444"; btn.classList.remove('recording-pulse'); icon.classList.remove('fa-stop'); icon.classList.add('fa-microphone');
     }
   } catch (err) { alert("ไม่สามารถเข้าถึงไมโครโฟนได้: " + err.message); }
 }
 
 async function uploadRecordedAudio() {
-  if (!recordedBlob) {
-    showToast("ไม่พบไฟล์เสียง กรุณาอัดใหม่", "error"); return;
-  }
-  
+  if (!recordedBlob) { showToast("ไม่พบไฟล์เสียง", "error"); return; }
   showToast("กำลังอัปโหลดเสียง...", "warning");
   const ext = recordedBlob.type.includes('mp4') ? 'm4a' : recordedBlob.type.includes('webm') ? 'webm' : 'mp3';
-  
-  const formData = new FormData();
-  formData.append("action", "uploadAdminFile");
-  formData.append("password", adminPassword);
-  formData.append("fileType", "audio");
-  formData.append("extension", ext);
-  formData.append("file", recordedBlob, "record." + ext); 
-
+  const formData = new FormData(); formData.append("action", "uploadAdminFile"); formData.append("password", adminPassword); formData.append("fileType", "audio"); formData.append("extension", ext); formData.append("file", recordedBlob, "record." + ext); 
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: formData
-    });
+    const response = await fetch(API_URL, { method: 'POST', body: formData });
     const res = await response.json();
-    
     if(res.status === 'success') {
-      document.getElementById('form-audio').value = res.url;
-      showToast("อัปโหลดเสียงบันทึกสำเร็จ!", "success");
-      document.getElementById('audio-preview-box').classList.add('hidden');
-      document.getElementById('audio-preview-element').src = "";
+      document.getElementById('form-audio').value = res.url; showToast("อัปโหลดสำเร็จ!", "success"); document.getElementById('audio-preview-box').classList.add('hidden'); document.getElementById('audio-preview-element').src = "";
     } else { showToast(res.msg, "error"); }
-  } catch (err) {
-    showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error");
-  }
+  } catch (err) { showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); }
+}
+function cancelRecordedAudio() { recordedBlob = null; document.getElementById('audio-preview-element').src = ""; document.getElementById('audio-preview-box').classList.add('hidden'); showToast("ลบทิ้งแล้ว", "success"); }
+
+// --- ฟังก์ชันใหม่ สำหรับหน้าตั้งค่าระบบ (QR Code) ---
+function saveSystemSettings() {
+  const bankName = document.getElementById('setting-bank-name').value.trim();
+  const bankNum = document.getElementById('setting-bank-number').value.trim();
+  const qrImg = document.getElementById('setting-qr-image').value.trim();
+  
+  if(!bankName || !bankNum || !qrImg) { return showToast("กรุณากรอกข้อมูลให้ครบถ้วน", "warning"); }
+  
+  const btn = document.getElementById('btn-save-settings');
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
+  btn.disabled = true;
+  
+  const settings = { bank_name: bankName, bank_number: bankNum, qr_image: qrImg };
+  
+  fetchAPI('savePaymentSettings', { settings: settings })
+  .then(res => {
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false;
+    if(res.status === 'success') { showToast(res.msg, "success"); } else { showToast(res.msg, "error"); }
+  }).catch(err => {
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> บันทึก'; btn.disabled = false;
+    showToast("บันทึกไม่สำเร็จ: " + err.message, "error");
+  });
 }
 
-function cancelRecordedAudio() {
-  recordedBlob = null;
-  document.getElementById('audio-preview-element').src = "";
-  document.getElementById('audio-preview-box').classList.add('hidden');
-  showToast("ลบเสียงชั่วคราวแล้ว สามารถกดอัดใหม่ได้เลย", "success");
+async function uploadSystemQR(event) {
+  const file = event.target.files[0]; if(!file) return;
+  showToast("กำลังอัปโหลด QR Code...", "warning");
+  
+  const formData = new FormData();
+  formData.append("action", "uploadAdminFile"); formData.append("password", adminPassword); formData.append("fileType", "image"); formData.append("extension", file.name.split('.').pop()); formData.append("file", file); 
+
+  try {
+    const response = await fetch(API_URL, { method: 'POST', body: formData });
+    const res = await response.json();
+    if(res.status === 'success') {
+      document.getElementById('setting-qr-image').value = res.url; document.getElementById('setting-qr-preview').src = res.url;
+      showToast("อัปโหลด QR Code สำเร็จ!", "success");
+    } else { showToast(res.msg, "error"); }
+  } catch (err) { showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); }
 }
