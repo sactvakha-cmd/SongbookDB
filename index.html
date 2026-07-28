@@ -128,9 +128,9 @@
       </div>
 
       <div style="background: #f1f5f9; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
-        <img src="my-qr.jpg" alt="QR Code" style="width: 200px; border-radius: 10px; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-        <p style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">091-014-5332</p>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">ชื่อบัญชี: สุรชาติ มาเยอะ Surachat Mayer</p>
+        <img id="pay-qr-image" src="my-qr.jpg" alt="QR Code" style="width: 200px; border-radius: 10px; margin-bottom: 10px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <p id="pay-bank-number" style="font-size: 1.5rem; font-weight: bold; color: var(--text-main); letter-spacing: 2px;">กำลังโหลด...</p>
+        <p id="pay-bank-name" style="color: var(--text-muted); font-size: 0.85rem;">กำลังโหลด...</p>
       </div>
       <div style="text-align: left; margin-bottom: 20px;">
         <label style="font-size: 0.9rem; font-weight: bold; color: var(--text-main); display: block; margin-bottom: 5px;">แนบสลิปโอนเงิน (จำเป็น) <span style="color:red">*</span></label>
@@ -219,7 +219,6 @@
 
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar no-print">
-        <!-- นี่คือจุดสำคัญที่ทำให้ปุ่ม Back ฉลาดขึ้น -->
         <button class="btn-icon" onclick="goBackFromSong()"><i class="fa-solid fa-arrow-left"></i></button>
         
         <div id="top-audio-player" class="top-audio-ui hidden">
@@ -446,7 +445,7 @@
   </div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
-  <script src="app.js?v=137"></script>
+  <script src="app.js?v=138"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
