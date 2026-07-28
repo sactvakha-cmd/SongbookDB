@@ -245,6 +245,17 @@ function showLoginView() {
     switchAuthTab('login');
 }
 
+// --- ฟังก์ชันใหม่: ดึงข้อมูลการตั้งค่าบัญชีจากระบบหลังบ้าน ---
+function loadPaymentSettings() {
+  fetchAPI('getPaymentSettings', {}).then(res => {
+    if(res.status === 'success' && res.settings) {
+        document.getElementById('pay-qr-image').src = res.settings.qr_image || 'my-qr.jpg';
+        document.getElementById('pay-bank-number').innerText = res.settings.bank_number || '091-014-5332';
+        document.getElementById('pay-bank-name').innerText = res.settings.bank_name || 'ชื่อบัญชี: สุรชาติ มาเยอะ Surachat Mayer';
+    }
+  }).catch(e => console.log('Load payment settings error', e));
+}
+
 function goToRenewFromProfile() {
   const savedUser = JSON.parse(localStorage.getItem('songbook_user')); if(!savedUser) return;
   localStorage.setItem('temp_renew_phone', savedUser.phone); localStorage.setItem('temp_renew_pin', savedUser.pin); localStorage.setItem('temp_renew_name', "สมาชิกเดิม (ต่ออายุ)"); 
@@ -252,6 +263,7 @@ function goToRenewFromProfile() {
   document.getElementById('slip-upload').value = ""; document.getElementById('slip-image-preview').style.display = "none"; pendingSlipBase64 = "";
   document.getElementById('app').classList.add('hidden'); document.getElementById('main-bottom-nav').classList.add('hidden');
   document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden');
+  loadPaymentSettings();
 }
 
 function goToPayment(isNew) {
@@ -263,6 +275,7 @@ function goToPayment(isNew) {
   }
   pendingSlipBase64 = ""; document.getElementById('slip-upload').value = ""; document.getElementById('slip-image-preview').style.display = "none";
   document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden');
+  loadPaymentSettings();
 }
 
 function cancelPayment() {
@@ -374,7 +387,6 @@ function selectCategoryFromPopup(catId) {
   if (catId === 'ALL') { openAllSongs(); } else { openCategory(catId, catId); }
 }
 
-// ==== ฟังก์ชันใหม่: เพื่อล้างค่าการค้นหาแล้วพากลับหน้าแรกแบบ 100% ====
 function goHome() {
   const searchInput = document.getElementById('global-search');
   const artistFilter = document.getElementById('artist-filter');
@@ -398,7 +410,6 @@ function updateBottomNav(view) {
   
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   
-  // เปลี่ยนปุ่มหน้าแรก ให้เรียก goHome() แทน switchView('dashboard')
   const homeBtn = `<div class="nav-item ${view==='dashboard'?'active':''}" onclick="goHome()"><i class="fa-solid fa-house"></i><span data-i18n="nav_home">${ln.nav_home}</span></div>`;
   const musicBtn = `<div class="nav-item ${view==='music'?'active':''}" onclick="openMusicPlayer()"><i class="fa-solid fa-circle-play"></i><span data-i18n="nav_music">${ln.nav_music || 'Playlist'}</span></div>`;
   const catBtn = `<div class="nav-item ${view==='category' || view==='category_popup' ?'active':''}" onclick="toggleCategoryPopup()"><i class="fa-solid fa-layer-group"></i><span data-i18n="nav_categories">${ln.nav_categories}</span></div>`;
