@@ -212,6 +212,10 @@ function searchSongs() { renderSongs(); }
 function openAdminForm(id = null) {
   const editorOld = document.getElementById('form-lyrics-old'); 
   const editorNew = document.getElementById('form-lyrics-new');
+  
+  // เคลียร์ค่าแถบเครื่องมือ (Font, Size, Line Height, Spacing) กลับเป็นค่าเริ่มต้น
+  document.querySelectorAll('.editor-select').forEach(select => select.value = "");
+
   if(id) {
     const s = allSongs.find(x => x.ID === id);
     document.getElementById('form-id').value = s.ID; 
@@ -230,7 +234,6 @@ function openAdminForm(id = null) {
     editorNew.innerHTML = s.LyricsNew || ""; 
     document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + s.ID;
   } else {
-    // แก้ปัญหาข้อมูลเดิมค้างเวลาสร้างเพลงใหม่ (เคลียร์ให้ครบทุกช่อง)
     document.getElementById('form-id').value = ""; 
     document.getElementById('form-title').value = ""; 
     document.getElementById('form-eng-title').value = ""; 
