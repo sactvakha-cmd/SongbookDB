@@ -210,7 +210,8 @@ function renderSongs() {
 function searchSongs() { renderSongs(); }
 
 function openAdminForm(id = null) {
-  const editorOld = document.getElementById('form-lyrics-old'); const editorNew = document.getElementById('form-lyrics-new');
+  const editorOld = document.getElementById('form-lyrics-old'); 
+  const editorNew = document.getElementById('form-lyrics-new');
   if(id) {
     const s = allSongs.find(x => x.ID === id);
     document.getElementById('form-id').value = s.ID; 
@@ -229,16 +230,27 @@ function openAdminForm(id = null) {
     editorNew.innerHTML = s.LyricsNew || ""; 
     document.getElementById('admin-title').innerText = "✏️ แก้ไข: " + s.ID;
   } else {
+    // แก้ปัญหาข้อมูลเดิมค้างเวลาสร้างเพลงใหม่ (เคลียร์ให้ครบทุกช่อง)
     document.getElementById('form-id').value = ""; 
     document.getElementById('form-title').value = ""; 
+    document.getElementById('form-eng-title').value = ""; 
     document.getElementById('form-artist').value = "";
     document.getElementById('form-author').value = "";
+    document.getElementById('form-chords').value = ""; 
+    document.getElementById('form-notation').value = ""; 
+    document.getElementById('form-audio').value = ""; 
+    document.getElementById('form-link').value = ""; 
+    document.getElementById('form-image').value = "";
+    document.getElementById('form-inspiration').value = ""; 
     editorOld.innerHTML = ""; 
     editorNew.innerHTML = ""; 
     document.getElementById('admin-title').innerText = "➕ เพิ่มเพลงใหม่";
-    document.getElementById('form-audio').value = ""; 
-    document.getElementById('form-image').value = "";
-    if(currentAdminCategory !== 'ALL') document.getElementById('form-cat').value = currentAdminCategory;
+    
+    if(currentAdminCategory !== 'ALL') {
+        document.getElementById('form-cat').value = currentAdminCategory;
+    } else {
+        document.getElementById('form-cat').value = "เพลงชีวิตคริสเตียนอาข่า";
+    }
   }
   switchView('admin-form');
 }
@@ -500,7 +512,6 @@ async function uploadRecordedAudio() {
 }
 function cancelRecordedAudio() { recordedBlob = null; document.getElementById('audio-preview-element').src = ""; document.getElementById('audio-preview-box').classList.add('hidden'); showToast("ลบทิ้งแล้ว", "success"); }
 
-// --- ฟังก์ชันใหม่ สำหรับหน้าตั้งค่าระบบ (QR Code) ---
 function saveSystemSettings() {
   const bankName = document.getElementById('setting-bank-name').value.trim();
   const bankNum = document.getElementById('setting-bank-number').value.trim();
