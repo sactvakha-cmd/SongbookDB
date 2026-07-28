@@ -123,11 +123,9 @@
               <input type="text" id="form-eng-title" placeholder="English title...">
             </div>
 
-            <!-- ช่องพิมพ์/เลือกศิลปินแบบผสม (Datalist) -->
             <label style="color:var(--primary); font-weight:bold;">ศิลปิน / นักร้อง (Artist) <span style="color:var(--text-muted); font-size:0.8rem; font-weight:normal;">(พิมพ์ใหม่ หรือเลือกจากที่เคยมี)</span></label>
             <input type="text" id="form-artist" list="artist-list" placeholder="ชื่อศิลปิน / นักร้อง (เว้นว่างได้)" style="border-color: var(--primary);">
             <datalist id="artist-list">
-              <!-- ข้อมูลตัวเลือกศิลปินจะถูกดึงมาใส่ที่นี่อัตโนมัติจากไฟล์ admin.js -->
             </datalist>
             
             <label>ผู้แต่ง / เรียบเรียง (Author)</label>
@@ -325,10 +323,42 @@
       </div>
     </div>
 
+    <!-- ส่วนของการตั้งค่าระบบ (QR Code, บัญชี) -->
+    <div id="view-settings" class="hidden fade-in">
+      <div class="top-bar">
+        <h2><i class="fa-solid fa-gear"></i> ตั้งค่าระบบ</h2>
+        <button class="btn-primary" id="btn-save-settings" style="width: auto; padding: 10px 20px; font-size: 0.95rem; border-radius: 50px; background:#10b981;" onclick="saveSystemSettings()"><i class="fa-solid fa-check"></i> บันทึก</button>
+      </div>
+
+      <div class="reader-card form-group">
+        <h3 style="margin-bottom: 15px; color: var(--primary);"><i class="fa-solid fa-money-check-dollar"></i> ข้อมูลบัญชีรับเงิน (แสดงในหน้าชำระเงินของแอป)</h3>
+        
+        <label>ชื่อบัญชี <span style="color:red">*</span></label>
+        <input type="text" id="setting-bank-name" placeholder="เช่น ชื่อบัญชี: สุรชาติ มาเยอะ...">
+        
+        <label>เลขที่บัญชี / พร้อมเพย์ <span style="color:red">*</span></label>
+        <input type="text" id="setting-bank-number" placeholder="เช่น 091-014-5332">
+        
+        <label>รูปภาพ QR Code <span style="color:red">*</span></label>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <input type="text" id="setting-qr-image" placeholder="ลิงก์รูป หรืออัปโหลด..." style="margin-bottom:0; flex:1;" oninput="document.getElementById('setting-qr-preview').src = this.value || 'my-qr.jpg'">
+          
+          <label class="btn-primary" style="display:flex; align-items:center; justify-content:center; cursor:pointer; padding: 0 15px; border-radius: 8px; font-size: 0.9rem; background:#3b82f6;">
+            <i class="fa-solid fa-upload"></i>
+            <input type="file" accept="image/*" style="display:none;" onchange="uploadSystemQR(event)">
+          </label>
+        </div>
+        
+        <div style="background: #f1f5f9; padding: 15px; border-radius: 12px; text-align: center;">
+            <img id="setting-qr-preview" src="my-qr.jpg" style="max-width: 200px; border-radius: 10px; border: 2px solid var(--border-color); box-shadow: 0 4px 10px rgba(0,0,0,0.1);" alt="QR Preview">
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="admin.js?v=112"></script>
+  <script src="admin.js?v=113"></script>
 </body>
 </html>
