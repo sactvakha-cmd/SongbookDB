@@ -5,7 +5,6 @@ let allUsers = [];
 let currentAdminView = 'dashboard';
 let adminScrollPositions = {};
 
-// สร้างระบบเก็บค่า Scroll Position ก่อนการ Reload หน้าเว็บ (เพื่อให้เลื่อนกลับมาที่เดิมหลังเซฟเพลง)
 window.addEventListener('beforeunload', () => {
   sessionStorage.setItem('adminScrollTemp', window.scrollY);
 });
@@ -61,7 +60,7 @@ function fetchAllData() {
       if(resSongs.status === 'success') {
         allSongs = resSongs.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-        populateArtistDatalist(); // เรียกฟังก์ชันอัปเดต DataList ของศิลปิน
+        populateArtistDatalist(); 
       }
       
       showToast("เข้าสู่ระบบแอดมินสำเร็จ");
@@ -72,7 +71,6 @@ function fetchAllData() {
       
       filterAdminCat(currentAdminCategory);
 
-      // เลื่อนหน้าจอกลับมาที่ตำแหน่งเดิมหากมีการ Refresh (หลังกดบันทึก)
       const savedScroll = sessionStorage.getItem('adminScrollTemp');
       if (savedScroll) {
          setTimeout(() => { window.scrollTo(0, parseInt(savedScroll)); sessionStorage.removeItem('adminScrollTemp'); }, 100);
@@ -84,12 +82,39 @@ function fetchAllData() {
   });
 }
 
-// ฟังก์ชันใหม่! สร้างรายการชื่อศิลปินใส่ Datalist อัตโนมัติ
+// ==== ฟังก์ชันใหม่! สำหรับดึงข้อมูลแบบไม่รีเฟรชหน้าเว็บ (Soft Reload) ====
+function refreshAdminData(targetView = null) {
+  document.getElementById('loader').classList.remove('hidden');
+  document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
+
+  Promise.all([
+    fetchAPI('getAllUsers'),
+    fetchAPI('getAllSongsAdmin')
+  ]).then(results => {
+      if(results[0].status === 'success') allUsers = results[0].users || [];
+      if(results[1].status === 'success') {
+        allSongs = results[1].songs || [];
+        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
+        populateArtistDatalist();
+      }
+      document.getElementById('loader').classList.add('hidden');
+
+      if(targetView) {
+          switchView(targetView);
+      } else {
+          if(currentAdminView === 'dashboard') filterAdminCat(currentAdminCategory);
+          if(currentAdminView === 'users') renderUsers();
+      }
+  }).catch(err => {
+      document.getElementById('loader').classList.add('hidden');
+      showToast("อัปเดตข้อมูลล้มเหลว", "error");
+  });
+}
+
 function populateArtistDatalist() {
   const datalist = document.getElementById('artist-list');
   if (!datalist) return;
   
-  // กวาดชื่อ Artist ออกมา (ตัดค่าว่าง) และกรองเอาเฉพาะที่ไม่ซ้ำ
   const artistSet = new Set();
   allSongs.forEach(song => {
     if (song.Artist && song.Artist.trim() !== "") {
@@ -97,7 +122,6 @@ function populateArtistDatalist() {
     }
   });
 
-  // สร้าง tag <option> ยัดเข้าไปใน datalist
   datalist.innerHTML = Array.from(artistSet).sort().map(artist => `<option value="${artist}"></option>`).join('');
 }
 
@@ -221,24 +245,33 @@ function saveSong() {
   
   if(!data.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
 
-  // เปลี่ยนสถานะปุ่มเป็นกำลังโหลด เพื่อให้ไม่รู้สึกว่าระบบค้าง
   const btnSave = document.getElementById('btn-save-top');
-  const originalBtnContent = btnSave.innerHTML;
-  btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังประมวลผล...';
+  const originalText = btnSave.innerHTML;
+  btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
   btnSave.disabled = true;
   
   fetchAPI('saveSong', { data: data }).then(res => {
     showToast(res.msg); 
-    // ลดเวลาหน่วงก่อนรีเฟรชหน้าจอจาก 1 วินาที (1000) เหลือ 0.5 วินาที (500) ให้ดูไวขึ้น
-    setTimeout(() => location.reload(), 500);
+    btnSave.innerHTML = originalText;
+    btnSave.disabled = false;
+    // โหลดข้อมูลแบบ Soft Reload และกลับไปหน้าแรกทันที
+    refreshAdminData('dashboard');
   }).catch(e => { 
     showToast(e.message, "error"); 
-    btnSave.innerHTML = originalBtnContent;
+    btnSave.innerHTML = originalText;
     btnSave.disabled = false; 
   });
 }
 
-function deleteSong(id) { if(confirm(`ลบเพลง ${id}?`)) { fetchAPI('deleteSong', { id: id }).then(res => { showToast(res.msg); location.reload(); }); } }
+function deleteSong(id) { 
+    if(confirm(`ลบเพลง ${id}?`)) { 
+        document.getElementById('loader').classList.remove('hidden');
+        fetchAPI('deleteSong', { id: id }).then(res => { 
+            showToast(res.msg); 
+            refreshAdminData(); 
+        }); 
+    } 
+}
 
 function switchAdminLyricView(type) {
   document.getElementById('btn-edit-lyric-old').classList.remove('active'); document.getElementById('btn-edit-lyric-new').classList.remove('active'); document.getElementById('btn-edit-lyric-'+type).classList.add('active');
@@ -416,9 +449,23 @@ function saveUser() {
     RenewCount: parseInt(document.getElementById('form-user-count').value) || 1,
     Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
   };
-  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); setTimeout(() => location.reload(), 1000); });
+  
+  document.getElementById('loader').classList.remove('hidden');
+  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { 
+      showToast(res.msg); 
+      refreshAdminData('users');
+  });
 }
-function deleteUser(phone) { if(confirm(`ลบเบอร์ ${phone}?`)) { fetchAPI('deleteUser', { phone: phone }).then(res => { showToast(res.msg); location.reload(); }); } }
+
+function deleteUser(phone) { 
+    if(confirm(`ลบเบอร์ ${phone}?`)) { 
+        document.getElementById('loader').classList.remove('hidden');
+        fetchAPI('deleteUser', { phone: phone }).then(res => { 
+            showToast(res.msg); 
+            refreshAdminData(); 
+        }); 
+    } 
+}
 
 function showToast(msg, type="success") {
   const toast = document.getElementById('toast');
