@@ -289,6 +289,52 @@ input:focus, select:focus, textarea:focus { box-shadow: 0 0 0 2px var(--primary)
     text-shadow: none; 
 }
 
+/* --- Popup Number Grid (ตารางเลขเพลง) --- */
+.number-grid-container {
+    display: grid;
+    /* สร้างคอลัมน์ให้พอดีหน้าจอ อัตโนมัติ (คล้ายตาราง 10-15 คอลัมน์) */
+    grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+    gap: 6px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 20px 20px 20px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.number-grid-container::-webkit-scrollbar { display: none; }
+
+.num-grid-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 500;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+/* สลับสีพื้นหลังเบาๆ เหมือนตารางในรูป */
+.num-grid-item:nth-child(even) {
+    background: var(--bg-main);
+}
+.num-grid-item:active {
+    transform: scale(0.9);
+}
+.num-grid-item.selected {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    font-weight: 700;
+    box-shadow: 0 4px 10px var(--primary-glow);
+}
+
 /* --- Utils --- */
 .loader-container { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--primary); background: var(--bg-main); z-index: 9999; position: fixed; top: 0; left: 0; width: 100%;}
 .spinner { width: 50px; height: 50px; border: 4px solid rgba(37, 99, 235, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
