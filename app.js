@@ -9,17 +9,20 @@ async function fetchAPI(action, params = {}) {
 }
 
 const i18n = {
-  th: { app_title: "คลังเพลงคริสเตียนอาข่า", search_placeholder: "ค้นหาด้วย เลข หรือ ชื่อเพลง...", manage_text: "ดูและจัดการ", total_songs: "เพลงทั้งหมดในคลัง", group_songs: "กลุ่มเพลง", song_count_label: "จำนวนเพลง:", song_unit: "เพลง", nav_home: "หน้าแรก", nav_profile: "โปรไฟล์", nav_categories: "หมวดหมู่", cat_life: "เพลงชีวิตคริสเตียนอาข่า", cat_gen: "เพลงคริสเตียนทั่วไป", cat_xmas: "เพลงคริสต์มาส", cat_sad: "เพลงไว้อาลัย", cat_wed: "เพลงงานมงคลสมรส", cat_praise: "เพลงสรรเสริญ", cat_worship: "เพลงนมัสการ", cat_other: "เพลงอื่นๆ", nav_cat_life: "อาข่า", nav_cat_gen: "ทั่วไป", nav_cat_xmas: "คริสต์มาส", nav_cat_sad: "ไว้อาลัย", nav_cat_wed: "มงคลสมรส", nav_cat_praise: "สรรเสริญ", nav_cat_worship: "นมัสการ", nav_cat_other: "อื่นๆ", nav_music: "เพลย์ลิสต์", music_mp3: "เครื่องเล่น MP3", music_play_all: "ฟังเพลงทั้งหมด", menu_copy: "คัดลอกเนื้อเพลง", menu_share: "แชร์เพลงนี้", menu_print: "พิมพ์ / บันทึก PDF", label_chord: "คอร์ด:", lyric_new: "อาข่าแบบใหม่", lyric_old: "อาข่าแบบเก่า", music_tab_list: "เพลย์ลิสต์", music_tab_play: "กำลังเล่น", music_tab_lyric: "เนื้อเพลง", setting_account: "บัญชีของคุณ", setting_phone: "เบอร์โทรศัพท์:", setting_expire: "วันหมดอายุ:", btn_renew: "ต่ออายุการใช้งาน", btn_logout: "ออกจากระบบ", setting_display: "การแสดงผล", setting_theme: "โหมดหน้าจอ", theme_light: "สว่าง", theme_dark: "มืด", setting_color: "สีหลักของแอป", setting_advanced: "ตั้งค่าระบบเพิ่มเติม", setting_sys_lang: "ภาษาระบบ (System Language)", setting_zoom: "ขนาดหน้าจอ (Zoom):", setting_font: "ขนาดตัวอักษร (Font):", setting_bg_main: "สีพื้นหลัง", setting_bg_card: "สีการ์ด", btn_reset: "คืนค่า", pwa_title: "ติดตั้งแอปลงเครื่อง", pwa_desc: "เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น", pwa_cancel: "ภายหลัง", pwa_install: "ติดตั้งเลย" },
-  en: { app_title: "Akha Songbook", search_placeholder: "Search number or title...", manage_text: "View & Manage", total_songs: "Total Songs", group_songs: "Categories", song_count_label: "Total:", song_unit: "songs", nav_home: "Home", nav_profile: "Profile", nav_categories: "Categories", cat_life: "Akha Christian Life", cat_gen: "General Christian", cat_xmas: "Christmas", cat_sad: "Funeral", cat_wed: "Wedding", cat_praise: "Praise", cat_worship: "Worship", cat_other: "Others", nav_cat_life: "Akha", nav_cat_gen: "General", nav_cat_xmas: "Xmas", nav_cat_sad: "Funeral", nav_cat_wed: "Wedding", nav_cat_praise: "Praise", nav_cat_worship: "Worship", nav_cat_other: "Others", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "New Akha", lyric_old: "Old Akha", music_tab_list: "Playlist", music_tab_play: "Now Playing", music_tab_lyric: "Lyrics", setting_account: "Your Account", setting_phone: "Phone Number:", setting_expire: "Expiry Date:", btn_renew: "Renew Subscription", btn_logout: "Logout", setting_display: "Display", setting_theme: "Theme Mode", theme_light: "Light", theme_dark: "Dark", setting_color: "App Color", setting_advanced: "Advanced Settings", setting_sys_lang: "System Language", setting_zoom: "Screen Zoom:", setting_font: "Font Size:", setting_bg_main: "Background Color", setting_bg_card: "Card Color", btn_reset: "Reset", pwa_title: "Install App", pwa_desc: "For faster and easier access.", pwa_cancel: "Later", pwa_install: "Install Now" },
-  my: { app_title: "အာခါ သီချင်းစာအုပ်", search_placeholder: "နံပါတ် သို့မဟုတ် ခေါင်းစဉ်ဖြင့် ရှာဖွေပါ...", manage_text: "စီမံရန်", total_songs: "သီချင်းစုစုပေါင်း", group_songs: "အမျိုးအစားများ", song_count_label: "စုစုပေါင်း-", song_unit: "ပုဒ်", nav_home: "ပင်မ", nav_profile: "ပရိုဖိုင်", nav_categories: "အမျိုးအစား", cat_life: "အာခါ ခရစ်ယာန် အသက်တာ", cat_gen: "အထွေထွေ ခရစ်ယာန်", cat_xmas: "ခရစ္စမတ်", cat_sad: "ဈာပန", cat_wed: "မင်္ဂလာဆောင်", cat_praise: "ချီးမွမ်းခြင်း", cat_worship: "ကိုးကွယ်ခြင်း", cat_other: "အခြား", nav_cat_life: "အာခါ", nav_cat_gen: "အထွေထွေ", nav_cat_xmas: "ခရစ္စမတ်", nav_cat_sad: "ဈာပန", nav_cat_wed: "မင်္ဂလာဆောင်", nav_cat_praise: "ချီးမွမ်းခြင်း", nav_cat_worship: "ကိုးကွယ်ခြင်း", nav_cat_other: "အခြား", nav_music: "ဖွင့်စာရင်း", music_mp3: "MP3 ပလေယာ", music_play_all: "အားလုံးဖွင့်ပါ", menu_copy: "စာသားကူးယူရန်", menu_share: "မျှဝေရန်", menu_print: "ပရင့် / PDF သိမ်းရန်", label_chord: "ကော့ဒ်-", lyric_new: "အာခါ (သစ်)", lyric_old: "အာခါ (ဟောင်း)", music_tab_list: "ဖွင့်စာရင်း", music_tab_play: "ဖွင့်နေသည်", music_tab_lyric: "စာသား", setting_account: "သင့်အကောင့်", setting_phone: "ဖုန်းနံပါတ်-", setting_expire: "သက်တမ်းကုန်ဆုံးရက်-", btn_renew: "သက်တမ်းတိုးရန်", btn_logout: "ထွက်မည်", setting_display: "ပြသမှု", setting_theme: "အခင်းအကျင်း", theme_light: "အလင်း", theme_dark: "အမှောင်", setting_color: "အက်ပ် အရောင်", setting_advanced: "အဆင့်မြင့် ဆက်တင်များ", setting_sys_lang: "စနစ် ဘာသာစကား (System Language)", setting_zoom: "ချဲ့ရန်-", setting_font: "ဖောင့်အရွယ်အစား-", setting_bg_main: "နောက်ခံအရောင်", setting_bg_card: "ကတ်အရောင်", btn_reset: "ပြန်လည်သတ်မှတ်ရန်", pwa_title: "အက်ပ်ကို ထည့်သွင်းပါ", pwa_desc: "ပိုမိုမြန်ဆန်လွယ်ကူစွာ အသုံးပြုရန်။", pwa_cancel: "နောက်မှ", pwa_install: "ယခုထည့်သွင်းပါ" },
-  zh: { app_title: "阿卡诗歌本", search_placeholder: "按编号或标题搜索...", manage_text: "查看与管理", total_songs: "歌曲总数", group_songs: "分类", song_count_label: "总计:", song_unit: "首", nav_home: "首页", nav_profile: "个人资料", nav_categories: "分类", cat_life: "阿卡基督徒生活", cat_gen: "普通基督教", cat_xmas: "圣诞", cat_sad: "葬礼", cat_wed: "婚礼", cat_praise: "赞美", cat_worship: "敬拜", cat_other: "其他", nav_cat_life: "阿卡", nav_cat_gen: "普通", nav_cat_xmas: "圣诞", nav_cat_sad: "葬礼", nav_cat_wed: "婚礼", nav_cat_praise: "赞美", nav_cat_worship: "敬拜", nav_cat_other: "其他", nav_music: "播放列表", music_mp3: "MP3 播放器", music_play_all: "播放全部", menu_copy: "复制歌词", menu_share: "分享歌曲", menu_print: "打印 / 保存 PDF", label_chord: "和弦:", lyric_new: "新阿卡语", lyric_old: "旧阿卡语", music_tab_list: "列表", music_tab_play: "正在播放", music_tab_lyric: "歌词", setting_account: "您的账户", setting_phone: "电话号码:", setting_expire: "到期日期:", btn_renew: "续费", btn_logout: "退出登录", setting_display: "显示", setting_theme: "主题模式", theme_light: "浅色", theme_dark: "深色", setting_color: "应用颜色", setting_advanced: "高级设置", setting_sys_lang: "系统语言 (System Language)", setting_zoom: "屏幕缩放:", setting_font: "字体大小:", setting_bg_main: "背景颜色", setting_bg_card: "卡片颜色", btn_reset: "重置", pwa_title: "安装应用", pwa_desc: "以便更快捷地访问。", pwa_cancel: "稍后", pwa_install: "立即安装" },
-  an: { app_title: "Aqkaq kalizaq DawrCar deuq.", search_placeholder: "Bof-awr pov-eu...", manage_text: "Haw-awr lavsav-eu", total_songs: "Dawqcar dawqtawvluf", group_songs: "Dawqcawr armaf", song_count_label: "Dawqcar:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Armaf", cat_life: "Aqkaq kalizaq Car-eu Sanqbof", cat_gen: "Aqkaq kalizaq cardawq nuideuq.", cat_xmas: "Kirsarmax DawqCar", cat_sad: "Shirbui-anr car-eu Dawqcar", cat_wed: "Oermr barngae Car-eu Dawqcar", cat_praise: "Jaceuq-euu dawqcar", cat_worship: "Uqduq tanq-eu DawqCar", cat_other: "Dawqcar Nuideuq.", nav_cat_life: "Sanqbof", nav_cat_gen: "Nuideuq.", nav_cat_xmas: "Kirsarmax", nav_cat_sad: "Shirbui", nav_cat_wed: "Oermr", nav_cat_praise: "Jaceuq", nav_cat_worship: "Uqduq", nav_cat_other: "Nuideuq.", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aqkaq New", lyric_old: "Aqkaq Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" },
-  ao: { app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awˇ poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Aˇmaꞈ", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aˬkaˬ New", lyric_old: "Aˬkaˬ Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" }
+  th: { filter_num: "เลข", app_title: "คลังเพลงคริสเตียนอาข่า", search_placeholder: "ค้นหาด้วย เลข หรือ ชื่อเพลง...", manage_text: "ดูและจัดการ", total_songs: "เพลงทั้งหมดในคลัง", group_songs: "กลุ่มเพลง", song_count_label: "จำนวนเพลง:", song_unit: "เพลง", nav_home: "หน้าแรก", nav_profile: "โปรไฟล์", nav_categories: "หมวดหมู่", cat_life: "เพลงชีวิตคริสเตียนอาข่า", cat_gen: "เพลงคริสเตียนทั่วไป", cat_xmas: "เพลงคริสต์มาส", cat_sad: "เพลงไว้อาลัย", cat_wed: "เพลงงานมงคลสมรส", cat_praise: "เพลงสรรเสริญ", cat_worship: "เพลงนมัสการ", cat_other: "เพลงอื่นๆ", nav_cat_life: "อาข่า", nav_cat_gen: "ทั่วไป", nav_cat_xmas: "คริสต์มาส", nav_cat_sad: "ไว้อาลัย", nav_cat_wed: "มงคลสมรส", nav_cat_praise: "สรรเสริญ", nav_cat_worship: "นมัสการ", nav_cat_other: "อื่นๆ", nav_music: "เพลย์ลิสต์", music_mp3: "เครื่องเล่น MP3", music_play_all: "ฟังเพลงทั้งหมด", menu_copy: "คัดลอกเนื้อเพลง", menu_share: "แชร์เพลงนี้", menu_print: "พิมพ์ / บันทึก PDF", label_chord: "คอร์ด:", lyric_new: "อาข่าแบบใหม่", lyric_old: "อาข่าแบบเก่า", music_tab_list: "เพลย์ลิสต์", music_tab_play: "กำลังเล่น", music_tab_lyric: "เนื้อเพลง", setting_account: "บัญชีของคุณ", setting_phone: "เบอร์โทรศัพท์:", setting_expire: "วันหมดอายุ:", btn_renew: "ต่ออายุการใช้งาน", btn_logout: "ออกจากระบบ", setting_display: "การแสดงผล", setting_theme: "โหมดหน้าจอ", theme_light: "สว่าง", theme_dark: "มืด", setting_color: "สีหลักของแอป", setting_advanced: "ตั้งค่าระบบเพิ่มเติม", setting_sys_lang: "ภาษาระบบ (System Language)", setting_zoom: "ขนาดหน้าจอ (Zoom):", setting_font: "ขนาดตัวอักษร (Font):", setting_bg_main: "สีพื้นหลัง", setting_bg_card: "สีการ์ด", btn_reset: "คืนค่า", pwa_title: "ติดตั้งแอปลงเครื่อง", pwa_desc: "เพื่อการใช้งานที่รวดเร็วและเข้าถึงง่ายขึ้น", pwa_cancel: "ภายหลัง", pwa_install: "ติดตั้งเลย" },
+  en: { filter_num: "Num", app_title: "Akha Songbook", search_placeholder: "Search number or title...", manage_text: "View & Manage", total_songs: "Total Songs", group_songs: "Categories", song_count_label: "Total:", song_unit: "songs", nav_home: "Home", nav_profile: "Profile", nav_categories: "Categories", cat_life: "Akha Christian Life", cat_gen: "General Christian", cat_xmas: "Christmas", cat_sad: "Funeral", cat_wed: "Wedding", cat_praise: "Praise", cat_worship: "Worship", cat_other: "Others", nav_cat_life: "Akha", nav_cat_gen: "General", nav_cat_xmas: "Xmas", nav_cat_sad: "Funeral", nav_cat_wed: "Wedding", nav_cat_praise: "Praise", nav_cat_worship: "Worship", nav_cat_other: "Others", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "New Akha", lyric_old: "Old Akha", music_tab_list: "Playlist", music_tab_play: "Now Playing", music_tab_lyric: "Lyrics", setting_account: "Your Account", setting_phone: "Phone Number:", setting_expire: "Expiry Date:", btn_renew: "Renew Subscription", btn_logout: "Logout", setting_display: "Display", setting_theme: "Theme Mode", theme_light: "Light", theme_dark: "Dark", setting_color: "App Color", setting_advanced: "Advanced Settings", setting_sys_lang: "System Language", setting_zoom: "Screen Zoom:", setting_font: "Font Size:", setting_bg_main: "Background Color", setting_bg_card: "Card Color", btn_reset: "Reset", pwa_title: "Install App", pwa_desc: "For faster and easier access.", pwa_cancel: "Later", pwa_install: "Install Now" },
+  my: { filter_num: "နံပါတ်", app_title: "အာခါ သီချင်းစာအုပ်", search_placeholder: "နံပါတ် သို့မဟုတ် ခေါင်းစဉ်ဖြင့် ရှာဖွေပါ...", manage_text: "စီမံရန်", total_songs: "သီချင်းစုစုပေါင်း", group_songs: "အမျိုးအစားများ", song_count_label: "စုစုပေါင်း-", song_unit: "ပုဒ်", nav_home: "ပင်မ", nav_profile: "ပရိုဖိုင်", nav_categories: "အမျိုးအစား", cat_life: "အာခါ ခရစ်ယာန် အသက်တာ", cat_gen: "အထွေထွေ ခရစ်ယာန်", cat_xmas: "ခရစ္စမတ်", cat_sad: "ဈာပန", cat_wed: "မင်္ဂလာဆောင်", cat_praise: "ချီးမွမ်းခြင်း", cat_worship: "ကိုးကွယ်ခြင်း", cat_other: "အခြား", nav_cat_life: "အာခါ", nav_cat_gen: "အထွေထွေ", nav_cat_xmas: "ခရစ္စမတ်", nav_cat_sad: "ဈာပန", nav_cat_wed: "မင်္ဂလာဆောင်", nav_cat_praise: "ချီးမွမ်းခြင်း", nav_cat_worship: "ကိုးကွယ်ခြင်း", nav_cat_other: "အခြား", nav_music: "ဖွင့်စာရင်း", music_mp3: "MP3 ပလေယာ", music_play_all: "အားလုံးဖွင့်ပါ", menu_copy: "စာသားကူးယူရန်", menu_share: "မျှဝေရန်", menu_print: "ပရင့် / PDF သိမ်းရန်", label_chord: "ကော့ဒ်-", lyric_new: "အာခါ (သစ်)", lyric_old: "အာခါ (ဟောင်း)", music_tab_list: "ဖွင့်စာရင်း", music_tab_play: "ဖွင့်နေသည်", music_tab_lyric: "စာသား", setting_account: "သင့်အကောင့်", setting_phone: "ဖုန်းနံပါတ်-", setting_expire: "သက်တမ်းကုန်ဆုံးရက်-", btn_renew: "သက်တမ်းတိုးရန်", btn_logout: "ထွက်မည်", setting_display: "ပြသမှု", setting_theme: "အခင်းအကျင်း", theme_light: "အလင်း", theme_dark: "အမှောင်", setting_color: "အက်ပ် အရောင်", setting_advanced: "အဆင့်မြင့် ဆက်တင်များ", setting_sys_lang: "စနစ် ဘာသာစကား (System Language)", setting_zoom: "ချဲ့ရန်-", setting_font: "ဖောင့်အရွယ်အစား-", setting_bg_main: "နောက်ခံအရောင်", setting_bg_card: "ကတ်အရောင်", btn_reset: "ပြန်လည်သတ်မှတ်ရန်", pwa_title: "အက်ပ်ကို ထည့်သွင်းပါ", pwa_desc: "ပိုမိုမြန်ဆန်လွယ်ကူစွာ အသုံးပြုရန်။", pwa_cancel: "နောက်မှ", pwa_install: "ယခုထည့်သွင်းပါ" },
+  zh: { filter_num: "编号", app_title: "阿卡诗歌本", search_placeholder: "按编号或标题搜索...", manage_text: "查看与管理", total_songs: "歌曲总数", group_songs: "分类", song_count_label: "总计:", song_unit: "首", nav_home: "首页", nav_profile: "个人资料", nav_categories: "分类", cat_life: "阿卡基督徒生活", cat_gen: "普通基督教", cat_xmas: "圣诞", cat_sad: "葬礼", cat_wed: "婚礼", cat_praise: "赞美", cat_worship: "敬拜", cat_other: "其他", nav_cat_life: "阿卡", nav_cat_gen: "普通", nav_cat_xmas: "圣诞", nav_cat_sad: "葬礼", nav_cat_wed: "婚礼", nav_cat_praise: "赞美", nav_cat_worship: "敬拜", nav_cat_other: "其他", nav_music: "播放列表", music_mp3: "MP3 播放器", music_play_all: "播放全部", menu_copy: "复制歌词", menu_share: "分享歌曲", menu_print: "打印 / 保存 PDF", label_chord: "和弦:", lyric_new: "新阿卡语", lyric_old: "旧阿卡语", music_tab_list: "列表", music_tab_play: "正在播放", music_tab_lyric: "歌词", setting_account: "您的账户", setting_phone: "电话号码:", setting_expire: "到期日期:", btn_renew: "续费", btn_logout: "退出登录", setting_display: "显示", setting_theme: "主题模式", theme_light: "浅色", theme_dark: "深色", setting_color: "应用颜色", setting_advanced: "高级设置", setting_sys_lang: "系统语言 (System Language)", setting_zoom: "屏幕缩放:", setting_font: "字体大小:", setting_bg_main: "背景颜色", setting_bg_card: "卡片颜色", btn_reset: "重置", pwa_title: "安装应用", pwa_desc: "以便更快捷地访问。", pwa_cancel: "稍后", pwa_install: "立即安装" },
+  an: { filter_num: "เลข", app_title: "Aqkaq kalizaq DawrCar deuq.", search_placeholder: "Bof-awr pov-eu...", manage_text: "Haw-awr lavsav-eu", total_songs: "Dawqcar dawqtawvluf", group_songs: "Dawqcawr armaf", song_count_label: "Dawqcar:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Armaf", cat_life: "Aqkaq kalizaq Car-eu Sanqbof", cat_gen: "Aqkaq kalizaq cardawq nuideuq.", cat_xmas: "Kirsarmax DawqCar", cat_sad: "Shirbui-anr car-eu Dawqcar", cat_wed: "Oermr barngae Car-eu Dawqcar", cat_praise: "Jaceuq-euu dawqcar", cat_worship: "Uqduq tanq-eu DawqCar", cat_other: "Dawqcar Nuideuq.", nav_cat_life: "Sanqbof", nav_cat_gen: "Nuideuq.", nav_cat_xmas: "Kirsarmax", nav_cat_sad: "Shirbui", nav_cat_wed: "Oermr", nav_cat_praise: "Jaceuq", nav_cat_worship: "Uqduq", nav_cat_other: "Nuideuq.", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aqkaq New", lyric_old: "Aqkaq Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" },
+  ao: { filter_num: "เลข", app_title: "Aˬkaˬ kalizaˬ Caˇdawˬ", search_placeholder: "Bof-awˇ poˆ-awˬ...", manage_text: "Haw-awˇ Laˆsaˆ-eu", total_songs: "Dawˬcaˇ Dawˬtawˆluꞈ", group_songs: "Dawˬcaˇ aˇmaꞈ", song_count_label: "Dawˬcaˇ:", song_unit: "hm", nav_home: "Imqhawq", nav_profile: "Profile", nav_categories: "Aˇmaꞈ", cat_life: "Aˬkaˬ kalizaˬ Caˇ-eu Sahˬboꞈ", cat_gen: "Aˬkaˬ kalizaˬ Caˇdawˬ Nuideuˬ", cat_xmas: "Kiˇsaˇmaˇ Dawˬcaˇ", cat_sad: "Shiˇbui", cat_wed: "Oeˇmˇ baˇgaˇ Caˇ-eu dawˬcaˇ", cat_praise: "Jaceuˬ-eu Dawˬcaˇ", cat_worship: "Uˬduˬ tahˬ-eu Dawˬcaˇ", cat_other: "Dawˬcaˇ Nuideuˬ", nav_cat_life: "Sahˬboꞈ", nav_cat_gen: "Nuideuˬ", nav_cat_xmas: "Kiˇsaˇmaˇ", nav_cat_sad: "Shiˇbui", nav_cat_wed: "Oeˇmˇ", nav_cat_praise: "Jaceuˬ", nav_cat_worship: "Uˬduˬ", nav_cat_other: "Nuideuˬ", nav_music: "Playlist", music_mp3: "MP3 Player", music_play_all: "Play All Songs", menu_copy: "Copy Lyrics", menu_share: "Share Song", menu_print: "Print / Save PDF", label_chord: "Chords:", lyric_new: "Aˬkaˬ New", lyric_old: "Aˬkaˬ Old", music_tab_list: "Playlist", music_tab_play: "Playing", music_tab_lyric: "Lyrics" }
 };
 
 let appLang = 'th'; 
 let allSongs = [];
-let currentCategory = ""; let currentSong = null; 
+let currentCategory = ""; 
+let currentSong = null; 
+let currentNumberFilter = ""; // ตัวแปรสำหรับฟิลเตอร์ตัวเลขเพลง
+
 let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
 let isRegisteringNew = true;
@@ -28,7 +31,6 @@ let previousView = 'dashboard';
 let savedScrollPositions = {};
 let approvalCheckInterval = null; 
 
-// ตัวแปรสำหรับแบ่งหน้า (Pagination)
 let currentListPage = 1;
 const ITEMS_PER_PAGE = 60;
 
@@ -375,13 +377,117 @@ function toggleCategoryPopup() {
   }
 }
 
+// ==== ระบบตารางตัวเลขเพลง (Number Grid) ====
+function toggleNumberGrid() {
+  const overlay = document.getElementById('number-grid-overlay');
+  const popup = document.getElementById('number-grid-popup');
+  
+  if (popup.classList.contains('hidden')) {
+    renderNumberGrid();
+    popup.classList.remove('hidden');
+    overlay.classList.remove('hidden');
+    document.body.classList.add('no-scroll');
+    setTimeout(() => popup.classList.add('show'), 10);
+  } else {
+    popup.classList.remove('show');
+    document.body.classList.remove('no-scroll');
+    setTimeout(() => { 
+        popup.classList.add('hidden'); 
+        overlay.classList.add('hidden'); 
+    }, 300);
+  }
+}
+
+function renderNumberGrid() {
+  const container = document.getElementById('number-grid-container');
+  
+  let catSongs = allSongs;
+  if (currentCategory !== "ALL") {
+      catSongs = allSongs.filter(s => s.Category === currentCategory);
+  }
+
+  if (catSongs.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 20px; color: var(--text-muted);">ไม่มีข้อมูลเพลง</div>`;
+      return;
+  }
+
+  // หาตัวเลขสูงสุดในหมวดหมู่นี้ และเก็บรายการเลขที่มีเพลงอยู่จริง
+  let maxNum = 0;
+  const availableNumbers = new Set();
+  
+  catSongs.forEach(s => {
+      if(!s.ID) return;
+      const numStr = s.ID.replace(/\D/g, ''); // ตัดเฉพาะตัวเลข
+      if(numStr) {
+          const num = parseInt(numStr, 10);
+          availableNumbers.add(num);
+          if (num > maxNum) maxNum = num;
+      }
+  });
+  
+  if (maxNum === 0) maxNum = catSongs.length;
+
+  let html = `<div class="num-grid-item ${currentNumberFilter === '' ? 'selected' : ''}" onclick="selectNumberFromGrid('')" style="grid-column: 1/-1; background: var(--bg-main); font-weight:bold; color:var(--primary);">แสดงทั้งหมด (Clear)</div>`;
+  
+  for (let i = 1; i <= maxNum; i++) {
+      const isSelected = (currentNumberFilter === i);
+      const hasSong = availableNumbers.has(i);
+      
+      // ถ้าช่องนี้ไม่มีเพลง ให้ปุ่มจางและกดไม่ได้ (สมจริงเหมือนหนังสือเพลง)
+      const opacityStyle = hasSong ? '' : 'opacity: 0.25; pointer-events: none;';
+      
+      html += `<div class="num-grid-item ${isSelected ? 'selected' : ''}" style="${opacityStyle}" onclick="selectNumberFromGrid(${i})">${i}</div>`;
+  }
+  container.innerHTML = html;
+}
+
+function selectNumberFromGrid(num) {
+  currentNumberFilter = num;
+  
+  // อัปเดตปุ่มในหน้าหมวดหมู่
+  const btn = document.getElementById('btn-number-grid');
+  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
+  const btnText = ln.filter_num || "เลข";
+  
+  if (num === "") {
+      btn.innerHTML = `<span data-i18n="filter_num">${btnText}</span> <i class="fa-solid fa-table-cells"></i>`;
+      btn.style.background = "";
+      btn.style.color = "var(--primary)";
+      btn.style.border = "1px solid var(--border-color)";
+  } else {
+      btn.innerHTML = `เลข: ${num} <i class="fa-solid fa-xmark" style="margin-left: 5px; font-size: 0.8rem;"></i>`;
+      btn.style.background = "var(--primary)";
+      btn.style.color = "white";
+      btn.style.border = "1px solid var(--primary)";
+  }
+
+  toggleNumberGrid();
+  searchCategory(true);
+}
+// ============================================
+
 function closePopupIfOpen() {
-  const popup = document.getElementById('category-popup');
-  const overlay = document.getElementById('category-popup-overlay');
-  if (!popup.classList.contains('hidden')) {
-      popup.classList.remove('show');
+  const popup1 = document.getElementById('category-popup');
+  const overlay1 = document.getElementById('category-popup-overlay');
+  const popup2 = document.getElementById('number-grid-popup');
+  const overlay2 = document.getElementById('number-grid-overlay');
+
+  let closedAnything = false;
+  
+  if (popup1 && !popup1.classList.contains('hidden')) {
+      popup1.classList.remove('show');
+      setTimeout(() => { popup1.classList.add('hidden'); overlay1.classList.add('hidden'); }, 300);
+      closedAnything = true;
+  }
+  
+  if (popup2 && !popup2.classList.contains('hidden')) {
+      popup2.classList.remove('show');
+      setTimeout(() => { popup2.classList.add('hidden'); overlay2.classList.add('hidden'); }, 300);
+      closedAnything = true;
+  }
+
+  if (closedAnything) {
       document.body.classList.remove('no-scroll');
-      setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300);
   }
 }
 
@@ -476,6 +582,7 @@ function openAllSongs() {
   document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
+  selectNumberFromGrid(""); // ล้างค่าตัวกรองตัวเลข
   currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
@@ -488,6 +595,7 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
+  selectNumberFromGrid(""); // ล้างค่าตัวกรองตัวเลข
   currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
@@ -506,10 +614,20 @@ function searchCategory(isImmediate = false, isPageChange = false) {
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
         const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
+        
+        // เช็คการกรองตัวเลข
+        let matchNumber = true;
+        if (currentNumberFilter !== "") {
+            const sNumStr = s.ID ? s.ID.replace(/\D/g, '') : "";
+            const sNum = parseInt(sNumStr, 10);
+            matchNumber = (sNum === currentNumberFilter);
+        }
+
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
-        return matchCat && matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+        
+        return matchCat && matchArtist && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
       document.getElementById('cat-total').innerText = results.length; 
