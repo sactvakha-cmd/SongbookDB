@@ -190,11 +190,20 @@ function filterAdminCat(cat) {
 
 function renderSongs() {
   const q = document.getElementById('song-search').value.toLowerCase();
-  const results = allSongs.filter(s => {
+  const sortVal = document.getElementById('sort-songs') ? document.getElementById('sort-songs').value : 'id_asc';
+
+  let results = allSongs.filter(s => {
     const matchSearch = (s.Title||"").toLowerCase().includes(q) || (s.ID||"").toLowerCase().includes(q);
     const matchCat = (currentAdminCategory === 'ALL') || (s.Category === currentAdminCategory);
     return matchSearch && matchCat;
   });
+  
+  // เพิ่มการจัดเรียงตามที่แอดมินเลือก
+  if (sortVal === 'play_desc') {
+    results.sort((a, b) => (b.PlayCount || 0) - (a.PlayCount || 0)); // มากไปน้อย
+  } else {
+    results.sort((a, b) => (a.ID || "").localeCompare((b.ID || ""))); // เรียง A-Z ปกติ
+  }
   
   document.getElementById('song-list').innerHTML = results.map(s => `
     <div class="song-item" onclick="openAdminForm('${s.ID}')">
