@@ -21,7 +21,7 @@ let appLang = 'th';
 let allSongs = [];
 let currentCategory = ""; 
 let currentSong = null; 
-let currentNumberFilter = ""; // ตัวแปรสำหรับฟิลเตอร์ตัวเลขเพลง
+let currentNumberFilter = ""; 
 
 let userPhone = ""; let userExpiry = "";
 let pendingSlipBase64 = "";
@@ -377,7 +377,7 @@ function toggleCategoryPopup() {
   }
 }
 
-// ==== ระบบตารางตัวเลขเพลง (Number Grid) ====
+// ==== ฟังก์ชันจัดการระบบตัวเลขเพลง (Number Grid) แก้ไขใหม่ ====
 function toggleNumberGrid() {
   const overlay = document.getElementById('number-grid-overlay');
   const popup = document.getElementById('number-grid-popup');
@@ -411,13 +411,12 @@ function renderNumberGrid() {
       return;
   }
 
-  // หาตัวเลขสูงสุดในหมวดหมู่นี้ และเก็บรายการเลขที่มีเพลงอยู่จริง
   let maxNum = 0;
   const availableNumbers = new Set();
   
   catSongs.forEach(s => {
       if(!s.ID) return;
-      const numStr = s.ID.replace(/\D/g, ''); // ตัดเฉพาะตัวเลข
+      const numStr = s.ID.replace(/\D/g, ''); 
       if(numStr) {
           const num = parseInt(numStr, 10);
           availableNumbers.add(num);
@@ -427,42 +426,56 @@ function renderNumberGrid() {
   
   if (maxNum === 0) maxNum = catSongs.length;
 
-  let html = `<div class="num-grid-item ${currentNumberFilter === '' ? 'selected' : ''}" onclick="selectNumberFromGrid('')" style="grid-column: 1/-1; background: var(--bg-main); font-weight:bold; color:var(--primary);">แสดงทั้งหมด (Clear)</div>`;
+  // นำปุ่มแสดงทั้งหมดออก (หรือเก็บไว้เป็นป้ายด้านบน) แต่จะเน้นการทำงานแบบ Shortcut 
+  let html = `<div class="num-grid-item" onclick="toggleNumberGrid()" style="grid-column: 1/-1; background: var(--bg-main); font-weight:bold; color:var(--text-muted);">กลับหน้าเดิม (ยกเลิก)</div>`;
   
   for (let i = 1; i <= maxNum; i++) {
-      const isSelected = (currentNumberFilter === i);
       const hasSong = availableNumbers.has(i);
-      
-      // ถ้าช่องนี้ไม่มีเพลง ให้ปุ่มจางและกดไม่ได้ (สมจริงเหมือนหนังสือเพลง)
       const opacityStyle = hasSong ? '' : 'opacity: 0.25; pointer-events: none;';
-      
-      html += `<div class="num-grid-item ${isSelected ? 'selected' : ''}" style="${opacityStyle}" onclick="selectNumberFromGrid(${i})">${i}</div>`;
+      html += `<div class="num-grid-item" style="${opacityStyle}" onclick="selectNumberFromGrid(${i})">${i}</div>`;
   }
   container.innerHTML = html;
 }
 
-function selectNumberFromGrid(num) {
-  currentNumberFilter = num;
-  
-  // อัปเดตปุ่มในหน้าหมวดหมู่
-  const btn = document.getElementById('btn-number-grid');
-  const ln = i18n[appLang] || i18n['en'] || i18n['th'];
-  const btnText = ln.filter_num || "เลข";
-  
-  if (num === "") {
-      btn.innerHTML = `<span data-i18n="filter_num">${btnText}</span> <i class="fa-solid fa-table-cells"></i>`;
-      btn.style.background = "";
-      btn.style.color = "var(--primary)";
-      btn.style.border = "1px solid var(--border-color)";
-  } else {
-      btn.innerHTML = `เลข: ${num} <i class="fa-solid fa-xmark" style="margin-left: 5px; font-size: 0.8rem;"></i>`;
-      btn.style.background = "var(--primary)";
-      btn.style.color = "white";
-      btn.style.border = "1px solid var(--primary)";
-  }
+// ฟังก์ชันสำหรับเคลียร์ปุ่มตัวเลขเงียบๆ ไม่ให้เกิดการขยับ UI กระทันหัน
+function clearNumberFilterSilent() {
+    currentNumberFilter = "";
+    const btn = document.getElementById('btn-number-grid');
+    if (btn) {
+        const ln = i18n[appLang] || i18n['en'] || i18n['th'];
+        const btnText = ln.filter_num || "เลข";
+        btn.innerHTML = `<span data-i18n="filter_num">${btnText}</span> <i class="fa-solid fa-table-cells"></i>`;
+        btn.style.background = "";
+        btn.style.color = "var(--primary)";
+        btn.style.border = "1px solid var(--border-color)";
+    }
+}
 
-  toggleNumberGrid();
-  searchCategory(true);
+// เมื่อกดเลขเพลงปุ๊บ วิ่งไปหน้าเนื้อเพลงนั้นทันที!
+function selectNumberFromGrid(num) {
+  if (num === "") {
+      clearNumberFilterSilent();
+      toggleNumberGrid();
+      searchCategory(true);
+  } else {
+      let catSongs = allSongs;
+      if (currentCategory !== "ALL") {
+          catSongs = allSongs.filter(s => s.Category === currentCategory);
+      }
+
+      const targetSong = catSongs.find(s => {
+          if(!s.ID) return false;
+          const sNumStr = s.ID.replace(/\D/g, '');
+          return parseInt(sNumStr, 10) === num;
+      });
+
+      if (targetSong) {
+          toggleNumberGrid(); // ปิดหน้าต่างตัวเลข
+          openSong(targetSong.ID); // กระโดดเข้าหน้าเนื้อเพลงทันที
+      } else {
+          showToast("ไม่พบเพลงหมายเลขนี้", "warning");
+      }
+  }
 }
 // ============================================
 
@@ -576,16 +589,17 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
+// ==== แก้ไขการกระพริบโดยสั่ง render ล่วงหน้าก่อนเปลี่ยนวิว ====
 function openAllSongs() { 
   currentCategory = "ALL"; 
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
-  selectNumberFromGrid(""); // ล้างค่าตัวกรองตัวเลข
+  clearNumberFilterSilent();
   currentListPage = 1;
-  switchView('category'); 
   searchCategory(true); 
+  switchView('category'); 
 }
 
 function openCategory(catId, catRealId) { 
@@ -595,10 +609,10 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
-  selectNumberFromGrid(""); // ล้างค่าตัวกรองตัวเลข
+  clearNumberFilterSilent();
   currentListPage = 1;
-  switchView('category'); 
   searchCategory(true); 
+  switchView('category'); 
 }
 
 let searchCatTimeout = null;
@@ -614,20 +628,11 @@ function searchCategory(isImmediate = false, isPageChange = false) {
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
         const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
-        
-        // เช็คการกรองตัวเลข
-        let matchNumber = true;
-        if (currentNumberFilter !== "") {
-            const sNumStr = s.ID ? s.ID.replace(/\D/g, '') : "";
-            const sNum = parseInt(sNumStr, 10);
-            matchNumber = (sNum === currentNumberFilter);
-        }
-
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
         
-        return matchCat && matchArtist && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+        return matchCat && matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
       document.getElementById('cat-total').innerText = results.length; 
@@ -795,7 +800,6 @@ function switchReaderLyricView(type) {
   }
 }
 
-// ---- Media Session API Update Function ----
 function updateMediaSessionMetadata(song) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
