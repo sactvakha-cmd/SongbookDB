@@ -28,9 +28,9 @@ let previousView = 'dashboard';
 let savedScrollPositions = {};
 let approvalCheckInterval = null; 
 
+// ตัวแปรสำหรับแบ่งหน้า (Pagination)
 let currentListPage = 1;
 const ITEMS_PER_PAGE = 60;
-let currentSelectedNumber = "";
 
 const baseCategories = [
   { id: 'เพลงชีวิตคริสเตียนอาข่า', i18n_cat: 'cat_life', i18n_nav: 'nav_cat_life', icon: 'fa-book-bible', bg: 'bg-g1' },
@@ -126,23 +126,22 @@ function doLogin() {
   authenticateUser(phone, pin, btn, false);
 }
 
-function populateFilters() {
+function populateArtistFilter() {
   const artistSet = new Set();
-  
   allSongs.forEach(song => {
     if (song.Artist && song.Artist.trim() !== "") {
       artistSet.add(song.Artist.trim());
     }
   });
 
-  const artistOptions = `<option value="">-- Artist --</option>` + 
+  const optionsHTML = `<option value="">-- ศิลปิน/Artist --</option>` + 
     Array.from(artistSet).sort().map(artist => `<option value="${artist}">${artist}</option>`).join('');
   
   const globalFilter = document.getElementById('artist-filter');
   const catFilter = document.getElementById('cat-artist-filter');
   
-  if (globalFilter) globalFilter.innerHTML = artistOptions;
-  if (catFilter) catFilter.innerHTML = artistOptions;
+  if (globalFilter) globalFilter.innerHTML = optionsHTML;
+  if (catFilter) catFilter.innerHTML = optionsHTML;
 }
 
 function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
@@ -189,7 +188,7 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       allSongs = res.songs || [];
       allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
       
-      populateFilters();
+      populateArtistFilter();
       
       document.getElementById('profile-phone').innerText = phone; document.getElementById('profile-expiry').innerText = res.expiry;
       document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.add('hidden');
@@ -365,8 +364,6 @@ function toggleCategoryPopup() {
     });
     
     document.getElementById('popup-category-list').innerHTML = html;
-    
-    popup.style.display = 'flex';
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
     popup.classList.remove('show');
@@ -374,64 +371,17 @@ function toggleCategoryPopup() {
     
     updateBottomNav(currentActiveView);
     
-    setTimeout(() => { popup.classList.add('hidden'); popup.style.display = ''; overlay.classList.add('hidden'); }, 300); 
+    setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
   }
-}
-
-function toggleNumberGridPopup() {
-    const popup = document.getElementById('number-popup');
-    const overlay = document.getElementById('number-popup-overlay');
-    
-    if (popup.classList.contains('hidden')) {
-        popup.classList.remove('hidden');
-        overlay.classList.remove('hidden');
-        document.body.classList.add('no-scroll');
-        
-        popup.style.display = 'flex';
-        setTimeout(() => popup.classList.add('show'), 10);
-    } else {
-        popup.classList.remove('show');
-        document.body.classList.remove('no-scroll');
-        
-        setTimeout(() => { popup.classList.add('hidden'); popup.style.display = ''; overlay.classList.add('hidden'); }, 300); 
-    }
-}
-
-function selectNumberFilter(num) {
-    currentSelectedNumber = num;
-    const btn = document.getElementById('btn-cat-number');
-    if (btn) {
-        btn.innerText = num === "" ? "-- เลข --" : `เลข: ${num}`;
-        if(num !== "") {
-            btn.style.color = "var(--primary)";
-            btn.style.borderColor = "var(--primary)";
-            btn.style.fontWeight = "bold";
-        } else {
-            btn.style.color = "var(--text-main)";
-            btn.style.borderColor = "var(--border-color)";
-            btn.style.fontWeight = "normal";
-        }
-    }
-    
-    toggleNumberGridPopup();
-    searchCategory();
 }
 
 function closePopupIfOpen() {
-  const catPopup = document.getElementById('category-popup');
-  const catOverlay = document.getElementById('category-popup-overlay');
-  if (catPopup && !catPopup.classList.contains('hidden')) {
-      catPopup.classList.remove('show');
+  const popup = document.getElementById('category-popup');
+  const overlay = document.getElementById('category-popup-overlay');
+  if (!popup.classList.contains('hidden')) {
+      popup.classList.remove('show');
       document.body.classList.remove('no-scroll');
-      setTimeout(() => { catPopup.classList.add('hidden'); catPopup.style.display = ''; catOverlay.classList.add('hidden'); }, 300);
-  }
-  
-  const numPopup = document.getElementById('number-popup');
-  const numOverlay = document.getElementById('number-popup-overlay');
-  if (numPopup && !numPopup.classList.contains('hidden')) {
-      numPopup.classList.remove('show');
-      document.body.classList.remove('no-scroll');
-      setTimeout(() => { numPopup.classList.add('hidden'); numPopup.style.display = ''; numOverlay.classList.add('hidden'); }, 300);
+      setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300);
   }
 }
 
@@ -443,10 +393,8 @@ function selectCategoryFromPopup(catId) {
 function goHome() {
   const searchInput = document.getElementById('global-search');
   const artistFilter = document.getElementById('artist-filter');
-  
   if(searchInput) searchInput.value = "";
   if(artistFilter) artistFilter.value = "";
-  currentSelectedNumber = "";
   
   const resDiv = document.getElementById('search-results');
   const contentDiv = document.getElementById('dashboard-content');
@@ -480,7 +428,7 @@ document.addEventListener("visibilitychange", () => {
     fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { 
         if(res.status === 'success') { 
             allSongs = res.songs || []; 
-            populateFilters();
+            populateArtistFilter();
             renderDashboard(); 
             if(currentCategory) searchCategory(); 
         } 
@@ -496,7 +444,7 @@ function forceDataRefresh() {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         
-        populateFilters(); 
+        populateArtistFilter(); 
         
         renderDashboard(); 
         if(currentCategory) searchCategory(true); 
@@ -522,35 +470,12 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
-function buildNumberGrid(targetSongs) {
-    const gridContainer = document.getElementById('number-grid-container');
-    if (!gridContainer) return;
-    
-    const numSet = new Set();
-    targetSongs.forEach(song => {
-        const num = parseInt((song.ID || "").replace(/\D/g, ''), 10);
-        if (!isNaN(num)) numSet.add(num);
-    });
-    
-    const sortedNums = Array.from(numSet).sort((a,b)=>a-b);
-    
-    gridContainer.innerHTML = sortedNums.map(num => {
-        const isActive = (currentSelectedNumber === num.toString());
-        const style = isActive ? `background:var(--primary); color:white; border-color:var(--primary);` : ``;
-        return `<div class="number-grid-item" style="${style}" onclick="selectNumberFilter('${num}')">${num}</div>`;
-    }).join('');
-}
-
 function openAllSongs() { 
   currentCategory = "ALL"; 
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
-  
-  selectNumberFilter(""); 
-  buildNumberGrid(allSongs);
-  
   currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
@@ -563,12 +488,6 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
   document.getElementById('cat-artist-filter').value = ""; 
-  
-  selectNumberFilter("");
-  
-  const catSongs = allSongs.filter(s => s.Category === catId);
-  buildNumberGrid(catSongs);
-  
   currentListPage = 1;
   switchView('category'); 
   searchCategory(true); 
@@ -587,17 +506,10 @@ function searchCategory(isImmediate = false, isPageChange = false) {
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
         const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
-        
-        let matchNumber = true;
-        if (currentSelectedNumber !== "") {
-            const songNum = parseInt((s.ID || "").replace(/\D/g, ''), 10);
-            matchNumber = (songNum === parseInt(currentSelectedNumber, 10));
-        }
-        
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
-        return matchCat && matchArtist && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+        return matchCat && matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
       document.getElementById('cat-total').innerText = results.length; 
@@ -633,7 +545,6 @@ function searchGlobal(isPageChange = false) {
       
       const results = allSongs.filter(s => { 
         const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
-        
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
@@ -766,6 +677,7 @@ function switchReaderLyricView(type) {
   }
 }
 
+// ---- Media Session API Update Function ----
 function updateMediaSessionMetadata(song) {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
