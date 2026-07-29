@@ -366,7 +366,11 @@ function toggleCategoryPopup() {
     });
     
     document.getElementById('popup-category-list').innerHTML = html;
-    setTimeout(() => popup.classList.add('show'), 10);
+    
+    // ใช้ requestAnimationFrame สำหรับให้แอนิเมชัน popup สมูทขึ้น
+    requestAnimationFrame(() => {
+        popup.classList.add('show');
+    });
   } else {
     popup.classList.remove('show');
     document.body.classList.remove('no-scroll');
@@ -377,7 +381,7 @@ function toggleCategoryPopup() {
   }
 }
 
-// ==== ฟังก์ชันจัดการระบบตัวเลขเพลง (Number Grid) แก้ไขใหม่ ====
+// ==== Number Grid ====
 function toggleNumberGrid() {
   const overlay = document.getElementById('number-grid-overlay');
   const popup = document.getElementById('number-grid-popup');
@@ -387,7 +391,10 @@ function toggleNumberGrid() {
     popup.classList.remove('hidden');
     overlay.classList.remove('hidden');
     document.body.classList.add('no-scroll');
-    setTimeout(() => popup.classList.add('show'), 10);
+    
+    requestAnimationFrame(() => {
+        popup.classList.add('show');
+    });
   } else {
     popup.classList.remove('show');
     document.body.classList.remove('no-scroll');
@@ -426,7 +433,6 @@ function renderNumberGrid() {
   
   if (maxNum === 0) maxNum = catSongs.length;
 
-  // นำปุ่มแสดงทั้งหมดออก (หรือเก็บไว้เป็นป้ายด้านบน) แต่จะเน้นการทำงานแบบ Shortcut 
   let html = `<div class="num-grid-item" onclick="toggleNumberGrid()" style="grid-column: 1/-1; background: var(--bg-main); font-weight:bold; color:var(--text-muted);">กลับหน้าเดิม (ยกเลิก)</div>`;
   
   for (let i = 1; i <= maxNum; i++) {
@@ -437,7 +443,6 @@ function renderNumberGrid() {
   container.innerHTML = html;
 }
 
-// ฟังก์ชันสำหรับเคลียร์ปุ่มตัวเลขเงียบๆ ไม่ให้เกิดการขยับ UI กระทันหัน
 function clearNumberFilterSilent() {
     currentNumberFilter = "";
     const btn = document.getElementById('btn-number-grid');
@@ -451,7 +456,6 @@ function clearNumberFilterSilent() {
     }
 }
 
-// เมื่อกดเลขเพลงปุ๊บ วิ่งไปหน้าเนื้อเพลงนั้นทันที!
 function selectNumberFromGrid(num) {
   if (num === "") {
       clearNumberFilterSilent();
@@ -470,8 +474,8 @@ function selectNumberFromGrid(num) {
       });
 
       if (targetSong) {
-          toggleNumberGrid(); // ปิดหน้าต่างตัวเลข
-          openSong(targetSong.ID); // กระโดดเข้าหน้าเนื้อเพลงทันที
+          toggleNumberGrid(); 
+          openSong(targetSong.ID); 
       } else {
           showToast("ไม่พบเพลงหมายเลขนี้", "warning");
       }
@@ -589,7 +593,6 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
-// ==== แก้ไขการกระพริบโดยสั่ง render ล่วงหน้าก่อนเปลี่ยนวิว ====
 function openAllSongs() { 
   currentCategory = "ALL"; 
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
@@ -628,11 +631,20 @@ function searchCategory(isImmediate = false, isPageChange = false) {
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
         const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
+        
+        // เช็คการกรองตัวเลข
+        let matchNumber = true;
+        if (currentNumberFilter !== "") {
+            const sNumStr = s.ID ? s.ID.replace(/\D/g, '') : "";
+            const sNum = parseInt(sNumStr, 10);
+            matchNumber = (sNum === currentNumberFilter);
+        }
+
         const t1 = s.Title ? s.Title.toString().toLowerCase() : ""; 
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
         
-        return matchCat && matchArtist && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+        return matchCat && matchArtist && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
       document.getElementById('cat-total').innerText = results.length; 
@@ -737,6 +749,7 @@ function changePageGlobal(newPage) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// ==== แก้ไขการเปลี่ยนหน้าจอให้สมูท ไร้รอยต่อ (ระดับ Native App) ====
 function switchView(view) {
   try {
     closePopupIfOpen();
@@ -757,26 +770,41 @@ function switchView(view) {
       initSettingsUI();
     }
 
+    // ซ่อนทุกหน้าก่อน
     ['view-dashboard', 'view-category', 'view-song', 'view-settings', 'view-music'].forEach(v => { 
-      document.getElementById(v).classList.add('hidden'); 
-      document.getElementById(v).classList.remove('fade-in'); 
+      const el = document.getElementById(v);
+      el.classList.add('hidden'); 
+      el.classList.remove('fade-in'); 
     });
     
-    let activeView = document.getElementById('view-' + view); 
-    if(activeView) { activeView.classList.remove('hidden'); void activeView.offsetWidth; activeView.classList.add('fade-in'); }
-    
+    currentActiveView = view;
+    updateBottomNav(view); 
+
     if(view === 'dashboard') { 
         currentCategory = ""; 
         if(document.getElementById('global-search').value === "" && document.getElementById('artist-filter').value === "") {
             document.getElementById('dashboard-content').classList.remove('hidden'); 
         }
     }
-    updateBottomNav(view); 
 
-    if (view === 'song' || view === 'settings' || view === 'music') { window.scrollTo(0, 0); } 
-    else { setTimeout(() => { window.scrollTo(0, savedScrollPositions[view] || 0); }, 10); }
+    // ใช้ requestAnimationFrame เพื่อให้เบราว์เซอร์เตรียม DOM ให้เสร็จก่อนแสดงผล (ลดการกระพริบ 100%)
+    requestAnimationFrame(() => {
+        const activeView = document.getElementById('view-' + view); 
+        if(activeView) { 
+            activeView.classList.remove('hidden'); 
+            // บังคับ Reflow
+            void activeView.offsetWidth; 
+            activeView.classList.add('fade-in'); 
+        }
 
-    currentActiveView = view;
+        // จัดการเรื่อง Scroll ให้เนียน
+        if (view === 'song' || view === 'settings' || view === 'music') { 
+            window.scrollTo(0, 0); 
+        } else { 
+            window.scrollTo(0, savedScrollPositions[view] || 0); 
+        }
+    });
+
   } catch (e) { console.error("Switch View Error", e); }
 }
 
