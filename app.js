@@ -365,6 +365,8 @@ function toggleCategoryPopup() {
     });
     
     document.getElementById('popup-category-list').innerHTML = html;
+    
+    popup.style.display = 'flex';
     setTimeout(() => popup.classList.add('show'), 10);
   } else {
     popup.classList.remove('show');
@@ -372,7 +374,7 @@ function toggleCategoryPopup() {
     
     updateBottomNav(currentActiveView);
     
-    setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
+    setTimeout(() => { popup.classList.add('hidden'); popup.style.display = ''; overlay.classList.add('hidden'); }, 300); 
   }
 }
 
@@ -385,12 +387,13 @@ function toggleNumberGridPopup() {
         overlay.classList.remove('hidden');
         document.body.classList.add('no-scroll');
         
+        popup.style.display = 'flex';
         setTimeout(() => popup.classList.add('show'), 10);
     } else {
         popup.classList.remove('show');
         document.body.classList.remove('no-scroll');
         
-        setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300); 
+        setTimeout(() => { popup.classList.add('hidden'); popup.style.display = ''; overlay.classList.add('hidden'); }, 300); 
     }
 }
 
@@ -415,12 +418,20 @@ function selectNumberFilter(num) {
 }
 
 function closePopupIfOpen() {
-  const popup = document.getElementById('category-popup');
-  const overlay = document.getElementById('category-popup-overlay');
-  if (!popup.classList.contains('hidden')) {
-      popup.classList.remove('show');
+  const catPopup = document.getElementById('category-popup');
+  const catOverlay = document.getElementById('category-popup-overlay');
+  if (catPopup && !catPopup.classList.contains('hidden')) {
+      catPopup.classList.remove('show');
       document.body.classList.remove('no-scroll');
-      setTimeout(() => { popup.classList.add('hidden'); overlay.classList.add('hidden'); }, 300);
+      setTimeout(() => { catPopup.classList.add('hidden'); catPopup.style.display = ''; catOverlay.classList.add('hidden'); }, 300);
+  }
+  
+  const numPopup = document.getElementById('number-popup');
+  const numOverlay = document.getElementById('number-popup-overlay');
+  if (numPopup && !numPopup.classList.contains('hidden')) {
+      numPopup.classList.remove('show');
+      document.body.classList.remove('no-scroll');
+      setTimeout(() => { numPopup.classList.add('hidden'); numPopup.style.display = ''; numOverlay.classList.add('hidden'); }, 300);
   }
 }
 
@@ -696,9 +707,6 @@ function switchView(view) {
   try {
     closePopupIfOpen();
     closeSongMenu();
-    
-    const numPopup = document.getElementById('number-popup');
-    if(numPopup && !numPopup.classList.contains('hidden')) toggleNumberGridPopup();
 
     savedScrollPositions[currentActiveView] = window.scrollY;
     
