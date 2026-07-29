@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit:wght@300;400;500;600;700&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo:wght@400;700&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2">
   <style>
     .top-lang-dropdown {
       background: var(--bg-surface); color: var(--primary);
@@ -27,15 +27,19 @@
     }
     
     .search-flex-container {
-      display: flex; gap: 8px; align-items: center; margin-bottom: 10px;
+      display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
     }
     
     .search-flex-container .search-container {
-      flex: 7; margin-bottom: 0; 
+      width: 100%; margin-bottom: 0; 
     }
     
-    .search-flex-container .artist-select {
-      flex: 3; background: var(--bg-surface); color: var(--text-main);
+    .filter-group {
+      display: flex; gap: 8px; width: 100%;
+    }
+    
+    .artist-select, .number-select {
+      flex: 1; background: var(--bg-surface); color: var(--text-main);
       border: 1px solid var(--border-color); border-radius: var(--radius-ui);
       padding: 12px 10px; font-family: var(--font-main); font-size: 0.85rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; cursor: pointer;
@@ -166,9 +170,14 @@
           <i class="fa-solid fa-magnifying-glass"></i>
           <input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()">
         </div>
-        <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
-          <option value="">Artist</option>
-        </select>
+        <div class="filter-group">
+          <select id="global-number-filter" class="number-select" onchange="searchGlobal()">
+            <option value="">-- เลข --</option>
+          </select>
+          <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
+            <option value="">-- Artist --</option>
+          </select>
+        </div>
       </div>
 
       <div id="search-results"></div>
@@ -209,9 +218,14 @@
           <i class="fa-solid fa-filter"></i>
           <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
         </div>
-        <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
-          <option value="">-- ศิลปิน/Artist --</option>
-        </select>
+        <div class="filter-group">
+          <select id="cat-number-filter" class="number-select" onchange="searchCategory()">
+            <option value="">-- เลข --</option>
+          </select>
+          <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
+            <option value="">-- Artist --</option>
+          </select>
+        </div>
       </div>
 
       <div id="song-list"></div>
@@ -445,7 +459,7 @@
   </div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
-  <script src="app.js?v=140"></script>
+  <script src="app.js?v=141"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
