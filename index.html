@@ -196,6 +196,7 @@
       </div>
     </div>
 
+    <!-- ===== หน้าหมวดหมู่ ===== -->
     <div id="view-category" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -204,12 +205,18 @@
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
       
+      <!-- เพิ่มปุ่ม เลือกตัวเลข ตรงนี้ -->
       <div class="search-flex-container">
-        <div class="search-container">
+        <div class="search-container" style="flex: 5;">
           <i class="fa-solid fa-filter"></i>
           <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
         </div>
-        <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
+        
+        <button id="btn-number-grid" class="artist-select" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 5px; height: 43px; padding: 0; color: var(--primary); font-weight: bold;" onclick="toggleNumberGrid()">
+          <span data-i18n="filter_num">เลข</span> <i class="fa-solid fa-table-cells"></i>
+        </button>
+
+        <select id="cat-artist-filter" class="artist-select" style="flex: 3; height: 43px;" onchange="searchCategory()">
           <option value="">-- ศิลปิน/Artist --</option>
         </select>
       </div>
@@ -431,6 +438,16 @@
     <div id="popup-category-list"></div>
   </div>
 
+  <!-- ===== เพิ่ม Popup ตารางตัวเลข (Number Grid) ===== -->
+  <div id="number-grid-overlay" class="popup-overlay hidden no-print" onclick="toggleNumberGrid()"></div>
+  <div id="number-grid-popup" class="category-popup hidden no-print" style="max-height: 75vh;">
+    <div class="popup-header">
+      <h3 data-i18n="filter_num">เลือกเลขเพลง</h3>
+      <button class="btn-icon-small" onclick="toggleNumberGrid()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="number-grid-container" class="number-grid-container"></div>
+  </div>
+
   <div id="pwa-overlay-bg" class="pwa-overlay no-print"></div>
   <div id="pwa-install-banner" class="hidden pwa-pop no-print">
     <img src="icon-192.png" alt="App Icon">
@@ -445,7 +462,7 @@
   </div>
 
   <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
-  <script src="app.js?v=140"></script>
+  <script src="app.js?v=145"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
