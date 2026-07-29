@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo&family=Arvo&family=Athiti&family=Bai+Jamjuree&family=Bitter&family=Cabin&family=Caveat&family=Chakra+Petch&family=Charm&family=Charmonman&family=Chathura&family=Chonburi&family=Crimson+Text&family=Dosis&family=Fahkwang&family=Fira+Sans&family=Fjalla+One&family=Hind&family=Inconsolata&family=Inter&family=Itim&family=Josefin+Sans&family=K2D&family=Kanit:wght@300;400;500;600;700&family=KoHo&family=Kodchasan&family=Krub&family=Lato&family=Lora&family=Maitree&family=Mali&family=Merriweather&family=Mitr&family=Montserrat&family=Mukta&family=Mulish&family=Nanum+Myeongjo:wght@400;700&family=Niramit&family=Noto+Sans&family=Noto+Sans+Thai&family=Noto+Serif+Thai&family=Nunito&family=Open+Sans&family=Oswald&family=Oxygen&family=PT+Sans&family=PT+Serif&family=Pacifico&family=Pattaya&family=Playfair+Display&family=Poppins&family=Pridi&family=Prompt&family=Raleway&family=Roboto&family=Roboto+Condensed&family=Roboto+Slab&family=Rubik&family=Sarabun&family=Signika&family=Slabo+27px&family=Sriracha&family=Srisakdi&family=Taviraj&family=Thasadith&family=Titillium+Web&family=Trirong&family=Ubuntu&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=142">
   <style>
     .top-lang-dropdown {
       background: var(--bg-surface); color: var(--primary);
@@ -24,25 +24,6 @@
       padding: 6px 10px; font-family: var(--font-main); font-size: 0.85rem; font-weight: 600;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05); outline: none; cursor: pointer;
       max-width: 110px; 
-    }
-    
-    .search-flex-container {
-      display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
-    }
-    
-    .search-flex-container .search-container {
-      width: 100%; margin-bottom: 0; 
-    }
-    
-    .filter-group {
-      display: flex; gap: 8px; width: 100%;
-    }
-    
-    .artist-select, .number-select {
-      flex: 1; background: var(--bg-surface); color: var(--text-main);
-      border: 1px solid var(--border-color); border-radius: var(--radius-ui);
-      padding: 12px 10px; font-family: var(--font-main); font-size: 0.85rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.02); outline: none; cursor: pointer;
     }
 
     #view-dashboard .hero-header {
@@ -147,6 +128,7 @@
   </div>
 
   <div id="app" class="container hidden">
+    <!-- หน้าหลัก Dashboard -->
     <div id="view-dashboard" class="fade-in">
       
       <div class="hero-header" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding-top: 15px;">
@@ -165,19 +147,15 @@
         </select>
       </div>
 
+      <!-- แถบเครื่องมือค้นหาหน้าหลัก (มีแค่ ค้นหา กับ Artist) -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass"></i>
           <input type="text" id="global-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchGlobal()">
         </div>
-        <div class="filter-group">
-          <select id="global-number-filter" class="number-select" onchange="searchGlobal()">
-            <option value="">-- เลข --</option>
-          </select>
-          <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
-            <option value="">-- Artist --</option>
-          </select>
-        </div>
+        <select id="artist-filter" class="artist-select" onchange="searchGlobal()">
+          <option value="">-- Artist --</option>
+        </select>
       </div>
 
       <div id="search-results"></div>
@@ -205,6 +183,7 @@
       </div>
     </div>
 
+    <!-- หน้าหมวดหมู่ -->
     <div id="view-category" class="hidden fade-in">
       <div class="top-bar">
         <button class="btn-icon" onclick="switchView('dashboard')"><i class="fa-solid fa-arrow-left"></i></button>
@@ -213,24 +192,22 @@
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
       
+      <!-- แถบเครื่องมือค้นหาหมวดหมู่ (ค้นหา | ปุ่มเลข | Artist อยู่แถวเดียวกันหมด) -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-filter"></i>
-          <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
+          <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหา..." oninput="searchCategory()">
         </div>
-        <div class="filter-group">
-          <select id="cat-number-filter" class="number-select" onchange="searchCategory()">
-            <option value="">-- เลข --</option>
-          </select>
-          <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
-            <option value="">-- Artist --</option>
-          </select>
-        </div>
+        <button id="btn-cat-number" class="number-btn" onclick="toggleNumberGridPopup()">-- เลข --</button>
+        <select id="cat-artist-filter" class="artist-select" onchange="searchCategory()">
+          <option value="">-- Artist --</option>
+        </select>
       </div>
 
       <div id="song-list"></div>
     </div>
 
+    <!-- หน้าเนื้อเพลง -->
     <div id="view-song" class="hidden fade-in">
       <div class="top-bar no-print">
         <button class="btn-icon" onclick="goBackFromSong()"><i class="fa-solid fa-arrow-left"></i></button>
@@ -445,6 +422,21 @@
     <div id="popup-category-list"></div>
   </div>
 
+  <!-- Popup Grid สำหรับเลือกเลขเพลง -->
+  <div id="number-popup-overlay" class="popup-overlay hidden no-print" onclick="toggleNumberGridPopup()"></div>
+  <div id="number-popup" class="number-popup hidden no-print">
+    <div class="popup-header" style="margin-bottom: 10px;">
+      <h3>เลือกเลขเพลง</h3>
+      <button class="btn-icon-small" onclick="toggleNumberGridPopup()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div style="text-align:center; margin-bottom:15px; padding: 0 20px;">
+      <button class="btn-outline" style="width:100%; padding: 8px; border-radius: 12px; font-size: 0.9rem;" onclick="selectNumberFilter('')">แสดงเพลงทั้งหมด (ล้างเลข)</button>
+    </div>
+    <div id="number-grid-container" class="number-grid">
+        <!-- ตัวเลขจะถูกสร้างที่นี่โดย Javascript -->
+    </div>
+  </div>
+
   <div id="pwa-overlay-bg" class="pwa-overlay no-print"></div>
   <div id="pwa-install-banner" class="hidden pwa-pop no-print">
     <img src="icon-192.png" alt="App Icon">
@@ -458,8 +450,7 @@
     </div>
   </div>
 
-  <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
-  <script src="app.js?v=141"></script>
+  <script src="app.js?v=142"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
