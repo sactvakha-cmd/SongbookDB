@@ -17,7 +17,6 @@ window.onload = () => {
   if(savedPass) { adminPassword = savedPass; fetchAllData(); } 
   else { document.getElementById('loader').classList.add('hidden'); document.getElementById('view-login').classList.remove('hidden'); }
   
-  // เปิดการทำงานระบบ Copy & Paste รูปลง Editor
   setupEditorPaste();
 };
 
@@ -32,9 +31,8 @@ function setupEditorPaste() {
       
       for (let index in items) {
         const item = items[index];
-        // เช็คว่าสิ่งที่ Paste ลงมาคือ "รูปภาพ" หรือไม่
         if (item.kind === 'file' && item.type.startsWith('image/')) {
-          e.preventDefault(); // ป้องกันไม่ให้เบราว์เซอร์วางรูปเป็นโค้ด Base64 ดิบๆ (จะทำให้ DB เต็ม)
+          e.preventDefault(); 
           const blob = item.getAsFile();
           if(!blob) continue;
           
@@ -53,11 +51,9 @@ function setupEditorPaste() {
             if(res.status === 'success') {
               showToast("อัปโหลดและแทรกรูปสำเร็จ!", "success");
               
-              // ถ้าช่อง "ลิงก์รูปภาพเนื้อเพลง (ImageUrl)" ยังว่าง ให้ใส่ลิงก์เผื่อไว้ให้ด้วย
-              const imgInput = document.getElementById('form-image');
-              if(!imgInput.value) imgInput.value = res.url;
+              // บังคับอัปเดตลิงก์รูปภาพในช่อง "ลิงก์รูปภาพเนื้อเพลง" เสมอ เพื่อให้เชื่อมกัน 100%
+              document.getElementById('form-image').value = res.url;
 
-              // แทรกรูปลงในตำแหน่งที่เคอร์เซอร์อยู่
               editor.focus();
               const imgHtml = `<br><img src="${res.url}" style="max-width:100%; border-radius:10px; margin:10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><br>`;
               document.execCommand('insertHTML', false, imgHtml);
@@ -561,7 +557,6 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
-// อัปเดตฟังก์ชัน uploadMedia ให้ทำการแทรกรูปอัตโนมัติหากอัปโหลดภาพสำเร็จ
 async function uploadMedia(event, targetId, fileType) {
   const file = event.target.files[0]; if(!file) return; 
   showToast("กำลังอัปโหลดไฟล์...", "warning");
@@ -580,7 +575,6 @@ async function uploadMedia(event, targetId, fileType) {
         document.getElementById(targetId).value = res.url; 
         showToast("อัปโหลดสำเร็จ!", "success"); 
         
-        // ถ้ายัปโหลดรูปภาพผ่านปุ่มนี้ ให้แทรกรูปลงใน Editor ที่ใช้งานอยู่ด้วยเลย
         if(fileType === 'image') {
             const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') 
                                     ? document.getElementById('form-lyrics-new') 
