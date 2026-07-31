@@ -32,10 +32,9 @@
     .admin-cat-btn { padding: 6px 16px; border-radius: 50px; border: 1px solid #e2e8f0; background: #f8fafc; color: #64748b; font-family: 'Kanit', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; white-space: nowrap; transition: all 0.3s ease; }
     .admin-cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px var(--primary-glow); }
 
-    /* ทำให้แถบค้นหาและหมวดหมู่ติดหนึบด้านบน */
     .sticky-filters {
       position: sticky;
-      top: 60px; /* อยู่ใต้ top-bar */
+      top: 60px;
       background: var(--bg-main);
       z-index: 40;
       padding-top: 10px;
@@ -45,7 +44,6 @@
       margin-bottom: 15px;
     }
     
-    /* ให้รายการเพลงกดได้ */
     .song-item { cursor: pointer; }
     .song-item:hover { transform: translateX(5px); border-left: 4px solid var(--primary); }
   </style>
@@ -72,14 +70,12 @@
         <button class="btn-icon" style="background:#f59e0b; color:white; border:none;" onclick="openAdminForm()"><i class="fa-solid fa-plus"></i></button>
       </div>
       
-      <!-- ส่วนนี้จะติดหนึบด้านบน -->
       <div class="sticky-filters">
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
           <div class="search-container" style="flex: 1; margin-bottom: 0;">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input type="text" id="song-search" placeholder="ค้นหาเพลง..." oninput="searchSongs()">
           </div>
-          <!-- เพิ่มปุ่มเรียงลำดับยอดวิว (Play Count) -->
           <select id="sort-songs" onchange="searchSongs()" style="width: auto; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: var(--bg-surface); font-family: 'Kanit', sans-serif; font-size: 0.85rem; color: var(--text-main); outline: none; cursor: pointer;">
             <option value="id_asc">เรียงตามรหัส (A-Z)</option>
             <option value="play_desc">🔥 ยอดฟังสูงสุด</option>
@@ -94,6 +90,7 @@
           <button class="admin-cat-btn" data-cat="เพลงนมัสการ" onclick="filterAdminCat('เพลงนมัสการ')">นมัสการ</button>
           <button class="admin-cat-btn" data-cat="เพลงงานมงคลสมรส" onclick="filterAdminCat('เพลงงานมงคลสมรส')">มงคลสมรส</button>
           <button class="admin-cat-btn" data-cat="เพลงไว้อาลัย" onclick="filterAdminCat('เพลงไว้อาลัย')">ไว้อาลัย</button>
+          <button class="admin-cat-btn" data-cat="Akha Hymns Myanmar" onclick="filterAdminCat('Akha Hymns Myanmar')">Hymns MM</button>
           <button class="admin-cat-btn" data-cat="เพลงอื่นๆ" onclick="filterAdminCat('เพลงอื่นๆ')">อื่นๆ</button>
         </div>
       </div>
@@ -122,6 +119,7 @@
               <option value="เพลงนมัสการ">เพลงนมัสการ</option>
               <option value="เพลงงานมงคลสมรส">เพลงงานมงคลสมรส</option>
               <option value="เพลงไว้อาลัย">เพลงไว้อาลัย</option>
+              <option value="Akha Hymns Myanmar">Akha Hymns Myanmar (เนื้อเพลงเป็นรูป)</option>
               <option value="เพลงอื่นๆ">เพลงอื่นๆ</option>
             </select>
             
@@ -189,6 +187,9 @@
 
           <div class="form-col-right">
             <label style="color:var(--primary); font-weight:bold; display:block; margin-bottom:5px;">ระบุข้อมูลเนื้อเพลง <span style="color:red">*</span></label>
+            <div style="background: rgba(37, 99, 235, 0.05); padding: 10px; border-radius: 8px; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+              * หากใช้หมวด Akha Hymns Myanmar ไม่จำเป็นต้องพิมพ์เนื้อเพลงตรงนี้ ให้อัปโหลดรูปภาพที่ช่อง "ลิงก์รูปภาพเนื้อเพลง" แทนได้เลย
+            </div>
             
             <div class="lyrics-toggle" style="margin: 0 0 15px 0; width: 100%; display: flex; justify-content: space-between;">
               <button class="lyrics-toggle-btn active" id="btn-edit-lyric-old" onclick="switchAdminLyricView('old')" style="flex:1; border-radius:8px;">อาข่าแบบเก่า (ข้อมูลเดิม)</button>
@@ -196,7 +197,6 @@
             </div>
             
             <div id="main-editor-toolbar" class="editor-toolbar">
-              
               <select class="editor-select" onchange="formatTextAdmin('fontName', this.value)" style="width:auto; min-width:110px;" title="รูปแบบฟอนต์">
                 <option value="">-- ฟอนต์ --</option>
                 <option value="'Nanum Myeongjo', serif">ฟอนต์เนื้อเพลง</option>
@@ -293,7 +293,6 @@
       </div>
     </div>
 
-    <!-- ส่วนของการจัดการผู้ใช้ (Admin User Form) -->
     <div id="view-users" class="hidden fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-users"></i> ผู้ใช้งาน</h2>
@@ -323,6 +322,7 @@
 
         <div id="form-user-slip-box" class="hidden" style="margin-bottom: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px;">
           <a id="form-user-slip-link" href="#" target="_blank" class="btn-link" style="background:#10b981; width:100%; text-align:center;"><i class="fa-solid fa-image"></i> กดดูสลิปโอนเงิน</a>
+          <button class="btn-primary" type="button" style="width:100%; background:#ef4444; font-size:0.9rem; margin-top:10px;" onclick="rejectUserSlip()"><i class="fa-solid fa-xmark"></i> ปฏิเสธ (ให้ส่งสลิปใหม่)</button>
         </div>
         
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
@@ -333,7 +333,6 @@
       </div>
     </div>
 
-    <!-- ส่วนของการตั้งค่าระบบ (QR Code, บัญชี) -->
     <div id="view-settings" class="hidden fade-in">
       <div class="top-bar">
         <h2><i class="fa-solid fa-gear"></i> ตั้งค่าระบบ</h2>
@@ -369,6 +368,6 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="admin.js?v=116"></script>
+  <script src="admin.js?v=119"></script>
 </body>
 </html>
