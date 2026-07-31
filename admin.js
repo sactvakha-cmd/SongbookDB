@@ -198,11 +198,10 @@ function renderSongs() {
     return matchSearch && matchCat;
   });
   
-  // เพิ่มการจัดเรียงตามที่แอดมินเลือก
   if (sortVal === 'play_desc') {
-    results.sort((a, b) => (b.PlayCount || 0) - (a.PlayCount || 0)); // มากไปน้อย
+    results.sort((a, b) => (b.PlayCount || 0) - (a.PlayCount || 0)); 
   } else {
-    results.sort((a, b) => (a.ID || "").localeCompare((b.ID || ""))); // เรียง A-Z ปกติ
+    results.sort((a, b) => (a.ID || "").localeCompare((b.ID || ""))); 
   }
   
   document.getElementById('song-list').innerHTML = results.map(s => `
@@ -222,7 +221,6 @@ function openAdminForm(id = null) {
   const editorOld = document.getElementById('form-lyrics-old'); 
   const editorNew = document.getElementById('form-lyrics-new');
   
-  // เคลียร์ค่าแถบเครื่องมือ (Font, Size, Line Height, Spacing) กลับเป็นค่าเริ่มต้น
   document.querySelectorAll('.editor-select').forEach(select => select.value = "");
 
   if(id) {
@@ -406,23 +404,35 @@ function renderUsers() {
     let statusThai = "";
     if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
     else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
+    else if (status === "rejected") statusThai = "ปฏิเสธสลิป";
     return phone.includes(q) || name.includes(q) || exp.includes(q) || status.includes(q) || statusThai.includes(q);
   });
 
   document.getElementById('user-list').innerHTML = results.map(u => {
-    let isPending = u.Status === "pending_new" || u.Status === "pending_renew" || u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate;
     let statusText = `หมดอายุ: ${u.ExpiryDate}`;
-    if (isPending) {
-        if (u.Status === "pending_renew") statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
-        else statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
+    let statusColor = "var(--primary)";
+    
+    if (u.Status === "pending_renew") {
+        statusText = `รอตรวจสอบสลิป (ต่ออายุ) | เดิม: ${u.ExpiryDate !== "รอตรวจสอบ" ? u.ExpiryDate : '-'}`;
+        statusColor = "#f59e0b";
+    } else if (u.Status === "pending_new") {
+        statusText = "รอตรวจสอบสลิป (สมัครใหม่)";
+        statusColor = "#f59e0b";
+    } else if (u.Status === "rejected") {
+        statusText = "❌ ปฏิเสธสลิปแล้ว (รอผู้ใช้ส่งใหม่)";
+        statusColor = "var(--danger)";
+    } else if (u.ExpiryDate === "รอตรวจสอบ" || !u.ExpiryDate) {
+        statusText = "รอตรวจสอบ";
+        statusColor = "#f59e0b";
     }
-    let statusColor = isPending ? "#f59e0b" : "var(--primary)";
+
     let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; margin-left:5px;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
+    
     return `<div class="song-item">
       <div class="s-info">
         <div class="s-title">${u.Name||'ไม่มีชื่อ'} <span style="font-size:0.8rem; color:var(--text-muted);">(รอบ: ${u.RenewCount||1})</span></div>
         <div class="s-eng-title"><i class="fa-solid fa-phone"></i> ${u.Phone} | <i class="fa-solid fa-key"></i> ${u.PIN}</div>
-        <div class="s-meta" style="color:${statusColor}">${statusText} ${slip}</div>
+        <div class="s-meta" style="color:${statusColor}; font-weight:600;">${statusText} ${slip}</div>
       </div>
       <div class="quick-actions">
         <button class="btn-quick edit" onclick="openUserForm('${u.Phone}')"><i class="fa-solid fa-pen"></i></button>
@@ -438,7 +448,14 @@ function openUserForm(phone = null) {
     let u = allUsers.find(x => x.Phone === phone);
     document.getElementById('form-user-is-edit').value = "true"; document.getElementById('form-user-phone').value = u.Phone; document.getElementById('form-user-phone').disabled = true; document.getElementById('form-user-pin').value = u.PIN; document.getElementById('form-user-name').value = u.Name || ""; document.getElementById('form-user-count').value = u.RenewCount || 1;
     if(u.ExpiryDate && u.ExpiryDate !== "รอตรวจสอบ") { let d = new Date(u.ExpiryDate); document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0]; } else { document.getElementById('form-user-expiry').value = ""; }
-    if(u.SlipUrl) { document.getElementById('form-user-slip-box').classList.remove('hidden'); document.getElementById('form-user-slip-link').href = u.SlipUrl; } else { document.getElementById('form-user-slip-box').classList.add('hidden'); }
+    
+    if(u.SlipUrl) { 
+        document.getElementById('form-user-slip-box').classList.remove('hidden'); 
+        document.getElementById('form-user-slip-link').href = u.SlipUrl; 
+    } else { 
+        document.getElementById('form-user-slip-box').classList.add('hidden'); 
+    }
+    
     document.getElementById('user-form-title').innerText = "แก้ไข / อนุมัติ";
   } else { 
     document.getElementById('form-user-is-edit').value = "false"; document.getElementById('form-user-phone').value = ""; document.getElementById('form-user-phone').disabled = false; document.getElementById('form-user-pin').value = ""; document.getElementById('form-user-name').value = ""; document.getElementById('form-user-expiry').value = ""; document.getElementById('form-user-count').value = 1; document.getElementById('form-user-slip-box').classList.add('hidden'); document.getElementById('user-form-title').innerText = "เพิ่มผู้ใช้ใหม่";
@@ -458,6 +475,21 @@ function saveUser() {
   };
   document.getElementById('loader').classList.remove('hidden');
   fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); refreshAdminData('users'); });
+}
+
+function rejectUserSlip() {
+  const phone = document.getElementById('form-user-phone').value;
+  if(!phone) return;
+  if(confirm(`ยืนยันการปฏิเสธสลิปของเบอร์ ${phone}?\n(รูปสลิปจะถูกลบทิ้งถาวร และผู้ใช้จะต้องส่งสลิปใหม่)`)) {
+      document.getElementById('loader').classList.remove('hidden');
+      fetchAPI('rejectUser', { phone: phone }).then(res => {
+          showToast(res.msg);
+          refreshAdminData('users');
+      }).catch(e => {
+          showToast(e.message, "error");
+          document.getElementById('loader').classList.add('hidden');
+      });
+  }
 }
 
 function deleteUser(phone) { 
