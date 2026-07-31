@@ -16,7 +16,63 @@ window.onload = () => {
   const savedPass = sessionStorage.getItem('adminPassTemp');
   if(savedPass) { adminPassword = savedPass; fetchAllData(); } 
   else { document.getElementById('loader').classList.add('hidden'); document.getElementById('view-login').classList.remove('hidden'); }
+  
+  // เปิดการทำงานระบบ Copy & Paste รูปลง Editor
+  setupEditorPaste();
 };
+
+// ================= ระบบ Paste รูปภาพลงในช่องเนื้อเพลง =================
+function setupEditorPaste() {
+  const editors = [document.getElementById('form-lyrics-old'), document.getElementById('form-lyrics-new')];
+  
+  editors.forEach(editor => {
+    if(!editor) return;
+    editor.addEventListener('paste', async (e) => {
+      const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+      
+      for (let index in items) {
+        const item = items[index];
+        // เช็คว่าสิ่งที่ Paste ลงมาคือ "รูปภาพ" หรือไม่
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          e.preventDefault(); // ป้องกันไม่ให้เบราว์เซอร์วางรูปเป็นโค้ด Base64 ดิบๆ (จะทำให้ DB เต็ม)
+          const blob = item.getAsFile();
+          if(!blob) continue;
+          
+          showToast("กำลังอัปโหลดรูปภาพที่วาง...", "warning");
+          
+          const formData = new FormData();
+          formData.append("action", "uploadAdminFile"); 
+          formData.append("password", adminPassword); 
+          formData.append("fileType", "image"); 
+          formData.append("extension", blob.type.split('/')[1] || 'png'); 
+          formData.append("file", blob); 
+          
+          try {
+            const response = await fetch(API_URL, { method: 'POST', body: formData });
+            const res = await response.json();
+            if(res.status === 'success') {
+              showToast("อัปโหลดและแทรกรูปสำเร็จ!", "success");
+              
+              // ถ้าช่อง "ลิงก์รูปภาพเนื้อเพลง (ImageUrl)" ยังว่าง ให้ใส่ลิงก์เผื่อไว้ให้ด้วย
+              const imgInput = document.getElementById('form-image');
+              if(!imgInput.value) imgInput.value = res.url;
+
+              // แทรกรูปลงในตำแหน่งที่เคอร์เซอร์อยู่
+              editor.focus();
+              const imgHtml = `<br><img src="${res.url}" style="max-width:100%; border-radius:10px; margin:10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><br>`;
+              document.execCommand('insertHTML', false, imgHtml);
+            } else {
+              showToast(res.msg, "error");
+            }
+          } catch (err) {
+            showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error");
+          }
+        }
+      }
+    });
+  });
+}
+// =================================================================
 
 async function fetchAPI(action, params = {}) {
   const payload = { action: action, password: adminPassword, ...params };
@@ -505,15 +561,41 @@ function showToast(msg, type="success") {
   toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+// อัปเดตฟังก์ชัน uploadMedia ให้ทำการแทรกรูปอัตโนมัติหากอัปโหลดภาพสำเร็จ
 async function uploadMedia(event, targetId, fileType) {
-  const file = event.target.files[0]; if(!file) return; showToast("กำลังอัปโหลดไฟล์...", "warning");
+  const file = event.target.files[0]; if(!file) return; 
+  showToast("กำลังอัปโหลดไฟล์...", "warning");
+  
   const formData = new FormData();
-  formData.append("action", "uploadAdminFile"); formData.append("password", adminPassword); formData.append("fileType", fileType); formData.append("extension", file.name.split('.').pop()); formData.append("file", file); 
+  formData.append("action", "uploadAdminFile"); 
+  formData.append("password", adminPassword); 
+  formData.append("fileType", fileType); 
+  formData.append("extension", file.name.split('.').pop()); 
+  formData.append("file", file); 
+  
   try {
     const response = await fetch(API_URL, { method: 'POST', body: formData });
     const res = await response.json();
-    if(res.status === 'success') { document.getElementById(targetId).value = res.url; showToast("อัปโหลดสำเร็จ!", "success"); } else { showToast(res.msg, "error"); }
-  } catch (err) { showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); }
+    if(res.status === 'success') { 
+        document.getElementById(targetId).value = res.url; 
+        showToast("อัปโหลดสำเร็จ!", "success"); 
+        
+        // ถ้ายัปโหลดรูปภาพผ่านปุ่มนี้ ให้แทรกรูปลงใน Editor ที่ใช้งานอยู่ด้วยเลย
+        if(fileType === 'image') {
+            const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') 
+                                    ? document.getElementById('form-lyrics-new') 
+                                    : document.getElementById('form-lyrics-old');
+            activeEditor.focus();
+            const imgHtml = `<br><img src="${res.url}" style="max-width:100%; border-radius:10px; margin:10px 0; box-shadow: 0 4px 10px rgba(0,0,0,0.1);"><br>`;
+            document.execCommand('insertHTML', false, imgHtml);
+        }
+        
+    } else { 
+        showToast(res.msg, "error"); 
+    }
+  } catch (err) { 
+      showToast("อัปโหลดไม่สำเร็จ: " + err.message, "error"); 
+  }
 }
 
 let mediaRecorder; let audioChunks = []; let isRecording = false; let recordedBlob = null; 
