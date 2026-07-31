@@ -438,7 +438,7 @@
     <div id="popup-category-list"></div>
   </div>
 
-  <!-- ===== เพิ่ม Popup ตารางตัวเลข (Number Grid) ===== -->
+  <!-- ===== Popup ตารางตัวเลข (Number Grid) ===== -->
   <div id="number-grid-overlay" class="popup-overlay hidden no-print" onclick="toggleNumberGrid()"></div>
   <div id="number-grid-popup" class="category-popup hidden no-print" style="max-height: 75vh;">
     <div class="popup-header">
@@ -446,6 +446,14 @@
       <button class="btn-icon-small" onclick="toggleNumberGrid()"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div id="number-grid-container" class="number-grid-container"></div>
+  </div>
+
+  <!-- ===== Image Viewer Overlay (ระบบดูรูปขยาย) ===== -->
+  <div id="image-viewer" class="image-viewer-overlay no-print">
+    <button class="image-viewer-close" onclick="closeImageViewer()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="image-viewer-container" class="image-viewer-container">
+      <img id="image-viewer-img" class="image-viewer-img" src="" alt="Song Image Zoom">
+    </div>
   </div>
 
   <div id="pwa-overlay-bg" class="pwa-overlay no-print"></div>
@@ -461,8 +469,7 @@
     </div>
   </div>
 
-  <!-- เปลี่ยนเวอร์ชันเพื่อให้มือถือโหลดโค้ดใหม่ (ข้ามแคช) -->
-  <script src="app.js?v=147"></script>
+  <script src="app.js?v=151"></script>
   
   <script>
     if ('serviceWorker' in navigator) {
