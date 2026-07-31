@@ -387,7 +387,6 @@ function toggleCategoryPopup() {
   }
 }
 
-// ==== Number Grid ====
 function toggleNumberGrid() {
   const overlay = document.getElementById('number-grid-overlay');
   const popup = document.getElementById('number-grid-popup');
@@ -487,7 +486,6 @@ function selectNumberFromGrid(num) {
       }
   }
 }
-// ============================================
 
 function closePopupIfOpen() {
   const popup1 = document.getElementById('category-popup');
@@ -758,6 +756,7 @@ function switchView(view) {
   try {
     closePopupIfOpen();
     closeSongMenu();
+    closeImageViewer();
 
     savedScrollPositions[currentActiveView] = window.scrollY;
     
@@ -875,7 +874,15 @@ function openSong(id) {
     
     const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
     
-    const imgBox = document.getElementById('detail-image-container'); if(currentSong.ImageUrl) { imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image">`; imgBox.classList.remove('hidden'); } else { imgBox.innerHTML = ""; imgBox.classList.add('hidden'); }
+    // ตั้งค่ารูปภาพพร้อมผูก Event ซูมรูป
+    const imgBox = document.getElementById('detail-image-container'); 
+    if(currentSong.ImageUrl) { 
+        imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image" onclick="openImageViewer('${currentSong.ImageUrl}')">`; 
+        imgBox.classList.remove('hidden'); 
+    } else { 
+        imgBox.innerHTML = ""; 
+        imgBox.classList.add('hidden'); 
+    }
     
     const toggleBox = document.getElementById('lyrics-toggle-box');
     const lyricsEl = document.getElementById('detail-lyrics'); 
@@ -890,7 +897,6 @@ function openSong(id) {
         htmlContent = htmlContent.replace(/>\s+</g, '><');
         lyricsEl.innerHTML = htmlContent;
       } else if (currentSong.ImageUrl) {
-        // กรณีเพลงมีเฉพาะรูปภาพ (เช่น หมวด Akha Hymns Myanmar) ให้ซ่อนข้อความ 'ยังไม่มีเนื้อเพลง'
         lyricsEl.innerHTML = "";
       } else {
         lyricsEl.innerHTML = "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>";
@@ -961,6 +967,122 @@ document.addEventListener('click', (event) => {
     }
 });
 
+// ==== ระบบดูภาพแบบขยาย พร้อม Pinch-to-Zoom แบบ Native ====
+let viewerScale = 1;
+let viewerPanning = false;
+let viewerPointX = 0, viewerPointY = 0;
+let viewerStartX = 0, viewerStartY = 0;
+let pinchStartDistance = 0;
+let initialPinchScale = 1;
+
+function openImageViewer(imgUrl) {
+    const viewer = document.getElementById('image-viewer');
+    const viewerImg = document.getElementById('image-viewer-img');
+    
+    viewerImg.src = imgUrl;
+    
+    // Reset state
+    viewerScale = 1;
+    viewerPointX = 0;
+    viewerPointY = 0;
+    viewerImg.style.transform = `translate(0px, 0px) scale(1)`;
+    
+    viewer.classList.add('show');
+    document.body.classList.add('no-scroll');
+}
+
+function closeImageViewer() {
+    const viewer = document.getElementById('image-viewer');
+    viewer.classList.remove('show');
+    document.body.classList.remove('no-scroll');
+    setTimeout(() => {
+        document.getElementById('image-viewer-img').src = "";
+    }, 300);
+}
+
+// Logic คำนวณระยะห่างนิ้ว
+function getDistance(touches) {
+    return Math.hypot(
+        touches[0].pageX - touches[1].pageX,
+        touches[0].pageY - touches[1].pageY
+    );
+}
+
+const viewerContainer = document.getElementById('image-viewer-container');
+const viewerImg = document.getElementById('image-viewer-img');
+
+if(viewerContainer) {
+    // ปิดเมื่อแตะพื้นหลัง
+    viewerContainer.addEventListener('click', (e) => {
+        if(e.target === viewerContainer) closeImageViewer();
+    });
+
+    viewerContainer.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            pinchStartDistance = getDistance(e.touches);
+            initialPinchScale = viewerScale;
+        } else if (e.touches.length === 1) {
+            viewerPanning = true;
+            viewerStartX = e.touches[0].pageX - viewerPointX;
+            viewerStartY = e.touches[0].pageY - viewerPointY;
+        }
+    }, {passive: false});
+
+    viewerContainer.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const currentDistance = getDistance(e.touches);
+            viewerScale = Math.max(1, Math.min(initialPinchScale * (currentDistance / pinchStartDistance), 5));
+            viewerImg.style.transform = `translate(${viewerPointX}px, ${viewerPointY}px) scale(${viewerScale})`;
+        } else if (e.touches.length === 1 && viewerPanning) {
+            e.preventDefault();
+            viewerPointX = e.touches[0].pageX - viewerStartX;
+            viewerPointY = e.touches[0].pageY - viewerStartY;
+            
+            // Swipe down เพื่อปิดเมื่อไม่ได้ซูม
+            if(viewerScale === 1 && viewerPointY > 100) {
+                closeImageViewer();
+                viewerPanning = false;
+                return;
+            }
+            
+            if(viewerScale > 1) {
+                viewerImg.style.transform = `translate(${viewerPointX}px, ${viewerPointY}px) scale(${viewerScale})`;
+            }
+        }
+    }, {passive: false});
+
+    viewerContainer.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+            initialPinchScale = viewerScale;
+        }
+        if (e.touches.length === 0) {
+            viewerPanning = false;
+            // ดีดกลับเข้าที่ถ้าเลื่อนเกินขอบ (เมื่อซูม) หรือซูมออกหมด
+            if(viewerScale === 1) {
+                viewerPointX = 0;
+                viewerPointY = 0;
+                viewerImg.style.transform = `translate(0px, 0px) scale(1)`;
+            }
+        }
+    });
+
+    // สำหรับใช้เมาส์ Wheel ซูมบนคอม
+    viewerContainer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = Math.sign(e.deltaY) * -0.1;
+        viewerScale = Math.max(1, Math.min(viewerScale + delta, 5));
+        
+        if(viewerScale === 1) {
+            viewerPointX = 0;
+            viewerPointY = 0;
+        }
+        viewerImg.style.transform = `translate(${viewerPointX}px, ${viewerPointY}px) scale(${viewerScale})`;
+    }, {passive: false});
+}
+// ===============================================
+
 function getCleanSongText() {
     if(!currentSong) return "";
     let text = `[${currentSong.ID}] ${currentSong.Title}\n`;
@@ -981,7 +1103,6 @@ function getCleanSongText() {
     
     let plainText = lyricsBox.innerText.replace(/\n\s*\n/g, '\n\n').trim();
     
-    // ถ้าไม่มีเนื้อเพลงแต่มีรูปภาพ ให้แจ้งผู้ใช้
     if (!plainText && currentSong.ImageUrl) {
         plainText = "(เนื้อเพลงอยู่ในรูปแบบรูปภาพ กรุณาดูในแอปพลิเคชัน)";
     }
