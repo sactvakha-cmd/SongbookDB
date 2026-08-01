@@ -811,6 +811,35 @@ function goBackFromSong() {
   switchView(previousView || 'dashboard');
 }
 
+// ==== ฟังก์ชันใหม่: กรองรูปที่ซ้ำกันออก และผูกปุ่มซูมให้กับรูปอื่นๆ ====
+function processLyricsContent(htmlContent, mainImageUrl) {
+    if (!htmlContent) return "";
+    let cleanHtml = htmlContent.replace(/>\s+</g, '><');
+    
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = cleanHtml;
+    
+    const imgs = tempDiv.querySelectorAll('img');
+    imgs.forEach(img => {
+        const src = img.getAttribute('src');
+        // ถ้าเป็นรูปที่ตรงกับรูปหลัก (ImageUrl ด้านบน) ให้ลบทิ้ง
+        if (mainImageUrl && src === mainImageUrl) {
+            img.remove();
+        } else {
+            // ถ้าไม่ซ้ำ ให้เพิ่มฟังก์ชันคลิกเพื่อซูมให้ด้วย
+            img.setAttribute('onclick', `openImageViewer('${src}')`);
+            img.style.cursor = 'zoom-in';
+        }
+    });
+    
+    // ถ้าเนื้อเพลงว่างเปล่าจริงๆ (ลบรูปออกหมดแล้วเหลือแค่ช่องว่าง) ให้ส่งค่ากลับเป็นว่าง
+    if(tempDiv.textContent.trim() === "" && tempDiv.querySelectorAll('img').length === 0) {
+       return "";
+    }
+    
+    return tempDiv.innerHTML;
+}
+
 function switchReaderLyricView(type) {
   document.getElementById('btn-lyric-new').classList.remove('active'); 
   document.getElementById('btn-lyric-old').classList.remove('active'); 
@@ -820,8 +849,17 @@ function switchReaderLyricView(type) {
   let htmlContent = type === 'new' ? currentSong.LyricsNew : currentSong.Lyrics;
   
   if (htmlContent) {
-    htmlContent = htmlContent.replace(/>\s+</g, '><');
-    lyricsEl.innerHTML = htmlContent;
+    // ผ่านตัวกรองลบรูปซ้ำก่อน
+    const processedHtml = processLyricsContent(htmlContent, currentSong.ImageUrl);
+    if(processedHtml) {
+        lyricsEl.innerHTML = processedHtml;
+    } else {
+        if (currentSong.ImageUrl) {
+            lyricsEl.innerHTML = "";
+        } else {
+            lyricsEl.innerHTML = `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลง</div>`;
+        }
+    }
   } else {
     lyricsEl.innerHTML = `<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ไม่มีเนื้อเพลง</div>`;
   }
@@ -874,7 +912,6 @@ function openSong(id) {
     
     const notDiv = document.getElementById('detail-notation-container'); if(currentSong.Notation) { notDiv.innerText = currentSong.Notation; notDiv.classList.remove('hidden'); } else { notDiv.classList.add('hidden'); }
     
-    // ตั้งค่ารูปภาพพร้อมผูก Event ซูมรูป
     const imgBox = document.getElementById('detail-image-container'); 
     if(currentSong.ImageUrl) { 
         imgBox.innerHTML = `<img src="${currentSong.ImageUrl}" alt="Song Image" onclick="openImageViewer('${currentSong.ImageUrl}')">`; 
@@ -893,9 +930,17 @@ function openSong(id) {
     } else { 
       toggleBox.classList.add('hidden'); 
       let htmlContent = currentSong.LyricsNew || currentSong.Lyrics;
+      
       if (htmlContent) {
-        htmlContent = htmlContent.replace(/>\s+</g, '><');
-        lyricsEl.innerHTML = htmlContent;
+        // กรองรูปลบซ้ำออกก่อนแสดง
+        const processedHtml = processLyricsContent(htmlContent, currentSong.ImageUrl);
+        if(processedHtml) {
+            lyricsEl.innerHTML = processedHtml;
+        } else if (currentSong.ImageUrl) {
+            lyricsEl.innerHTML = "";
+        } else {
+            lyricsEl.innerHTML = "<div style='color:var(--text-muted); font-size:0.9rem; font-style:italic;'>ยังไม่มีเนื้อเพลง</div>";
+        }
       } else if (currentSong.ImageUrl) {
         lyricsEl.innerHTML = "";
       } else {
