@@ -51,7 +51,6 @@ function setupEditorPaste() {
             if(res.status === 'success') {
               showToast("อัปโหลดและแทรกรูปสำเร็จ!", "success");
               
-              // บังคับอัปเดตลิงก์รูปภาพในช่อง "ลิงก์รูปภาพเนื้อเพลง" เสมอ เพื่อให้เชื่อมกัน 100%
               document.getElementById('form-image').value = res.url;
 
               editor.focus();
@@ -317,33 +316,67 @@ function openAdminForm(id = null) {
   switchView('admin-form');
 }
 
+// ฟังก์ชันทำความสะอาดเนื้อเพลงเพื่อใช้ตรวจสอบเพลงซ้ำ (ลบ HTML และช่องว่างทั้งหมด)
+function getCleanText(html) {
+    if (!html) return "";
+    let tmp = document.createElement("DIV");
+    tmp.innerHTML = html;
+    return (tmp.textContent || tmp.innerText || "").replace(/\s+/g, '').toLowerCase();
+}
+
 function saveSong() {
-  const data = { 
+  const d = { 
       ID: document.getElementById('form-id').value, 
-      Title: document.getElementById('form-title').value, 
+      Title: document.getElementById('form-title').value.trim(), 
       Category: document.getElementById('form-cat').value, 
       Language: "Akha", 
-      Artist: document.getElementById('form-artist').value, 
-      Author: document.getElementById('form-author').value, 
-      Chords: document.getElementById('form-chords').value, 
+      Artist: document.getElementById('form-artist').value.trim(), 
+      Author: document.getElementById('form-author').value.trim(), 
+      Chords: document.getElementById('form-chords').value.trim(), 
       Lyrics: document.getElementById('form-lyrics-old').innerHTML, 
       LyricsNew: document.getElementById('form-lyrics-new').innerHTML, 
-      Inspiration: document.getElementById('form-inspiration').value, 
-      Notation: document.getElementById('form-notation').value, 
-      AudioUrl: document.getElementById('form-audio').value, 
-      ExternalLink: document.getElementById('form-link').value, 
-      EnglishTitle: document.getElementById('form-eng-title').value, 
-      ImageUrl: document.getElementById('form-image').value 
+      Inspiration: document.getElementById('form-inspiration').value.trim(), 
+      Notation: document.getElementById('form-notation').value.trim(), 
+      AudioUrl: document.getElementById('form-audio').value.trim(), 
+      ExternalLink: document.getElementById('form-link').value.trim(), 
+      EnglishTitle: document.getElementById('form-eng-title').value.trim(), 
+      ImageUrl: document.getElementById('form-image').value.trim() 
   };
   
-  if(!data.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
+  if(!d.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
+
+  // ================= ระบบตรวจสอบเพลงซ้ำ (Duplicate Check) =================
+  const lyricsOldClean = getCleanText(d.Lyrics);
+  const lyricsNewClean = getCleanText(d.LyricsNew);
+
+  const duplicate = allSongs.find(s => {
+      // ข้ามการเช็คตัวเอง ถ้าเป็นการแก้ไขเพลงเดิม
+      if (s.ID === d.ID) return false;
+
+      // 1. เช็คว่าชื่อเพลงตรงกันเป๊ะไหม
+      if (s.Title && s.Title.trim().toLowerCase() === d.Title.toLowerCase()) return true;
+
+      // 2. เช็คว่าเนื้อเพลง (ที่ลบวรรคตอนออกแล้ว) ตรงกันเป๊ะไหม
+      const sOldClean = getCleanText(s.Lyrics);
+      const sNewClean = getCleanText(s.LyricsNew);
+
+      if (lyricsOldClean !== "" && sOldClean === lyricsOldClean) return true;
+      if (lyricsNewClean !== "" && sNewClean === lyricsNewClean) return true;
+
+      return false;
+  });
+
+  if (duplicate) {
+      return showToast(`❌ มีเพลงนี้อยู่แล้ว (ซ้ำกับรหัส: ${duplicate.ID})`, "error");
+  }
+  // ====================================================================
 
   const btnSave = document.getElementById('btn-save-top');
   const originalText = btnSave.innerHTML;
   btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...';
   btnSave.disabled = true;
   
-  fetchAPI('saveSong', { data: data }).then(res => {
+  fetchAPI('saveSong', { data: d }).then(res => {
     showToast(res.msg); 
     btnSave.innerHTML = originalText;
     btnSave.disabled = false;
@@ -498,7 +531,27 @@ function searchUsers() { renderUsers(); }
 function openUserForm(phone = null) {
   if(phone) { 
     let u = allUsers.find(x => x.Phone === phone);
-    document.getElementById('form-user-is-edit').value = "true"; document.getElementById('form-user-phone').value = u.Phone; document.getElementById('form-user-phone').disabled = true; document.getElementById('form-user-pin').value = u.PIN; document.getElementById('form-user-name').value = u.Name || ""; document.getElementById('form-user-count').value = u.RenewCount || 1;
+    document.getElementById('form-user-is-edit').value = "true"; 
+    
+    // เรียบเรียงการแสดงผลเบอร์โทรตอนกดแก้
+    let cCode = "+other";
+    let localP = u.Phone;
+    if (u.Phone.startsWith('0')) { cCode = "+66"; localP = u.Phone.substring(1); } 
+    else if (u.Phone.startsWith('+66')) { cCode = "+66"; localP = u.Phone.substring(3); } 
+    else if (u.Phone.startsWith('+95')) { cCode = "+95"; localP = u.Phone.substring(3); } 
+    else if (u.Phone.startsWith('+86')) { cCode = "+86"; localP = u.Phone.substring(3); } 
+    else if (u.Phone.startsWith('+856')) { cCode = "+856"; localP = u.Phone.substring(4); }
+    
+    document.getElementById('form-user-country').value = cCode;
+    document.getElementById('form-user-country').disabled = true; 
+    document.getElementById('form-user-phone').value = localP; 
+    document.getElementById('form-user-phone').disabled = true; 
+    document.getElementById('form-user-phone').dataset.originalPhone = u.Phone; // ซ่อนเบอร์เต็มไว้
+
+    document.getElementById('form-user-pin').value = u.PIN; 
+    document.getElementById('form-user-name').value = u.Name || ""; 
+    document.getElementById('form-user-count').value = u.RenewCount || 1;
+
     if(u.ExpiryDate && u.ExpiryDate !== "รอตรวจสอบ") { let d = new Date(u.ExpiryDate); document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0]; } else { document.getElementById('form-user-expiry').value = ""; }
     
     if(u.SlipUrl) { 
@@ -510,7 +563,18 @@ function openUserForm(phone = null) {
     
     document.getElementById('user-form-title').innerText = "แก้ไข / อนุมัติ";
   } else { 
-    document.getElementById('form-user-is-edit').value = "false"; document.getElementById('form-user-phone').value = ""; document.getElementById('form-user-phone').disabled = false; document.getElementById('form-user-pin').value = ""; document.getElementById('form-user-name').value = ""; document.getElementById('form-user-expiry').value = ""; document.getElementById('form-user-count').value = 1; document.getElementById('form-user-slip-box').classList.add('hidden'); document.getElementById('user-form-title').innerText = "เพิ่มผู้ใช้ใหม่";
+    document.getElementById('form-user-is-edit').value = "false"; 
+    document.getElementById('form-user-country').disabled = false;
+    document.getElementById('form-user-country').value = "+66";
+    document.getElementById('form-user-phone').value = ""; 
+    document.getElementById('form-user-phone').disabled = false; 
+    document.getElementById('form-user-phone').dataset.originalPhone = "";
+    document.getElementById('form-user-pin').value = ""; 
+    document.getElementById('form-user-name').value = ""; 
+    document.getElementById('form-user-expiry').value = ""; 
+    document.getElementById('form-user-count').value = 1; 
+    document.getElementById('form-user-slip-box').classList.add('hidden'); 
+    document.getElementById('user-form-title').innerText = "เพิ่มผู้ใช้ใหม่";
   }
   switchView('user-form');
 }
@@ -520,17 +584,62 @@ function addDaysToExpiry(days) {
   document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0];
 }
 
+// ฟังก์ชันคัดกรองเบอร์โทรศัพท์ฝั่งแอดมิน
+function formatAndValidateAdminPhone() {
+    const country = document.getElementById('form-user-country').value;
+    let rawPhone = document.getElementById('form-user-phone').value.replace(/\D/g, ''); 
+    
+    if(!rawPhone) return { error: "กรุณากรอกเบอร์โทรศัพท์" };
+    
+    let p = rawPhone.replace(/^0+/, ''); 
+    
+    if (country === '+66') {
+        if (!/^[689]\d{8}$/.test(p)) return { error: "เบอร์ไทยต้องมี 9 หลัก (ไม่ต้องพิมพ์เลข 0)" };
+        return { phone: '0' + p }; // ใช้ฟอร์แมต 09... เพื่อให้คนเก่าใช้งานได้
+    } else if (country === '+95') {
+        if (!/^9\d{7,9}$/.test(p)) return { error: "เบอร์พม่าไม่ถูกต้อง (เช่น 9xxxxxxx ไม่ต้องใส่ 0)" };
+        return { phone: country + p };
+    } else if (country === '+86') {
+        if (!/^1[3-9]\d{9}$/.test(p)) return { error: "เบอร์จีนไม่ถูกต้อง (ต้องมี 11 หลัก)" };
+        return { phone: country + p };
+    } else if (country === '+856') {
+        if (p.length < 8) return { error: "เบอร์ลาวไม่ถูกต้อง" };
+        return { phone: country + p };
+    } else {
+        if (p.length < 7) return { error: "เบอร์โทรศัพท์สั้นเกินไป" };
+        return { phone: country + p };
+    }
+}
+
 function saveUser() {
+  const isEdit = document.getElementById('form-user-is-edit').value === "true";
+  let finalPhone = "";
+
+  if (!isEdit) {
+      const phoneData = formatAndValidateAdminPhone();
+      if(phoneData.error) { showToast(phoneData.error, "warning"); return; }
+      finalPhone = phoneData.phone;
+  } else {
+      finalPhone = document.getElementById('form-user-phone').dataset.originalPhone;
+  }
+
   const d = { 
-    Phone: document.getElementById('form-user-phone').value, PIN: document.getElementById('form-user-pin').value, Name: document.getElementById('form-user-name').value, 
-    ExpiryDate: document.getElementById('form-user-expiry').value, RenewCount: parseInt(document.getElementById('form-user-count').value) || 1, Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
+    Phone: finalPhone, 
+    PIN: document.getElementById('form-user-pin').value, 
+    Name: document.getElementById('form-user-name').value, 
+    ExpiryDate: document.getElementById('form-user-expiry').value, 
+    RenewCount: parseInt(document.getElementById('form-user-count').value) || 1, 
+    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
   };
+  
+  if(!d.PIN) return showToast("กรุณากรอก PIN ด้วยครับ", "warning");
+
   document.getElementById('loader').classList.remove('hidden');
-  fetchAPI('saveUser', { userData: d, isEdit: document.getElementById('form-user-is-edit').value === "true" }).then(res => { showToast(res.msg); refreshAdminData('users'); });
+  fetchAPI('saveUser', { userData: d, isEdit: isEdit }).then(res => { showToast(res.msg); refreshAdminData('users'); });
 }
 
 function rejectUserSlip() {
-  const phone = document.getElementById('form-user-phone').value;
+  const phone = document.getElementById('form-user-phone').dataset.originalPhone;
   if(!phone) return;
   if(confirm(`ยืนยันการปฏิเสธสลิปของเบอร์ ${phone}?\n(รูปสลิปจะถูกลบทิ้งถาวร และผู้ใช้จะต้องส่งสลิปใหม่)`)) {
       document.getElementById('loader').classList.remove('hidden');
