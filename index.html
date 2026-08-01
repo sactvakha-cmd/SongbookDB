@@ -161,6 +161,7 @@
         </select>
       </div>
 
+      <!-- ส่วนหน้าแรก ยังมีทั้งค้นหา และศิลปิน -->
       <div class="search-flex-container">
         <div class="search-container">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -205,20 +206,16 @@
       </div>
       <div style="margin-bottom: 10px; color: var(--text-muted); font-size: 0.9rem; text-align:center;"><span data-i18n="song_count_label">จำนวนเพลง:</span> <strong id="cat-total" style="color:var(--primary)">0</strong> <span data-i18n="song_unit">เพลง</span></div>
       
-      <!-- เพิ่มปุ่ม เลือกตัวเลข ตรงนี้ -->
+      <!-- เอาปุ่มศิลปินออก เหลือแค่ ช่องค้นหา และ ปุ่มเลขเพลง -->
       <div class="search-flex-container">
-        <div class="search-container" style="flex: 5;">
+        <div class="search-container" style="flex: 7;">
           <i class="fa-solid fa-filter"></i>
           <input type="text" id="cat-search" data-i18n="search_placeholder" placeholder="ค้นหาด้วย เลข หรือ ชื่อเพลง..." oninput="searchCategory()">
         </div>
         
-        <button id="btn-number-grid" class="artist-select" style="flex: 2; display: flex; justify-content: center; align-items: center; gap: 5px; height: 43px; padding: 0; color: var(--primary); font-weight: bold;" onclick="toggleNumberGrid()">
+        <button id="btn-number-grid" class="artist-select" style="flex: 3; display: flex; justify-content: center; align-items: center; gap: 5px; height: 43px; padding: 0; color: var(--primary); font-weight: bold;" onclick="toggleNumberGrid()">
           <span data-i18n="filter_num">เลข</span> <i class="fa-solid fa-table-cells"></i>
         </button>
-
-        <select id="cat-artist-filter" class="artist-select" style="flex: 3; height: 43px;" onchange="searchCategory()">
-          <option value="">-- ศิลปิน/Artist --</option>
-        </select>
       </div>
 
       <div id="song-list"></div>
