@@ -141,10 +141,8 @@ function populateArtistFilter() {
     Array.from(artistSet).sort().map(artist => `<option value="${artist}">${artist}</option>`).join('');
   
   const globalFilter = document.getElementById('artist-filter');
-  const catFilter = document.getElementById('cat-artist-filter');
   
   if (globalFilter) globalFilter.innerHTML = optionsHTML;
-  if (catFilter) catFilter.innerHTML = optionsHTML;
 }
 
 function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
@@ -602,7 +600,6 @@ function openAllSongs() {
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   document.getElementById('cat-title').innerText = ln.total_songs || 'Total Songs'; 
   document.getElementById('cat-search').value = ""; 
-  document.getElementById('cat-artist-filter').value = ""; 
   clearNumberFilterSilent();
   currentListPage = 1;
   searchCategory(true); 
@@ -615,7 +612,6 @@ function openCategory(catId, catRealId) {
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
   document.getElementById('cat-title').innerText = catConf ? (ln[catConf.i18n_cat] || catId) : catId; 
   document.getElementById('cat-search').value = ""; 
-  document.getElementById('cat-artist-filter').value = ""; 
   clearNumberFilterSilent();
   currentListPage = 1;
   searchCategory(true); 
@@ -630,11 +626,9 @@ function searchCategory(isImmediate = false, isPageChange = false) {
   const executeSearch = () => {
     try {
       const q = document.getElementById('cat-search').value.toLowerCase();
-      const selectedArtist = document.getElementById('cat-artist-filter').value;
       
       let results = allSongs.filter(s => { 
         const matchCat = (currentCategory === "ALL") || (s.Category === currentCategory); 
-        const matchArtist = selectedArtist === "" || s.Artist === selectedArtist; 
         
         let matchNumber = true;
         if (currentNumberFilter !== "") {
@@ -647,7 +641,7 @@ function searchCategory(isImmediate = false, isPageChange = false) {
         const t2 = s.ID ? s.ID.toString().toLowerCase() : ""; 
         const t3 = s.EnglishTitle ? s.EnglishTitle.toString().toLowerCase() : ""; 
         
-        return matchCat && matchArtist && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
+        return matchCat && matchNumber && (t1.includes(q) || t2.includes(q) || t3.includes(q)); 
       });
 
       document.getElementById('cat-total').innerText = results.length; 
@@ -811,7 +805,6 @@ function goBackFromSong() {
   switchView(previousView || 'dashboard');
 }
 
-// ==== ฟังก์ชันใหม่: กรองรูปที่ซ้ำกันออก และผูกปุ่มซูมให้กับรูปอื่นๆ ====
 function processLyricsContent(htmlContent, mainImageUrl) {
     if (!htmlContent) return "";
     let cleanHtml = htmlContent.replace(/>\s+</g, '><');
@@ -822,17 +815,14 @@ function processLyricsContent(htmlContent, mainImageUrl) {
     const imgs = tempDiv.querySelectorAll('img');
     imgs.forEach(img => {
         const src = img.getAttribute('src');
-        // ถ้าเป็นรูปที่ตรงกับรูปหลัก (ImageUrl ด้านบน) ให้ลบทิ้ง
         if (mainImageUrl && src === mainImageUrl) {
             img.remove();
         } else {
-            // ถ้าไม่ซ้ำ ให้เพิ่มฟังก์ชันคลิกเพื่อซูมให้ด้วย
             img.setAttribute('onclick', `openImageViewer('${src}')`);
             img.style.cursor = 'zoom-in';
         }
     });
     
-    // ถ้าเนื้อเพลงว่างเปล่าจริงๆ (ลบรูปออกหมดแล้วเหลือแค่ช่องว่าง) ให้ส่งค่ากลับเป็นว่าง
     if(tempDiv.textContent.trim() === "" && tempDiv.querySelectorAll('img').length === 0) {
        return "";
     }
@@ -849,7 +839,6 @@ function switchReaderLyricView(type) {
   let htmlContent = type === 'new' ? currentSong.LyricsNew : currentSong.Lyrics;
   
   if (htmlContent) {
-    // ผ่านตัวกรองลบรูปซ้ำก่อน
     const processedHtml = processLyricsContent(htmlContent, currentSong.ImageUrl);
     if(processedHtml) {
         lyricsEl.innerHTML = processedHtml;
@@ -932,7 +921,6 @@ function openSong(id) {
       let htmlContent = currentSong.LyricsNew || currentSong.Lyrics;
       
       if (htmlContent) {
-        // กรองรูปลบซ้ำออกก่อนแสดง
         const processedHtml = processLyricsContent(htmlContent, currentSong.ImageUrl);
         if(processedHtml) {
             lyricsEl.innerHTML = processedHtml;
@@ -1012,7 +1000,6 @@ document.addEventListener('click', (event) => {
     }
 });
 
-// ==== ระบบดูภาพแบบขยาย พร้อม Pinch-to-Zoom แบบ Native ====
 let viewerScale = 1;
 let viewerPanning = false;
 let viewerPointX = 0, viewerPointY = 0;
@@ -1026,7 +1013,6 @@ function openImageViewer(imgUrl) {
     
     viewerImg.src = imgUrl;
     
-    // Reset state
     viewerScale = 1;
     viewerPointX = 0;
     viewerPointY = 0;
@@ -1045,7 +1031,6 @@ function closeImageViewer() {
     }, 300);
 }
 
-// Logic คำนวณระยะห่างนิ้ว
 function getDistance(touches) {
     return Math.hypot(
         touches[0].pageX - touches[1].pageX,
@@ -1057,7 +1042,6 @@ const viewerContainer = document.getElementById('image-viewer-container');
 const viewerImg = document.getElementById('image-viewer-img');
 
 if(viewerContainer) {
-    // ปิดเมื่อแตะพื้นหลัง
     viewerContainer.addEventListener('click', (e) => {
         if(e.target === viewerContainer) closeImageViewer();
     });
@@ -1085,7 +1069,6 @@ if(viewerContainer) {
             viewerPointX = e.touches[0].pageX - viewerStartX;
             viewerPointY = e.touches[0].pageY - viewerStartY;
             
-            // Swipe down เพื่อปิดเมื่อไม่ได้ซูม
             if(viewerScale === 1 && viewerPointY > 100) {
                 closeImageViewer();
                 viewerPanning = false;
@@ -1104,7 +1087,6 @@ if(viewerContainer) {
         }
         if (e.touches.length === 0) {
             viewerPanning = false;
-            // ดีดกลับเข้าที่ถ้าเลื่อนเกินขอบ (เมื่อซูม) หรือซูมออกหมด
             if(viewerScale === 1) {
                 viewerPointX = 0;
                 viewerPointY = 0;
@@ -1113,7 +1095,6 @@ if(viewerContainer) {
         }
     });
 
-    // สำหรับใช้เมาส์ Wheel ซูมบนคอม
     viewerContainer.addEventListener('wheel', (e) => {
         e.preventDefault();
         const delta = Math.sign(e.deltaY) * -0.1;
@@ -1126,7 +1107,6 @@ if(viewerContainer) {
         viewerImg.style.transform = `translate(${viewerPointX}px, ${viewerPointY}px) scale(${viewerScale})`;
     }, {passive: false});
 }
-// ===============================================
 
 function getCleanSongText() {
     if(!currentSong) return "";
