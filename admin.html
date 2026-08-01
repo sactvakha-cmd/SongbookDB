@@ -162,7 +162,7 @@
             
             <div id="audio-preview-box" class="hidden" style="background:#f1f5f9; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-bottom:15px; display:flex; flex-direction:column; gap:10px;">
               <div style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">🎧 ลองฟังเสียงที่อัดไว้:</div>
-              <audio id="audio-preview-element" controls style="width:100%; height:40px; outline:none;"></audio>
+              <audio id="audio-preview-element" controls style="width:100%; height:40px; outline:none"></audio>
               <div style="display:flex; gap:10px;">
                 <button type="button" class="btn-primary" style="flex:1; background:#10b981; font-size:0.85rem; padding:8px; border-radius:6px; box-shadow:none;" onclick="uploadRecordedAudio()"><i class="fa-solid fa-cloud-arrow-up"></i> ยืนยันและอัปโหลด</button>
                 <button type="button" class="btn-primary" style="flex:1; background:#94a3b8; font-size:0.85rem; padding:8px; border-radius:6px; box-shadow:none;" onclick="cancelRecordedAudio()"><i class="fa-solid fa-trash-can"></i> ลบทิ้ง/อัดใหม่</button>
@@ -310,7 +310,19 @@
       </div>
       <div class="reader-card form-group">
         <input type="hidden" id="form-user-is-edit" value="false">
-        <label>เบอร์โทรศัพท์ (ไอดีเข้าสู่ระบบ) <span style="color:red">*</span></label><input type="tel" id="form-user-phone" maxlength="10">
+        
+        <label>เบอร์โทรศัพท์ (ไอดีเข้าสู่ระบบ) <span style="color:red">*</span></label>
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+          <select id="form-user-country" style="width: 110px; border-radius: 12px; border: 1px solid #e2e8f0; padding: 0 10px; font-family: 'Kanit', sans-serif; outline: none; background: var(--bg-surface);">
+             <option value="+66">🇹🇭 +66</option>
+             <option value="+95">🇲🇲 +95</option>
+             <option value="+86">🇨🇳 +86</option>
+             <option value="+856">🇱🇦 +856</option>
+             <option value="+other">🌐 อื่นๆ</option>
+          </select>
+          <input type="tel" id="form-user-phone" maxlength="20" style="flex: 1; margin-bottom: 0;" placeholder="ไม่ต้องใส่ 0 แรก">
+        </div>
+
         <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
         <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
         
