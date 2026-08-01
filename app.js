@@ -99,34 +99,90 @@ function setAppLanguage(lang, reRender = true) {
   }
 }
 
+// ================= ระบบตรวจสอบเบอร์โทรศัพท์ระหว่างประเทศ =================
+function formatAndValidatePhone() {
+    const country = document.getElementById('auth-country').value;
+    let rawPhone = document.getElementById('auth-phone').value.replace(/\D/g, ''); 
+    
+    if(!rawPhone) return { error: "กรุณากรอกเบอร์โทรศัพท์" };
+    
+    // ตัดเลข 0 ด้านหน้าสุดทิ้งอัตโนมัติ (เผื่อผู้ใช้เผลอพิมพ์มา)
+    let p = rawPhone.replace(/^0+/, ''); 
+    
+    if (country === '+66') {
+        if (!/^[689]\d{8}$/.test(p)) return { error: "เบอร์ไทยต้องมี 9 หลัก (ไม่ต้องพิมพ์เลข 0)" };
+        return { phone: '0' + p }; // ใช้ฟอร์แมต 09... เพื่อให้คนเก่าใช้งานได้
+    } else if (country === '+95') {
+        if (!/^9\d{7,9}$/.test(p)) return { error: "เบอร์พม่าไม่ถูกต้อง (เช่น 9xxxxxxx ไม่ต้องใส่ 0)" };
+        return { phone: country + p };
+    } else if (country === '+86') {
+        if (!/^1[3-9]\d{9}$/.test(p)) return { error: "เบอร์จีนไม่ถูกต้อง (ต้องมี 11 หลัก)" };
+        return { phone: country + p };
+    } else if (country === '+856') {
+        if (p.length < 8) return { error: "เบอร์ลาวไม่ถูกต้อง" };
+        return { phone: country + p };
+    } else {
+        if (p.length < 7) return { error: "เบอร์โทรศัพท์สั้นเกินไป" };
+        return { phone: country + p };
+    }
+}
+// ================================================================
+
 function switchAuthTab(tab) {
-  document.getElementById('tab-login').classList.remove('active'); document.getElementById('tab-register').classList.remove('active'); document.getElementById('tab-'+tab).classList.add('active');
+  document.getElementById('tab-login').classList.remove('active'); 
+  document.getElementById('tab-register').classList.remove('active'); 
+  document.getElementById('tab-'+tab).classList.add('active');
+  
+  const phoneInputHtml = `
+      <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+        <select id="auth-country" style="width: 110px; padding: 12px 10px; border-radius: var(--radius-ui); border: 1px solid var(--border-color); background: var(--bg-surface); font-family: var(--font-main); color: var(--text-main); outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+           <option value="+66">🇹🇭 +66</option>
+           <option value="+95">🇲🇲 +95</option>
+           <option value="+86">🇨🇳 +86</option>
+           <option value="+856">🇱🇦 +856</option>
+           <option value="+other">🌐 อื่นๆ</option>
+        </select>
+        <div class="search-container" style="flex: 1; margin-bottom: 0;">
+          <i class="fa-solid fa-phone"></i>
+          <input type="tel" id="auth-phone" placeholder="เบอร์โทร (ไม่ต้องใส่ 0 แรก)">
+        </div>
+      </div>
+  `;
+
   let html = "";
   if(tab === 'login') {
     html = `
-      <div class="search-container"><i class="fa-solid fa-phone"></i><input type="tel" id="auth-phone" placeholder="เบอร์โทรศัพท์ (ใส่ 0 นำหน้า)" maxlength="10"></div>
+      ${phoneInputHtml}
       <div class="search-container"><i class="fa-solid fa-lock"></i><input type="password" id="auth-pin" placeholder="รหัสผ่าน PIN" maxlength="6"></div>
-      <button class="btn-primary" onclick="doLogin()" id="btn-auth-action" style="margin-top:10px;">เข้าสู่ระบบ</button>
+      <button class="btn-primary" onclick="doLogin()" id="btn-auth-action" style="margin-top:10px; width:100%;">เข้าสู่ระบบ</button>
     `;
   } else {
     html = `
       <div style="background: rgba(37, 99, 235, 0.05); padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; color: var(--text-muted); text-align:left;">
         <li>ตั้งรหัส PIN 4-6 หลัก เพื่อใช้เข้าแอปครั้งต่อไป</li>
+        <li>เบอร์โทร <b>ไม่ต้องใส่เลข 0 ด้านหน้า</b></li>
       </div>
       <div class="search-container"><i class="fa-solid fa-user"></i><input type="text" id="auth-name" placeholder="ชื่อ-นามสกุล ของคุณ"></div>
-      <div class="search-container"><i class="fa-solid fa-phone"></i><input type="tel" id="auth-phone" placeholder="เบอร์โทรศัพท์ของคุณ" maxlength="10"></div>
+      ${phoneInputHtml}
       <div class="search-container"><i class="fa-solid fa-lock"></i><input type="password" id="auth-pin" placeholder="ตั้งรหัส PIN ใหม่" maxlength="6"></div>
-      <button class="btn-primary" onclick="goToPayment(true)" id="btn-auth-action" style="margin-top:10px;">สมัครสมาชิก / ส่งสลิปใหม่</button>
+      <button class="btn-primary" onclick="goToPayment(true)" id="btn-auth-action" style="margin-top:10px; width:100%;">สมัครสมาชิก / ส่งสลิปใหม่</button>
     `;
   }
   document.getElementById('auth-content-box').innerHTML = html;
 }
 
 function doLogin() {
-  const phone = document.getElementById('auth-phone').value.trim(); const pin = document.getElementById('auth-pin').value.trim();
-  if(!phone || !pin) { showToast("กรุณากรอกเบอร์โทรและรหัสผ่าน", "warning"); return; }
-  const btn = document.getElementById('btn-auth-action'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...'; btn.disabled = true;
-  authenticateUser(phone, pin, btn, false);
+  const pin = document.getElementById('auth-pin').value.trim();
+  if(!pin) { showToast("กรุณากรอกรหัสผ่าน PIN", "warning"); return; }
+  
+  const phoneData = formatAndValidatePhone();
+  if(phoneData.error) { showToast(phoneData.error, "warning"); return; }
+
+  const btn = document.getElementById('btn-auth-action'); 
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ...'; 
+  btn.disabled = true;
+  
+  authenticateUser(phoneData.phone, pin, btn, false);
 }
 
 function populateArtistFilter() {
@@ -277,12 +333,23 @@ function goToRenewFromProfile() {
 }
 
 function goToPayment(isNew) {
-  isRegisteringNew = isNew; document.getElementById('pay-title').innerText = isNew ? "ชำระเงินเพื่อสมัครสมาชิก" : "ต่ออายุการใช้งาน";
+  isRegisteringNew = isNew; 
+  document.getElementById('pay-title').innerText = isNew ? "ชำระเงินเพื่อสมัครสมาชิก" : "ต่ออายุการใช้งาน";
+  
   if(isNew) {
-    const name = document.getElementById('auth-name').value.trim(); const phone = document.getElementById('auth-phone').value.trim(); const pin = document.getElementById('auth-pin').value.trim();
-    if(!name || !phone || !pin) { showToast("กรุณากรอกข้อมูลให้ครบถ้วน", "warning"); return; }
-    localStorage.setItem('temp_renew_name', name); localStorage.setItem('temp_renew_phone', phone); localStorage.setItem('temp_renew_pin', pin);
+    const name = document.getElementById('auth-name').value.trim(); 
+    const pin = document.getElementById('auth-pin').value.trim();
+    
+    if(!name || !pin) { showToast("กรุณากรอกข้อมูลให้ครบถ้วน", "warning"); return; }
+    
+    const phoneData = formatAndValidatePhone();
+    if(phoneData.error) { showToast(phoneData.error, "warning"); return; }
+
+    localStorage.setItem('temp_renew_name', name); 
+    localStorage.setItem('temp_renew_phone', phoneData.phone); 
+    localStorage.setItem('temp_renew_pin', pin);
   }
+  
   pendingSlipBase64 = ""; document.getElementById('slip-upload').value = ""; document.getElementById('slip-image-preview').style.display = "none";
   document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-payment').classList.remove('hidden');
   loadPaymentSettings();
