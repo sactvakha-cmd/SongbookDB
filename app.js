@@ -99,17 +99,19 @@ function setAppLanguage(lang, reRender = true) {
   }
 }
 
+// ================= ระบบตรวจสอบเบอร์โทรศัพท์ระหว่างประเทศ =================
 function formatAndValidatePhone() {
     const country = document.getElementById('auth-country').value;
     let rawPhone = document.getElementById('auth-phone').value.replace(/\D/g, ''); 
     
     if(!rawPhone) return { error: "กรุณากรอกเบอร์โทรศัพท์" };
     
+    // ตัดเลข 0 ด้านหน้าสุดทิ้งอัตโนมัติ (เผื่อผู้ใช้เผลอพิมพ์มา)
     let p = rawPhone.replace(/^0+/, ''); 
     
     if (country === '+66') {
         if (!/^[689]\d{8}$/.test(p)) return { error: "เบอร์ไทยต้องมี 9 หลัก (ไม่ต้องพิมพ์เลข 0)" };
-        return { phone: '0' + p }; 
+        return { phone: '0' + p }; // ใช้ฟอร์แมต 09... เพื่อให้คนเก่าใช้งานได้
     } else if (country === '+95') {
         if (!/^9\d{7,9}$/.test(p)) return { error: "เบอร์พม่าไม่ถูกต้อง (เช่น 9xxxxxxx ไม่ต้องใส่ 0)" };
         return { phone: country + p };
@@ -124,6 +126,7 @@ function formatAndValidatePhone() {
         return { phone: country + p };
     }
 }
+// ================================================================
 
 function switchAuthTab(tab) {
   document.getElementById('tab-login').classList.remove('active'); 
@@ -198,53 +201,8 @@ function populateArtistFilter() {
   if (globalFilter) globalFilter.innerHTML = optionsHTML;
 }
 
-// ================= ระบบเข้าสู่โหมดออฟไลน์อัตโนมัติ =================
-function handleOfflineLogin(phone, pin, btnObj, showMsg = true) {
-    const savedSongs = localStorage.getItem('songbook_offline_songs');
-    const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
-    
-    if (savedSongs && savedUser && savedUser.phone === phone && savedUser.pin === pin) {
-        if (showMsg) showToast("เข้าสู่โหมดออฟไลน์ (Offline Mode)", "warning");
-        
-        allSongs = JSON.parse(savedSongs);
-        allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
-        populateArtistFilter();
-        
-        userPhone = phone;
-        document.getElementById('profile-phone').innerText = phone; 
-        document.getElementById('profile-expiry').innerText = "ใช้งานแบบออฟไลน์";
-        
-        document.getElementById('view-auth').classList.add('hidden'); 
-        document.getElementById('view-payment').classList.add('hidden');
-        document.getElementById('app').classList.remove('hidden'); 
-        document.getElementById('main-bottom-nav').classList.remove('hidden');
-        
-        document.getElementById('waiting-approval-msg').style.display = 'none';
-        document.getElementById('auth-tabs-container').style.display = 'flex';
-        document.getElementById('auth-content-box').style.display = 'block';
-        
-        updateBottomNav('dashboard'); 
-        renderDashboard();
-        
-        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
-        document.getElementById('loader').classList.add('hidden');
-    } else {
-        if (showMsg) showToast("ไม่มีอินเทอร์เน็ต และไม่พบข้อมูลดาวน์โหลดไว้", "error");
-        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
-        document.getElementById('loader').classList.add('hidden');
-    }
-}
-// ==========================================================
-
 function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
   if(!isSilentMode) { document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังตรวจสอบสิทธิ์..."; }
-  
-  // เช็คก่อนว่ามีเน็ตไหม ถ้าไม่มีให้สลับไปโหมด Offline ทันที
-  if (!navigator.onLine) {
-      handleOfflineLogin(phone, pin, btnObj, !isSilentMode);
-      return;
-  }
-
   fetchAPI('authAndGetSongs', { phone: phone, pin: pin })
   .then(res => {
     if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
@@ -263,9 +221,6 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
 
       userPhone = phone; userExpiry = res.expiry;
       localStorage.setItem('songbook_user', JSON.stringify({phone: phone, pin: pin}));
-      
-      // บันทึกเพลงทั้งหมดลงเครื่องเพื่อใช้ออฟไลน์
-      localStorage.setItem('songbook_offline_songs', JSON.stringify(res.songs || []));
       
       if(res.settings) {
         localStorage.setItem('songbook_settings', JSON.stringify(res.settings));
@@ -335,15 +290,10 @@ function authenticateUser(phone, pin, btnObj = null, isSilentMode = false) {
       localStorage.removeItem('songbook_user');
     }
   }).catch(err => {
-    // กรณีที่เกิดข้อผิดพลาดในการโหลด API ให้สลับเข้าสู่โหมดออฟไลน์
-    if (!navigator.onLine || err.message === 'Failed to fetch') {
-        handleOfflineLogin(phone, pin, btnObj, !isSilentMode);
-    } else {
-        if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
-        document.getElementById('loader').classList.add('hidden');
-        if(!isSilentMode) { 
-          showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); 
-        }
+    if(btnObj) { btnObj.innerHTML = 'เข้าสู่ระบบ'; btnObj.disabled = false; }
+    document.getElementById('loader').classList.add('hidden');
+    if(!isSilentMode) { 
+      showToast("การเชื่อมต่อล้มเหลว กรุณาตรวจสอบอินเทอร์เน็ต", "error"); 
     }
   });
 }
@@ -666,11 +616,10 @@ function updateBottomNav(view) {
 
 document.addEventListener("visibilitychange", () => {
   const savedUser = JSON.parse(localStorage.getItem('songbook_user'));
-  if (document.visibilityState === "visible" && savedUser && allSongs.length > 0 && navigator.onLine) {
+  if (document.visibilityState === "visible" && savedUser && allSongs.length > 0) {
     fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => { 
         if(res.status === 'success') { 
             allSongs = res.songs || []; 
-            localStorage.setItem('songbook_offline_songs', JSON.stringify(allSongs));
             populateArtistFilter();
             renderDashboard(); 
             if(currentCategory) searchCategory(); 
@@ -681,23 +630,16 @@ document.addEventListener("visibilitychange", () => {
 
 function forceDataRefresh() {
   const savedUser = JSON.parse(localStorage.getItem('songbook_user')); if(!savedUser) return;
-  if (!navigator.onLine) return showToast("คุณกำลังใช้งานในโหมดออฟไลน์", "warning");
-
   document.getElementById('app').classList.add('hidden'); document.getElementById('loader').classList.remove('hidden'); document.getElementById('loader-text').innerText = "กำลังซิงค์ข้อมูลล่าสุด...";
   fetchAPI('authAndGetSongs', { phone: savedUser.phone, pin: savedUser.pin }).then(res => {
       if(res.status === 'success') {
         allSongs = res.songs || [];
         allSongs.sort((a, b) => (a.ID || "").localeCompare((b.ID || "")));
         
-        localStorage.setItem('songbook_offline_songs', JSON.stringify(allSongs));
-        
         populateArtistFilter(); 
         
         renderDashboard(); 
-        if(currentCategory) {
-            updateCategoryDownloadBtn();
-            searchCategory(true); 
-        }
+        if(currentCategory) searchCategory(true); 
         if(!currentCategory && document.getElementById('global-search').value !== "") searchGlobal();
         document.getElementById('loader').classList.add('hidden'); document.getElementById('app').classList.remove('hidden'); showToast("ซิงค์ข้อมูลเสร็จสิ้น!", "success");
       } else { logoutUser(); }
@@ -720,133 +662,6 @@ function renderDashboard() {
   } catch(e) { console.error("Render Dashboard Error", e); }
 }
 
-// ================= ระบบจัดการปุ่มดาวน์โหลดโหมดออฟไลน์ =================
-function updateCategoryDownloadBtn() {
-    const btn = document.getElementById('btn-download-cat');
-    if(!btn) return;
-    
-    let catSongs = currentCategory === "ALL" ? allSongs : allSongs.filter(s => s.Category === currentCategory);
-    let downloaded = JSON.parse(localStorage.getItem('downloaded_songs') || '[]');
-    
-    let allDownloaded = catSongs.length > 0 && catSongs.every(s => downloaded.includes(s.ID));
-    
-    const icon = document.getElementById('icon-download-cat');
-    const text = document.getElementById('text-download-cat');
-    
-    btn.disabled = false;
-    if (allDownloaded) {
-        icon.className = 'fa-solid fa-circle-check';
-        text.innerText = 'ดาวน์โหลดออฟไลน์เรียบร้อยแล้ว';
-        btn.style.color = '#10b981';
-        btn.style.borderColor = '#10b981';
-        btn.style.background = 'rgba(16, 185, 129, 0.05)';
-    } else {
-        icon.className = 'fa-solid fa-cloud-arrow-down';
-        text.innerText = 'ดาวน์โหลดทั้งหมดในหมวดนี้ (ออฟไลน์)';
-        btn.style.color = 'var(--primary)';
-        btn.style.borderColor = 'var(--primary)';
-        btn.style.background = 'rgba(37, 99, 235, 0.05)';
-    }
-}
-
-function extractImagesFromSong(song) {
-    let urls = [];
-    if (song.ImageUrl) urls.push(song.ImageUrl);
-    
-    const extractFromHtml = (html) => {
-        if (!html) return;
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const imgs = div.querySelectorAll('img');
-        imgs.forEach(img => {
-            if (img.src && img.src.startsWith('http')) urls.push(img.src);
-        });
-    };
-    extractFromHtml(song.Lyrics);
-    extractFromHtml(song.LyricsNew);
-    return [...new Set(urls)];
-}
-
-async function downloadSingleSong(songId, btnEl = null) {
-    if (!navigator.onLine) return showToast("กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนดาวน์โหลด", "error");
-
-    const song = allSongs.find(s => s.ID === songId);
-    if (!song) return;
-    
-    if (btnEl) {
-        btnEl.classList.add('downloading');
-        btnEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-    }
-    
-    const urls = extractImagesFromSong(song);
-    if (urls.length > 0 && 'caches' in window) {
-        try {
-            const cache = await caches.open('akha-songbook-offline-images');
-            for (let url of urls) {
-                try { await cache.add(url); } catch(e) {}
-            }
-        } catch (e) { console.log("Cache error", e); }
-    }
-    
-    let downloaded = JSON.parse(localStorage.getItem('downloaded_songs') || '[]');
-    if (!downloaded.includes(songId)) {
-        downloaded.push(songId);
-        localStorage.setItem('downloaded_songs', JSON.stringify(downloaded));
-    }
-    
-    if (btnEl) {
-        btnEl.classList.remove('downloading');
-        btnEl.classList.add('downloaded');
-        btnEl.innerHTML = '<i class="fa-solid fa-circle-check"></i>';
-    }
-    showToast(`ดาวน์โหลด ${songId} ออฟไลน์สำเร็จ`, "success");
-    updateCategoryDownloadBtn();
-}
-
-async function downloadCurrentCategory() {
-    if (!navigator.onLine) return showToast("กรุณาเชื่อมต่ออินเทอร์เน็ตก่อนดาวน์โหลด", "error");
-
-    const btn = document.getElementById('btn-download-cat');
-    const icon = document.getElementById('icon-download-cat');
-    const text = document.getElementById('text-download-cat');
-    
-    btn.disabled = true;
-    icon.className = 'fa-solid fa-spinner fa-spin';
-    text.innerText = 'กำลังดาวน์โหลด โปรดรอสักครู่...';
-    
-    let catSongs = currentCategory === "ALL" ? allSongs : allSongs.filter(s => s.Category === currentCategory);
-    let allUrls = [];
-    let downloaded = JSON.parse(localStorage.getItem('downloaded_songs') || '[]');
-    
-    catSongs.forEach(song => {
-        allUrls.push(...extractImagesFromSong(song));
-        if (!downloaded.includes(song.ID)) downloaded.push(song.ID);
-    });
-    
-    allUrls = [...new Set(allUrls)]; 
-    
-    if (allUrls.length > 0 && 'caches' in window) {
-        try {
-            const cache = await caches.open('akha-songbook-offline-images');
-            let loadedCount = 0;
-            for (let url of allUrls) {
-                try { 
-                    await cache.add(url); 
-                    loadedCount++;
-                    text.innerText = `กำลังบันทึกรูปภาพ... ${loadedCount}/${allUrls.length}`;
-                } catch(e) {}
-            }
-        } catch (e) { console.log(e); }
-    }
-    
-    localStorage.setItem('downloaded_songs', JSON.stringify(downloaded));
-    
-    updateCategoryDownloadBtn();
-    searchCategory(true); 
-    showToast("ดาวน์โหลดหมวดหมู่นี้สำเร็จ", "success");
-}
-// ==========================================================
-
 function openAllSongs() { 
   currentCategory = "ALL"; 
   const ln = i18n[appLang] || i18n['en'] || i18n['th'];
@@ -854,7 +669,6 @@ function openAllSongs() {
   document.getElementById('cat-search').value = ""; 
   clearNumberFilterSilent();
   currentListPage = 1;
-  updateCategoryDownloadBtn();
   searchCategory(true); 
   switchView('category'); 
 }
@@ -867,7 +681,6 @@ function openCategory(catId, catRealId) {
   document.getElementById('cat-search').value = ""; 
   clearNumberFilterSilent();
   currentListPage = 1;
-  updateCategoryDownloadBtn();
   searchCategory(true); 
   switchView('category'); 
 }
@@ -962,27 +775,9 @@ function renderList(songs, container, context = 'category') {
     const endIndex = startIndex + ITEMS_PER_PAGE;
     const paginatedSongs = songs.slice(startIndex, endIndex);
 
-    let downloaded = JSON.parse(localStorage.getItem('downloaded_songs') || '[]');
-
     let html = paginatedSongs.map(s => {
       let engTitleHtml = s.EnglishTitle ? `<div class="s-eng-title">${s.EnglishTitle}</div>` : ''; 
-      
-      let isDl = downloaded.includes(s.ID);
-      let dlClass = isDl ? 'downloaded' : '';
-      let dlIcon = isDl ? 'fa-circle-check' : 'fa-cloud-arrow-down';
-
-      return `<div class="song-item" onclick="openSong('${s.ID}')">
-        <div class="s-id">${s.ID}</div>
-        <div class="s-info">
-          <div class="s-title">${s.Title||'-'}</div>
-          ${engTitleHtml}
-          <div class="s-meta">${s.Artist || s.Author || '-'}</div>
-        </div>
-        <button class="btn-download ${dlClass}" onclick="event.stopPropagation(); downloadSingleSong('${s.ID}', this)">
-          <i class="fa-solid ${dlIcon}"></i>
-        </button>
-        <i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5; margin-left:5px;"></i>
-      </div>`;
+      return `<div class="song-item" onclick="openSong('${s.ID}')"><div class="s-id">${s.ID}</div><div class="s-info"><div class="s-title">${s.Title||'-'}</div>${engTitleHtml}<div class="s-meta">${s.Artist || s.Author || '-'}</div></div><i class="fa-solid fa-chevron-right" style="color:var(--text-muted); opacity:0.5;"></i></div>`
     }).join('');
     
     if (totalPages > 1) {
@@ -1588,7 +1383,7 @@ function saveUiSettings() {
   
   localStorage.setItem('songbook_settings', JSON.stringify(settings));
   
-  if (userPhone && navigator.onLine) {
+  if (userPhone) {
     fetchAPI('updateSettings', { phone: userPhone, settings: settings }).catch(e => console.log('Error saving settings'));
   }
 }
@@ -1693,7 +1488,7 @@ function playMusicIndex(index) {
   const song = musicPlaylist[index];
   currentPlayingSongId = song.ID;
   
-  if (userPhone && navigator.onLine) {
+  if (userPhone) {
       fetchAPI('recordPlayCount', { songId: song.ID }).catch(e => console.log('Stats update err:', e));
   }
   
