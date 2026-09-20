@@ -1,11 +1,12 @@
 {
-  "name": "Aˬkaˬ kalizaˬ caˇdawˬ",
-  "short_name": "AKHS",
-  "description": "คลังเพลงคริสเตียนอาข่า",
+  "name": "School Management System",
+  "short_name": "SchoolApp",
+  "description": "ระบบบริหารจัดการโรงเรียนและติดตามข้อมูลนักเรียน",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f8fafc",
+  "background_color": "#f3f4f6",
   "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icon-192.png",
