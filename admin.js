@@ -4,6 +4,7 @@ let allSongs = [];
 let allUsers = [];
 let currentAdminView = 'dashboard';
 let adminScrollPositions = {};
+let savedEditorRange = null;
 
 window.addEventListener('beforeunload', () => {
   sessionStorage.setItem('adminScrollTemp', window.scrollY);
@@ -18,7 +19,36 @@ window.onload = () => {
   else { document.getElementById('loader').classList.add('hidden'); document.getElementById('view-login').classList.remove('hidden'); }
   
   setupEditorPaste();
+  setupSelectionTracking();
 };
+
+// ================= ระบบจดจำตำแหน่งคลุมดำข้อความ =================
+function saveCurrentEditorSelection() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    const activeEditor = document.getElementById('form-lyrics-old').classList.contains('hidden') 
+                          ? document.getElementById('form-lyrics-new') 
+                          : document.getElementById('form-lyrics-old');
+    if (activeEditor && activeEditor.contains(range.commonAncestorContainer)) {
+      if (!range.collapsed) {
+        savedEditorRange = range.cloneRange();
+      }
+    }
+  }
+}
+
+function setupSelectionTracking() {
+  ['form-lyrics-old', 'form-lyrics-new'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('mouseup', saveCurrentEditorSelection);
+      el.addEventListener('keyup', saveCurrentEditorSelection);
+      el.addEventListener('touchend', saveCurrentEditorSelection);
+    }
+  });
+  document.addEventListener('selectionchange', saveCurrentEditorSelection);
+}
 
 // ================= ระบบ Paste รูปภาพลงในช่องเนื้อเพลง =================
 function setupEditorPaste() {
@@ -316,7 +346,6 @@ function openAdminForm(id = null) {
   switchView('admin-form');
 }
 
-// ฟังก์ชันทำความสะอาดเนื้อเพลงเพื่อใช้ตรวจสอบเพลงซ้ำ (ลบ HTML และช่องว่างทั้งหมด)
 function getCleanText(html) {
     if (!html) return "";
     let tmp = document.createElement("DIV");
@@ -345,18 +374,13 @@ function saveSong() {
   
   if(!d.Title) return showToast("กรอกชื่อเพลงด้วยครับ", "warning");
 
-  // ================= ระบบตรวจสอบเพลงซ้ำ (Duplicate Check) =================
   const lyricsOldClean = getCleanText(d.Lyrics);
   const lyricsNewClean = getCleanText(d.LyricsNew);
 
   const duplicate = allSongs.find(s => {
-      // ข้ามการเช็คตัวเอง ถ้าเป็นการแก้ไขเพลงเดิม
       if (s.ID === d.ID) return false;
-
-      // 1. เช็คว่าชื่อเพลงตรงกันเป๊ะไหม
       if (s.Title && s.Title.trim().toLowerCase() === d.Title.toLowerCase()) return true;
 
-      // 2. เช็คว่าเนื้อเพลง (ที่ลบวรรคตอนออกแล้ว) ตรงกันเป๊ะไหม
       const sOldClean = getCleanText(s.Lyrics);
       const sNewClean = getCleanText(s.LyricsNew);
 
@@ -369,7 +393,6 @@ function saveSong() {
   if (duplicate) {
       return showToast(`❌ มีเพลงนี้อยู่แล้ว (ซ้ำกับรหัส: ${duplicate.ID})`, "error");
   }
-  // ====================================================================
 
   const btnSave = document.getElementById('btn-save-top');
   const originalText = btnSave.innerHTML;
@@ -408,6 +431,14 @@ function switchAdminLyricView(type) {
 }
 
 function formatTextAdmin(command, value = null) {
+  let selection = window.getSelection();
+  if ((!selection || !selection.rangeCount || selection.isCollapsed) && savedEditorRange) {
+    try {
+      selection.removeAllRanges();
+      selection.addRange(savedEditorRange.cloneRange());
+    } catch(e) {}
+  }
+
   document.execCommand('styleWithCSS', false, true);
   document.execCommand(command, false, value);
   
@@ -433,12 +464,25 @@ function formatTextAdmin(command, value = null) {
       });
     }
   });
+  saveCurrentEditorSelection();
 }
 
 function applyCustomStyle(property, value) {
   if (!value) return;
-  const selection = window.getSelection();
-  if (!selection.rangeCount || selection.isCollapsed) { return showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning"); }
+  
+  let selection = window.getSelection();
+  if ((!selection || !selection.rangeCount || selection.isCollapsed) && savedEditorRange) {
+    try {
+      selection.removeAllRanges();
+      selection.addRange(savedEditorRange.cloneRange());
+      selection = window.getSelection();
+    } catch(e) {}
+  }
+
+  if (!selection.rangeCount || selection.isCollapsed) { 
+    return showToast("กรุณาคลุมดำข้อความที่ต้องการปรับรูปแบบก่อนครับ", "warning"); 
+  }
+
   let finalValue = value;
   if (property === 'fontSize') finalValue = value + 'pt';
 
@@ -480,17 +524,19 @@ function applyCustomStyle(property, value) {
     el.replaceWith(span);
   });
   activeEditor.normalize();
+  saveCurrentEditorSelection();
 }
 
 function renderUsers() {
   const q = document.getElementById('user-search').value.toLowerCase();
   const results = allUsers.filter(u => {
     const phone = (u.Phone || "").toLowerCase(); const name = (u.Name || "").toLowerCase(); const exp = (u.ExpiryDate || "").toLowerCase(); const status = (u.Status || "").toLowerCase();
+    const pkg = (u.Package || "").toLowerCase();
     let statusThai = "";
     if (status === "pending_new") statusThai = "รอตรวจสอบ สมัครใหม่";
     else if (status === "pending_renew") statusThai = "รอตรวจสอบ ต่ออายุ";
     else if (status === "rejected") statusThai = "ปฏิเสธสลิป";
-    return phone.includes(q) || name.includes(q) || exp.includes(q) || status.includes(q) || statusThai.includes(q);
+    return phone.includes(q) || name.includes(q) || exp.includes(q) || status.includes(q) || statusThai.includes(q) || pkg.includes(q);
   });
 
   document.getElementById('user-list').innerHTML = results.map(u => {
@@ -512,10 +558,11 @@ function renderUsers() {
     }
 
     let slip = u.SlipUrl ? `<a href="${u.SlipUrl}" target="_blank" style="color:#10b981; font-size:0.8rem; margin-left:5px;"><i class="fa-solid fa-image"></i> สลิป</a>` : '';
-    
+    let pkgBadge = u.Package ? `<span style="background:rgba(37,99,235,0.08); color:var(--primary); padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:600; margin-left:6px;"><i class="fa-solid fa-tag"></i> ${u.Package}</span>` : '';
+
     return `<div class="song-item">
       <div class="s-info">
-        <div class="s-title">${u.Name||'ไม่มีชื่อ'} <span style="font-size:0.8rem; color:var(--text-muted);">(รอบ: ${u.RenewCount||1})</span></div>
+        <div class="s-title">${u.Name||'ไม่มีชื่อ'} <span style="font-size:0.8rem; color:var(--text-muted);">(รอบ: ${u.RenewCount||1})</span> ${pkgBadge}</div>
         <div class="s-eng-title"><i class="fa-solid fa-phone"></i> ${u.Phone} | <i class="fa-solid fa-key"></i> ${u.PIN}</div>
         <div class="s-meta" style="color:${statusColor}; font-weight:600;">${statusText} ${slip}</div>
       </div>
@@ -533,7 +580,6 @@ function openUserForm(phone = null) {
     let u = allUsers.find(x => x.Phone === phone);
     document.getElementById('form-user-is-edit').value = "true"; 
     
-    // เรียบเรียงการแสดงผลเบอร์โทรตอนกดแก้
     let cCode = "+other";
     let localP = u.Phone;
     if (u.Phone.startsWith('0')) { cCode = "+66"; localP = u.Phone.substring(1); } 
@@ -546,11 +592,13 @@ function openUserForm(phone = null) {
     document.getElementById('form-user-country').disabled = true; 
     document.getElementById('form-user-phone').value = localP; 
     document.getElementById('form-user-phone').disabled = true; 
-    document.getElementById('form-user-phone').dataset.originalPhone = u.Phone; // ซ่อนเบอร์เต็มไว้
+    document.getElementById('form-user-phone').dataset.originalPhone = u.Phone;
 
     document.getElementById('form-user-pin').value = u.PIN; 
     document.getElementById('form-user-name').value = u.Name || ""; 
     document.getElementById('form-user-count').value = u.RenewCount || 1;
+    
+    document.getElementById('form-user-package').innerText = u.Package || "ไม่ได้ระบุ (หรือเป็นสมาชิกรุ่นก่อนหน้า)";
 
     if(u.ExpiryDate && u.ExpiryDate !== "รอตรวจสอบ") { let d = new Date(u.ExpiryDate); document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0]; } else { document.getElementById('form-user-expiry').value = ""; }
     
@@ -573,6 +621,7 @@ function openUserForm(phone = null) {
     document.getElementById('form-user-name').value = ""; 
     document.getElementById('form-user-expiry').value = ""; 
     document.getElementById('form-user-count').value = 1; 
+    document.getElementById('form-user-package').innerText = "เพิ่มโดยแอดมิน";
     document.getElementById('form-user-slip-box').classList.add('hidden'); 
     document.getElementById('user-form-title').innerText = "เพิ่มผู้ใช้ใหม่";
   }
@@ -584,7 +633,6 @@ function addDaysToExpiry(days) {
   document.getElementById('form-user-expiry').value = d.toISOString().split('T')[0];
 }
 
-// ฟังก์ชันคัดกรองเบอร์โทรศัพท์ฝั่งแอดมิน
 function formatAndValidateAdminPhone() {
     const country = document.getElementById('form-user-country').value;
     let rawPhone = document.getElementById('form-user-phone').value.replace(/\D/g, ''); 
@@ -595,7 +643,7 @@ function formatAndValidateAdminPhone() {
     
     if (country === '+66') {
         if (!/^[689]\d{8}$/.test(p)) return { error: "เบอร์ไทยต้องมี 9 หลัก (ไม่ต้องพิมพ์เลข 0)" };
-        return { phone: '0' + p }; // ใช้ฟอร์แมต 09... เพื่อให้คนเก่าใช้งานได้
+        return { phone: '0' + p };
     } else if (country === '+95') {
         if (!/^9\d{7,9}$/.test(p)) return { error: "เบอร์พม่าไม่ถูกต้อง (เช่น 9xxxxxxx ไม่ต้องใส่ 0)" };
         return { phone: country + p };
@@ -623,13 +671,17 @@ function saveUser() {
       finalPhone = document.getElementById('form-user-phone').dataset.originalPhone;
   }
 
+  const existingUser = allUsers.find(x => x.Phone === finalPhone);
+  const userPkg = existingUser ? (existingUser.Package || "") : (document.getElementById('form-user-package').innerText || "เพิ่มโดยแอดมิน");
+
   const d = { 
     Phone: finalPhone, 
     PIN: document.getElementById('form-user-pin').value, 
     Name: document.getElementById('form-user-name').value, 
     ExpiryDate: document.getElementById('form-user-expiry').value, 
     RenewCount: parseInt(document.getElementById('form-user-count').value) || 1, 
-    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new'
+    Status: document.getElementById('form-user-expiry').value ? 'active' : 'pending_new',
+    Package: userPkg
   };
   
   if(!d.PIN) return showToast("กรุณากรอก PIN ด้วยครับ", "warning");
