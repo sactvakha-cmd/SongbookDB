@@ -326,6 +326,11 @@
         <label>รหัสผ่าน (PIN) <span style="color:red">*</span></label><input type="text" id="form-user-pin" maxlength="6">
         <label>ชื่อผู้ใช้งาน</label><input type="text" id="form-user-name">
         
+        <div id="form-user-package-box" style="margin-bottom: 15px; padding: 12px 15px; background: rgba(37, 99, 235, 0.08); border-radius: 12px; border: 1px solid rgba(37, 99, 235, 0.2);">
+          <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:3px;"><i class="fa-solid fa-tags"></i> แพ็กเกจที่ผู้ใช้เลือกชำระ:</div>
+          <strong id="form-user-package" style="color:var(--primary); font-size:1.05rem;">-</strong>
+        </div>
+
         <label>จำนวนรอบที่ต่ออายุ</label>
         <div style="display:flex; gap:10px; margin-bottom:15px;">
           <input type="number" id="form-user-count" min="1" style="flex:1;">
@@ -338,9 +343,10 @@
         </div>
         
         <label>วันหมดอายุ <span style="color:red">*</span></label><input type="date" id="form-user-expiry" style="padding-left:16px;">
-        <div style="display:flex; gap:10px; margin-bottom: 20px;">
-          <button class="btn-primary" type="button" style="flex:1; background:#10b981; color:white; font-size:0.9rem;" onclick="addDaysToExpiry(30)"><i class="fa-solid fa-check"></i> อนุมัติ 1 เดือน</button>
-          <button class="btn-primary" type="button" style="flex:1; background:#2563eb; color:white; font-size:0.9rem;" onclick="addDaysToExpiry(365)"><i class="fa-solid fa-check-double"></i> อนุมัติ 1 ปี</button>
+        <div style="display:flex; gap:8px; margin-bottom: 20px;">
+          <button class="btn-primary" type="button" style="flex:1; background:#10b981; color:white; font-size:0.85rem; padding:12px 6px;" onclick="addDaysToExpiry(30)" title="บวก 30 วัน"><i class="fa-solid fa-check"></i> อนุมัติ 1 เดือน</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#f59e0b; color:white; font-size:0.85rem; padding:12px 6px;" onclick="addDaysToExpiry(180)" title="บวก 180 วัน"><i class="fa-solid fa-check"></i> อนุมัติ 6 เดือน</button>
+          <button class="btn-primary" type="button" style="flex:1; background:#2563eb; color:white; font-size:0.85rem; padding:12px 6px;" onclick="addDaysToExpiry(365)" title="บวก 365 วัน"><i class="fa-solid fa-check-double"></i> อนุมัติ 1 ปี</button>
         </div>
       </div>
     </div>
@@ -380,6 +386,6 @@
 
   <div class="bottom-nav justify-center hidden" id="main-bottom-nav"></div>
 
-  <script src="admin.js?v=121"></script>
+  <script src="admin.js?v=122"></script>
 </body>
 </html>
