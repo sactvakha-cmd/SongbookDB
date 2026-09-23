@@ -294,7 +294,7 @@
                 <button id="tab-music-play" class="lyrics-toggle-btn" onclick="switchMusicTab('play')" data-i18n="music_tab_play">กำลังเล่น</button>
                 <button id="tab-music-lyric" class="lyrics-toggle-btn" onclick="switchMusicTab('lyric')" data-i18n="music_tab_lyric">เนื้อเพลง</button>
             </div>
-            <button class="btn-icon" id="btn-music-indicator" style="cursor:default; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
+            <button class="btn-icon" id="btn-music-indicator" onclick="toggleMusicAudio()" title="เล่น/หยุดเพลง" style="cursor:pointer; border:none; box-shadow:none; background:transparent; font-size:1.5rem; color:var(--primary);">
                 <i id="music-indicator-icon" class="fa-solid fa-compact-disc"></i>
             </button>
         </div>
